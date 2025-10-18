@@ -1,0 +1,21 @@
+All rights reserved — Device Inspector (inspecta) Non-Commercial License
+
+Copyright (c) 2025 mufthakherul
+
+Permission is granted to view, fork, and contribute to this repository for non-commercial purposes only, subject to the rules below.
+
+You MAY:
+- Clone or fork this repository for personal, educational, research, or non-commercial use.
+- Submit issues and pull requests under the project's contribution guidelines.
+- Use any files locally for evaluation, testing, or learning.
+
+You MAY NOT:
+- Use, copy, distribute, modify, or create derivative works of this repository, or any substantial portion of it, for commercial purposes (including distribution, sale, incorporation into commercial products, branding for commercial services, or offering as a paid service).
+- Rebrand or redistribute the repository or its output (including reports, scripts, binaries) as part of a commercial offering without a separate license from the copyright holder.
+- Remove or alter the copyright, license, or attribution notices included in the repository.
+
+Special rights reserved to the Author:
+- The copyright holder (mufthakherul) retains all rights and may relicense, commercialize, or change the licensing of the project at any time.
+- This repository is provided "as is" without warranty. The author is not liable for any damages that may arise from its use.
+
+To request commercial licensing or redistribution rights, contact: mufthakherul (via GitHub).
