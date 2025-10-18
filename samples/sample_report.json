@@ -1,0 +1,16 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2025-10-18T00:00:00Z",
+  "agent": {"name": "inspecta", "version": "0.1.0"},
+  "device": {"vendor": "ExampleCorp", "model": "X1000", "serial": "EX123"},
+  "mode": "quick",
+  "profile": "Office",
+  "summary": {"overall_score": 85, "grade": "Good", "recommendation": "Office"},
+  "scores": {"storage": 90, "battery": 80, "memory": 90, "cpu_thermal": 80},
+  "tests": [
+    {"name": "smartctl", "status": "ok", "data": {"name": "nvme0", "model": "X1000-SSD"}},
+    {"name": "memtester", "status": "ok", "data": {"errors": 0}}
+  ],
+  "artifacts": ["artifacts/smart_nvme0.json", "artifacts/memtest.log", "artifacts/sensors.csv"],
+  "evidence": {"manifest_sha256": null, "signed": false}
+}
