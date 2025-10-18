@@ -1,24 +1,499 @@
+# =========================
+# device-inspector / inspecta
+# Comprehensive .gitignore for the project
+# Covers Python, Node, Go, Rust, Java, C/C++, build artifacts,
+# OS files, editors, CI, Docker, virtualization, reports/artifacts and secret files.
+# =========================
+
+# -------------------------
+# General / OS
+# -------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Icon must end with two \r
+Icon?
+# Thumbnails
+._*
+.Spotlight-V100
+.Trashes
+__MACOSX
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.nfs*
+.local/
+.cache/
+.swapfile
+
+# -------------------------
+# Git / VCS
+# -------------------------
+# Git internals
+.git/
+.gitmodules
+.git-credentials
+.gitattributes
+
+# Backup / patch files
+*.orig
+*.rej
+
+# -------------------------
+# Project artifacts & outputs
+# -------------------------
+# Local artifacts and generated reports
+artifacts/
+reports/
+reports-*/         # any variant folder
+*.pdf
+*.html
+*.csv
+*.zip
+*.tar.gz
+*.tgz
+*.7z
+*.iso               # diagnostic/bootable images
+*.img               # raw images
+*.log               # general logs (allow exceptions below)
+
+# retain sample files in repo, but ignore runtime outputs:
+samples/*.log
+samples/*.json
+
+# temporary test output directories
+tmp/
+tmp-*/
+temp/
+cache/
+build/
+dist/
+release/
+out/
+
+# signed bundles / keys created during runs
+*.sig
+*.asc
+*.signed
+*.signedbundle
+*.zip.sig
+
+# -------------------------
 # Python
-__pycache__/
+# -------------------------
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+.pyenv/
+pip-wheel-metadata/
+__pypackages__/
+
+# Byte-compiled / optimized
 *.py[cod]
-*.so
+*$py.class
+
+# pytest / test outputs
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+junit-*.xml
+nosetests.xml
+
+# pip / packaging
 *.egg
 *.egg-info/
 dist/
 build/
-venv/
+pip-wheel-metadata/
+*.whl
+
+# virtualenv wrappers
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IPython / Jupyter
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+.jupyter/
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+*.manifest
+*.spec
+
+# Mypy cache
+.mypy_cache/
+.dmypy.json
+
+# Pyre
+.pyre/
+
+# -------------------------
+# Node / JavaScript
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log
+yarn-debug.log*
+.pnpm-debug.log
+package-lock.json
+yarn.lock
+.pnpm-store/
+.npm/
+.eslintcache
+.next/
+.nuxt/
+dist/
+.build/
+
+# local env files
+.env
+.env.*.local
+.env.local
+.env.test
+.env.production
+
+# VSCode Node debug
+.vscode/
+
+# -------------------------
+# Go
+# -------------------------
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build
+bin/
+_build/
+vendor/
+Godeps/
+*.test
+coverage.out
+
+# go workspace
+go-workspace/
+
+# -------------------------
+# Rust
+# -------------------------
+target/
+**/target/
+**/*.rs.bk
+
+# Cargo
+Cargo.lock
+
+# -------------------------
+# Java / Gradle / Maven
+# -------------------------
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+*.log
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# -------------------------
+# C / C++ / Make
+# -------------------------
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.lo
+*.la
+*.lai
+*.pch
+*.pdb
+*.ilk
+*.idb
+
+# build directories
+cmake-build-*/
+build-*/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+install_manifest.txt
+
+# -------------------------
+# Containers / Docker
+# -------------------------
+# Docker artifacts
+docker-compose.override.yml
+docker-compose.*.yml
+Dockerfile.*
+Dockerfile.build
+*.local.env
+*.env.build
+
+# Docker images and volumes
+*.tar
+docker-image-*.tar
+
+# Kubernetes
+.kubectl/
+.kube/
+kubeconfig.*
+helmfile.d/
+helmfile.*.yaml
+
+# -------------------------
+# CI / Build servers
+# -------------------------
+# GitHub Actions
+/.github/actions/**
+/.github/workflows/*.yml
+# GitHub Actions caches
+.github/cache/
+
+# GitLab CI
+.gitlab-ci.yml
+.gitlab/
+
+# Travis
+.travis.yml
+
+# CircleCI
+.circleci/
+
+# Jenkins
+jenkins/
+
+# TeamCity
+.teamcity/
+
+# Azure pipelines
+azure-pipelines.yml
+
+# Build artifacts / caches
+.cache/
+build-cache/
+ci-artifacts/
+
+# -------------------------
+# Editor & IDE
+# -------------------------
+# VS Code
+.vscode/
+.vscode-test/
+.history/
+
+# JetBrains (IntelliJ, PyCharm, CLion, WebStorm)
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Emacs
+*~
+\#*\#
+.\#*
+.emacs.desktop
+.emacs.desktop.lock
+
+# Vim
+*.swp
+*.swo
+.*.sw?
+Session.vim
+tags
+
+# Eclipse
+.metadata/
+*.tmp
+*.bak
+*.swp
+.settings/
+.recommenders
+
+# NetBeans
+nbproject/private/
+build/
+
+# -------------------------
+# Keys, Secrets & Credentials
+# -------------------------
+# dotenv and credentials
 .env
 .env.*
-pip-wheel-metadata/
-.pytest_cache/
-.cache/
+secrets/
+secrets.json
+credentials.json
+credentials.yaml
+*.pem
+*.key
+*.p12
+*.pfx
+*.asc
+*.gpg
+*.jks
 
-# Artifacts
+# SSH keys
+id_rsa
+id_rsa.pub
+id_ecdsa
+id_ecdsa.pub
+id_ed25519
+id_ed25519.pub
+.ssh/
+
+# AWS / Cloud
+.aws/
+.aws-credentials
+.aws-secrets
+gcp-key.json
+azure.*.json
+
+# Kubernetes / kubeconfig
+kubeconfig
+kubeconfig.yaml
+kubeconfig.*
+
+# Google service account
+*.gserviceaccount.key.json
+
+# Ignore accidentally committed tokens
+**/*-token.json
+**/*_token.json
+token.json
+
+# -------------------------
+# Test / Evidence files
+# -------------------------
+# Runtime-generated device evidence that may contain PII
+# Keep artifacts local and out of the repo by default
 artifacts/
 reports/
-*.pdf
-*.json
+artifacts-*/
+reports-*/
+camera_*.jpg
+camera_*.png
+audio_*.wav
+video_*.mp4
+screenshot_*.png
+screenshot_*.jpg
 
-# OS
-.DS_Store
-Thumbs.db
+# Device logs
+smartctl*.txt
+memtest*.log
+memtest*.raw
+cpu_bench_*.txt
+disk_bench_*.txt
+sensors-*.csv
+powercfg-battery-report*.html
+
+# Signed evidence and keys
+evidence-*.zip
+evidence-*.tar.gz
+evidence-*.sig
+*.pem
+*.key
+
+# -------------------------
+# Installer and packaging
+# -------------------------
+# installer builds
+dist/
+package/
+package-lock.json
+*.msi
+*.deb
+*.rpm
+
+# snaps / app images
+*.snap
+*.AppImage
+
+# -------------------------
+# Documentation / generated
+# -------------------------
+# Generated docs
+docs/_build/
+site/
+*.docx
+*.pdf
+*.pptx
+
+# API docs and schema outputs
+openapi.json
+openapi.yaml
+swagger.json
+swagger.yaml
+
+# -------------------------
+# Misc / Utilities
+# -------------------------
+# Lock files
+*.lock
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+
+# Editor temp files
+*.sublime-project
+*.sublime-workspace
+*.kate-swp
+
+# OS provisioning / VM images
+*.box
+*.vagrant/
+.vagrant/
+Vagrantfile.local
+
+# Machine-specific
+.local-*
+.local
+
+# Ignore coverage reports
+coverage/
+coverage-html/
+lcov-report/
+
+# Ignore generated protobuf / thrift go/java/rust files if you generate from schema
+gen/
+gen-*/
+
+# -------------------------
+# End of file
+# -------------------------
