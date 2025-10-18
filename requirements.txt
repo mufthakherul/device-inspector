@@ -1,0 +1,6 @@
+click>=8.0.0
+jsonschema>=4.0.0
+pytest>=7.0.0
+pytest-mock
+ruff
+black
