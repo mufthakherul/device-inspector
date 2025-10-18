@@ -1,0 +1,4 @@
+{
+  "device": {"name": "nvme0", "model_name": "Example NVMe SSD", "serial_number": "SN123"},
+  "nvme_smart_health_information_log": {"percentage_used": 5, "critical_warning": 0}
+}
