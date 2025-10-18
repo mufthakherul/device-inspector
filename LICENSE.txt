@@ -1,21 +1,103 @@
-All rights reserved — Device Inspector (inspecta) Non-Commercial License
-
+Device Inspector (inspecta) — Custom Non-Commercial License (Version 1.0)
 Copyright (c) 2025 mufthakherul
+All rights reserved.
 
-Permission is granted to view, fork, and contribute to this repository for non-commercial purposes only, subject to the rules below.
+Preamble
+This License grants specific limited rights to use, copy, and modify the materials in this repository for personal, educational, research, or other non-commercial purposes only. The Author (copyright holder) expressly reserves all other rights, including the right to relicense, commercialize, or otherwise exploit the Project in whole or in part at any time. If you wish to use the Project for commercial purposes, you must obtain a separate commercial license from the Author.
 
-You MAY:
-- Clone or fork this repository for personal, educational, research, or non-commercial use.
-- Submit issues and pull requests under the project's contribution guidelines.
-- Use any files locally for evaluation, testing, or learning.
+1. Definitions
+1.1 "Author" means the copyright holder: mufthakherul.
+1.2 "Project" means the repository and all files, source code, documentation, images, scripts, examples and other content provided in the repository named "device-inspector" (inspecta).
+1.3 "You" (or "Licensee") means any individual or legal entity that exercises rights under this License.
+1.4 "Commercial Use" means:
+    a) distribution, sale, license, sublicense, lease, rental, or other transfer of the Project or derivative works for monetary compensation;
+    b) use of the Project in connection with any commercial endeavor or service (including paid support, hosting, SaaS, consulting, integration into paid products, or use in a for-profit marketplace);
+    c) rebranding, repackaging, or redistribution of the Project or derivatives as part of a commercial offering.
+1.5 "Derivative Work" means any work that is based upon (derived from) the Project that contains substantial portions of the Project, whether modified, extended, translated, or combined with other materials.
+1.6 "Non-Commercial Use" refers to personal, educational, academic, research, demonstration, or evaluation activities that are not undertaken with an intent to generate revenue or commercial advantage.
 
-You MAY NOT:
-- Use, copy, distribute, modify, or create derivative works of this repository, or any substantial portion of it, for commercial purposes (including distribution, sale, incorporation into commercial products, branding for commercial services, or offering as a paid service).
-- Rebrand or redistribute the repository or its output (including reports, scripts, binaries) as part of a commercial offering without a separate license from the copyright holder.
-- Remove or alter the copyright, license, or attribution notices included in the repository.
+2. Grant of Rights (Non-Commercial)
+Subject to the terms and conditions of this License, the Author grants You a worldwide, non-exclusive, non-transferable, revocable license to:
+  a) view, fork, clone, and use the Project for Non-Commercial Use;
+  b) copy and modify the Project for Non-Commercial Use (create Derivative Works), provided that all copies and Derivative Works fully comply with Section 3 (Conditions) and Section 4 (Prohibitions);
+  c) submit contributions (pull requests/patches) back to the Project under the Contributor terms (Section 9).
 
-Special rights reserved to the Author:
-- The copyright holder (mufthakherul) retains all rights and may relicense, commercialize, or change the licensing of the project at any time.
-- This repository is provided "as is" without warranty. The author is not liable for any damages that may arise from its use.
+3. Conditions (applies to all permitted uses)
+3.1 Attribution and Notices:
+    - You must retain, in all copies or substantial portions of the Project (including Derivative Works), all copyright, patent, trademark, and attribution notices that appear in the original Project.
+    - You must include a copy of this License and the Author contact information in any distribution of the Project or a Derivative Work intended for Non-Commercial Use.
+3.2 Marking of Derivative Works:
+    - Any Derivative Work you distribute publicly for Non-Commercial Use must be clearly marked as derived from "device-inspector (inspecta)" and must include a conspicuous notice of what modifications you made.
+3.3 No Sublicense:
+    - You may not sublicense the rights granted under this License to any third party. Distribution remains subject to the restrictions in this License.
 
-To request commercial licensing or redistribution rights, contact: mufthakherul (via GitHub).
+4. Prohibited Actions (Commercial and other restricted uses)
+Unless You obtain an explicit written commercial license from the Author, You may NOT:
+  a) Use, redistribute, adapt, modify, or offer the Project or any Derivative Work for Commercial Use (as defined in Section 1.4).
+  b) Rebrand, rename, or distribute the Project or any Derivative Work in a manner that suggests the Project is provided by or endorsed by you or any third-party commercial brand (i.e., you may not remove or alter the original Author attribution and present the work as your own commercial product or branded service).
+  c) Remove or alter any copyright, license, or attribution notices in the Project or Derivative Works.
+  d) Grant permissions, issue licenses, or otherwise allow others to perform actions that are prohibited by this License (no sublicensing to permit commercial use).
+  e) Use any trademarks, logos, or trade names of the Author (including the "inspecta" name) without prior written permission.
+  f) Use the Project in a way that violates applicable export control or sanctions laws.
+
+5. Forks and Public Mirrors
+5.1 Public forks and mirrors on platforms such as GitHub are permitted provided they:
+    - remain public (do not attempt to place the Project behind a paid or access-restricted service for Commercial Use);
+    - include this License and the original Author attribution unchanged;
+    - clearly mark any modifications and any Derivative Work status.
+5.2 Forking does not grant any rights to use the Project for Commercial Use; all prohibitions in this License still apply.
+
+6. Contributions and Copyright Assignment
+6.1 By submitting a contribution (code, documentation, issue, patch, or other material) to the Project, You represent that:
+    - You have the necessary rights to submit the contribution under the terms of this License;
+    - The contribution is your original work or you have the right to grant the license;
+    - You grant the Author a perpetual, worldwide, royalty-free, irrevocable license to use, copy, modify, sublicense, and distribute your contribution as part of the Project in accordance with this License.
+6.2 The Author may require contributors to sign a Contributor License Agreement (CLA) or developer assignment if necessary for the Project governance. Contributors agree to such reasonable administrative steps if requested.
+
+7. Reservation of Rights; Re-licensing by the Author
+7.1 The Author retains all rights not expressly granted by this License.
+7.2 The Author expressly reserves the right, in its sole discretion, to relicense, commercialize, dual-license, or otherwise change the licensing terms of the Project at any time. Such re-licensing affects only future distributions from the Author; it does not retroactively alter or remove rights granted under this License to prior recipients.
+7.3 The Author may separately offer commercial licenses to third parties; those separate agreements do not require additional permissions from other non-commercial users.
+
+8. Termination
+8.1 This License and the rights granted hereunder will terminate automatically if You breach any term of this License and fail to cure such breach within thirty (30) days after receipt of written notice from the Author specifying the breach.
+8.2 Upon termination, You must cease all use of the Project for Non-Commercial Use, destroy or return all copies of the Project in your possession, and, if requested by the Author, confirm destruction in writing.
+8.3 Sections 3 (Conditions), 4 (Prohibited Actions), 6 (Contributions), 7 (Reservation), 10 (Warranty Disclaimer), 11 (Liability Limitation), 12 (Governing Law), and any other sections that by their nature survive termination shall survive.
+
+9. Warranty Disclaimer
+THE PROJECT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR QUIET ENJOYMENT. THE AUTHOR DOES NOT WARRANT THAT THE PROJECT WILL MEET YOUR REQUIREMENTS OR THAT THE OPERATION OF THE PROJECT WILL BE UNINTERRUPTED OR ERROR-FREE.
+
+10. Limitation of Liability
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF DATA; LOSS OF PROFITS; BUSINESS INTERRUPTION; OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE PROJECT, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE, TORT, STRICT LIABILITY OR OTHERWISE, EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+11. Indemnification
+You agree to indemnify, defend and hold harmless the Author from and against any claims, liabilities, damages, losses, and expenses (including reasonable legal fees and costs) arising from your breach of this License, your improper use of the Project, or any claim that your modifications or contributions infringe any third-party rights.
+
+12. Governing Law and Dispute Resolution
+This License shall be governed by and construed in accordance with the laws of the jurisdiction of the Author's primary residence or headquarters at the time of enforcement (currently: the Author's jurisdiction as shown in project records), without regard to conflict of law principles. Any dispute arising from or related to this License shall be resolved in the courts of that jurisdiction, and you consent to the exclusive jurisdiction and venue of such courts.
+
+13. Export Control and Sanctions
+You must comply with all applicable export control and economic sanctions laws and regulations when using or distributing the Project. You represent that neither you nor, to your knowledge, your ultimate end users are prohibited persons under any applicable law, regulation, or ordinance.
+
+14. Enforcement and Remedies
+The Author reserves the right to seek injunctive or other equitable relief in the event of an actual or threatened breach of this License, in addition to any other legal remedies available.
+
+15. Privacy / Data Handling
+If you use the Project to collect personal data from end users (e.g., test artifacts that might contain personal information), you are solely responsible for complying with applicable privacy laws (such as GDPR, CCPA) and for obtaining any required consents. The Author is not responsible for data collected by your modified Derivative Works or deployments.
+
+16. Contact for Commercial Licensing or Permissions
+To request a commercial license, redistribution permission, or trademark/use permission, contact the Author via the Project's GitHub profile (https://github.com/mufthakherul) or email where provided in the repository.
+
+17. Severability
+If any provision of this License is found to be unenforceable, invalid, or illegal under applicable law, that provision will be limited or eliminated to the minimum extent necessary so that the remaining provisions will otherwise remain in full force and effect and enforceable.
+
+18. Entire Agreement
+This License constitutes the entire agreement between You and the Author concerning the Project and supersedes any prior agreements or communications pertaining to the Project.
+
+19. Versioning
+This is version 1.0 of the Device Inspector (inspecta) Custom Non-Commercial License. The Author may publish later revisions; subsequent versions will be clearly labeled and posted in the Project repository. Unless the Author explicitly states otherwise, new versions do not apply retroactively to copies distributed under earlier versions.
+
+20. Acknowledgment
+By using, copying, forking, or contributing to the Project, You acknowledge that You have read and agree to be bound by the terms of this License.
+
+—— End of License ——
