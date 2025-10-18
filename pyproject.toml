@@ -1,0 +1,17 @@
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C", "I"]
+
+[tool.isort]
+profile = "black"
+
+[project]
+name = "inspecta-agent"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["click", "jsonschema"]
