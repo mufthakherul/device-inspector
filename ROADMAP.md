@@ -1,6 +1,9 @@
 # ROADMAP — device-inspector (inspecta)
 
-Last updated: 2025-10-18
+**Last updated:** 2025-10-28  
+**Status:** Phase 1 in progress — Sprint 1 started  
+
+> **📊 Progress Update (2025-10-28):** Sprint 0 complete (100%). Sprint 1 at ~30% completion with basic agent skeleton and SMART parsing implemented. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed current state.
 
 This roadmap is the authoritative, actionable plan for building the device-inspector (inspecta) project. It converts the Project Goal and high-level strategy into a time-boxed implementation plan: phases, sprints, milestones, deliverables, acceptance criteria, owners, risks and mitigations, metrics, and operational playbooks for pilot and launch.
 
@@ -56,22 +59,47 @@ Contents
 
 2) SPRINT-BY-SPRINT PLAN (2-week sprints; dates approximate)
 
-Sprint 0 — Discovery & infra (2025-10-20 → 2025-11-02)
+Sprint 0 — Discovery & infra (2025-10-20 → 2025-11-02) ✅ **COMPLETE**
 Goal: repo scaffolding, governance, and choice of tech stack so devs can start coding.
 
+**Status:** ✅ 100% Complete (2025-10-28)
+
 Tasks
-- Finalize language/runtime (recommend Python 3.11 for agent, optional Go/Rust microtools)
-- Create repo skeleton (done): /agent, /bootable, /server, /web, /docs, /samples, .github workflows
-- Publish key docs: README, LICENSE.txt, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, PROJECT_GOAL.md, ROADMAP.md
-- Set up GitHub Project board, issue templates, PR templates
-- Define minimal CI matrix (Linux runner) and basic linting rules
+- ✅ Finalize language/runtime (Python 3.11 for agent)
+- ✅ Create repo skeleton: /agent, /bootable, /server, /web, /docs, /samples, .github workflows
+- ✅ Publish key docs: README, LICENSE.txt, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, PROJECT_GOAL.md, ROADMAP.md
+- ✅ Set up GitHub Project board, issue templates, PR templates
+- ✅ Define minimal CI matrix (Linux runner) and basic linting rules
 
 Acceptance criteria
-- Repo exists with required docs and templates.
-- CI skeleton exists (lint job) and passes on main branch.
-- Project board has prioritized epic cards for Phase 1.
+- ✅ Repo exists with required docs and templates.
+- ✅ CI skeleton exists (lint job) and passes on main branch.
+- ✅ Project board has prioritized epic cards for Phase 1.
 
-Sprint 1 — Agent skeleton + Inventory & SMART (2025-11-03 → 2025-11-16)
+Sprint 1 — Agent skeleton + Inventory & SMART (2025-11-03 → 2025-11-16) 🟡 **IN PROGRESS**
+Goal: Basic agent CLI that detects system and runs smartctl to produce structured SMART JSON entry in report.json.
+
+**Status:** 🟡 ~30% Complete (2025-10-28)  
+**What's Done:** CLI skeleton, basic SMART parser, report.json generation, 6 tests passing  
+**In Progress:** Real smartctl execution, inventory plugin  
+**Blockers:** Need focused development time
+
+Tasks
+- ✅ Implement CLI skeleton: `inspecta` with `run --mode quick` and `inventory` subcommand
+- 🟡 Implement inventory plugin (dmidecode/system_profiler/PowerShell placeholder) — **IN PROGRESS**
+- 🟡 Add smartctl wrapper integration (use smartctl --json format) and parser module — **Partial: Parser done, execution needed**
+- ✅ Create basic report.json composer & sample output
+- 🟡 Unit tests for parsing logic — **Partial: 6 tests, need more**
+- ✅ CI: run unit tests on Linux; package smartctl presence check
+
+Acceptance criteria
+- 🟡 `inspecta inventory` outputs device JSON (vendor, model, serial, bios) — **Needs implementation**
+- 🟡 `inspecta run --mode quick` invokes smartctl (if available) and writes artifacts/smartctl.json and minimal report.json — **Works with sample data, needs real execution**
+- ✅ Unit tests pass in CI — **6 tests passing**
+
+**Next Actions:** See [NEXT_STEPS.md](NEXT_STEPS.md) Priority 1-3 for detailed implementation tasks.
+
+Sprint 2 — Disk perf, battery, CPU quick bench, scoring (2025-11-17 → 2025-11-30) 🔴 **NOT STARTED**
 Goal: Basic agent CLI that detects system and runs smartctl to produce structured SMART JSON entry in report.json.
 
 Tasks
