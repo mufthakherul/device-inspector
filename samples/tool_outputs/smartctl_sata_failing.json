@@ -1,0 +1,175 @@
+{
+  "json_format_version": [1, 0],
+  "smartctl": {
+    "version": [7, 2],
+    "svn_revision": "5155",
+    "platform_info": "x86_64-linux-5.15.0",
+    "build_info": "(local build)",
+    "argv": ["smartctl", "--json", "-a", "/dev/sdb"],
+    "exit_status": 8
+  },
+  "device": {
+    "name": "/dev/sdb",
+    "info_name": "/dev/sdb",
+    "type": "sat",
+    "protocol": "ATA",
+    "model_name": "WDC WD10EZEX-08WN4A0",
+    "serial_number": "WD-WCC6Y7FAIL123",
+    "firmware_version": "01.01A01"
+  },
+  "model_family": "Western Digital Blue",
+  "model_name": "WDC WD10EZEX-08WN4A0",
+  "serial_number": "WD-WCC6Y7FAIL123",
+  "firmware_version": "01.01A01",
+  "user_capacity": {
+    "blocks": 1953525168,
+    "bytes": 1000204886016
+  },
+  "smart_status": {
+    "passed": false
+  },
+  "ata_smart_attributes": {
+    "revision": 16,
+    "table": [
+      {
+        "id": 5,
+        "name": "Reallocated_Sector_Ct",
+        "value": 140,
+        "worst": 140,
+        "thresh": 140,
+        "when_failed": "FAILING_NOW",
+        "flags": {
+          "value": 51,
+          "string": "PO--CK ",
+          "prefailure": true,
+          "updated_online": true,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 248,
+          "string": "248"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Power_On_Hours",
+        "value": 85,
+        "worst": 85,
+        "thresh": 0,
+        "when_failed": "",
+        "flags": {
+          "value": 18,
+          "string": "-O--CK ",
+          "prefailure": false,
+          "updated_online": true,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 28945,
+          "string": "28945"
+        }
+      },
+      {
+        "id": 12,
+        "name": "Power_Cycle_Count",
+        "value": 92,
+        "worst": 92,
+        "thresh": 0,
+        "when_failed": "",
+        "flags": {
+          "value": 18,
+          "string": "-O--CK ",
+          "prefailure": false,
+          "updated_online": true,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 3421,
+          "string": "3421"
+        }
+      },
+      {
+        "id": 196,
+        "name": "Reallocated_Event_Count",
+        "value": 140,
+        "worst": 140,
+        "thresh": 140,
+        "when_failed": "FAILING_NOW",
+        "flags": {
+          "value": 50,
+          "string": "-O--CK ",
+          "prefailure": false,
+          "updated_online": true,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 248,
+          "string": "248"
+        }
+      },
+      {
+        "id": 197,
+        "name": "Current_Pending_Sector",
+        "value": 100,
+        "worst": 100,
+        "thresh": 0,
+        "when_failed": "",
+        "flags": {
+          "value": 50,
+          "string": "-O--CK ",
+          "prefailure": false,
+          "updated_online": true,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 64,
+          "string": "64"
+        }
+      },
+      {
+        "id": 198,
+        "name": "Offline_Uncorrectable",
+        "value": 100,
+        "worst": 100,
+        "thresh": 0,
+        "when_failed": "",
+        "flags": {
+          "value": 48,
+          "string": "----CK ",
+          "prefailure": false,
+          "updated_online": false,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 32,
+          "string": "32"
+        }
+      }
+    ]
+  },
+  "power_on_time": {
+    "hours": 28945
+  },
+  "power_cycle_count": 3421,
+  "temperature": {
+    "current": 42
+  }
+}

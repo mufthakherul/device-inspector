@@ -19,7 +19,7 @@ def compose_report(
     agent_version: str,
     device: Dict[str, Any],
     artifacts: List[str],
-    smart: Dict[str, Any],
+    tests: List[Dict[str, Any]],
     mode: str = "quick",
     profile: str = "default",
     smart_status: Optional[str] = None,
@@ -27,6 +27,15 @@ def compose_report(
     """Compose a minimal report dict.
 
     The returned dictionary should validate against `schemas/report-schema-1.0.0.json`.
+
+    Args:
+        agent_version: Version of the agent
+        device: Device information dictionary
+        artifacts: List of artifact file paths
+        tests: List of test result dictionaries
+        mode: Inspection mode (quick/full)
+        profile: Buyer profile
+        smart_status: Overall SMART status (ok/sample/missing)
     """
     report: Dict[str, Any] = {
         "report_version": "1.0.0",
@@ -41,33 +50,46 @@ def compose_report(
             "recommendation": "",
         },
         "scores": {},
-        "tests": [],
+        "tests": tests,
         "artifacts": artifacts,
         "evidence": {"manifest_sha256": None, "signed": False},
     }
 
-    # include smart result as a test entry
-    test_entry = {
-        "name": "smartctl",
-        "status": "ok" if smart else "warn",
-        "data": smart,
-    }
-    if smart_status:
-        test_entry["status_detail"] = smart_status
-    report["tests"].append(test_entry)
+    # Simple scoring heuristics based on tests
+    storage_score = 50  # Default
+    if tests:
+        # Check for SMART test results
+        smart_tests = [t for t in tests if t.get("name", "").startswith("smartctl")]
+        if smart_tests:
+            # If we have successful SMART results, score higher
+            ok_tests = [t for t in smart_tests if t.get("status") == "ok"]
+            if ok_tests:
+                storage_score = 80
+                # Check for warning signs in SMART data
+                for test in ok_tests:
+                    data = test.get("data", {})
+                    attrs = data.get("attributes", {})
+                    # Check for reallocated sectors
+                    if "Reallocated_Sector_Ct" in attrs:
+                        if attrs["Reallocated_Sector_Ct"] > 10:
+                            storage_score = 40  # Failing drive
+                        elif attrs["Reallocated_Sector_Ct"] > 0:
+                            storage_score = 60  # Warning
 
-    # simple scoring heuristics placeholder
     report["scores"] = {
-        "storage": 80 if smart else 50,
+        "storage": storage_score,
         "battery": 80,
         "memory": 90,
         "cpu_thermal": 85,
     }
-    # compute overall
+
+    # Compute overall score
     report["summary"]["overall_score"] = int(
         sum(report["scores"].values()) / len(report["scores"])
     )
     overall = report["summary"]["overall_score"]
+
+    # Determine grade
     if overall >= 90:
         grade = "Excellent"
     elif overall >= 75:
@@ -76,6 +98,7 @@ def compose_report(
         grade = "Fair"
     else:
         grade = "Poor"
+
     report["summary"]["grade"] = grade
     report["summary"]["recommendation"] = "Profile: %s" % profile
 
