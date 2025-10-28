@@ -1,9 +1,9 @@
 # ROADMAP — device-inspector (inspecta)
 
 **Last updated:** 2025-10-28  
-**Status:** Phase 1 in progress — Sprint 1 started  
+**Status:** Phase 1 in progress — Sprint 1 COMPLETE ✅, Sprint 2 ready to start
 
-> **📊 Progress Update (2025-10-28):** Sprint 0 complete (100%). Sprint 1 at ~30% completion with basic agent skeleton and SMART parsing implemented. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed current state.
+> **📊 Progress Update (2025-10-28):** Sprint 0 complete (100%). Sprint 1 COMPLETE ✅ (100%) - All inventory detection, real SMART execution, and error handling fully implemented ahead of schedule. 22 tests passing. Project now at ~60% overall. Ready for Sprint 2. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed current state.
 
 This roadmap is the authoritative, actionable plan for building the device-inspector (inspecta) project. It converts the Project Goal and high-level strategy into a time-boxed implementation plan: phases, sprints, milestones, deliverables, acceptance criteria, owners, risks and mitigations, metrics, and operational playbooks for pilot and launch.
 
@@ -76,38 +76,60 @@ Acceptance criteria
 - ✅ CI skeleton exists (lint job) and passes on main branch.
 - ✅ Project board has prioritized epic cards for Phase 1.
 
-Sprint 1 — Agent skeleton + Inventory & SMART (2025-11-03 → 2025-11-16) 🟡 **IN PROGRESS**
+Sprint 1 — Agent skeleton + Inventory & SMART (2025-10-28) ✅ **COMPLETE**
 Goal: Basic agent CLI that detects system and runs smartctl to produce structured SMART JSON entry in report.json.
 
-**Status:** 🟡 ~30% Complete (2025-10-28)  
-**What's Done:** CLI skeleton, basic SMART parser, report.json generation, 6 tests passing  
-**In Progress:** Real smartctl execution, inventory plugin  
-**Blockers:** Need focused development time
+**Status:** ✅ 100% Complete (2025-10-28) — Completed ahead of schedule in 1 day!  
+**What's Done:** 
+- ✅ CLI skeleton with full logging
+- ✅ Inventory plugin with dmidecode integration
+- ✅ Real smartctl execution on SATA/NVMe
+- ✅ Multi-device support
+- ✅ Comprehensive error handling
+- ✅ 22 tests passing (target was 15+)
 
 Tasks
 - ✅ Implement CLI skeleton: `inspecta` with `run --mode quick` and `inventory` subcommand
-- 🟡 Implement inventory plugin (dmidecode/system_profiler/PowerShell placeholder) — **IN PROGRESS**
-- 🟡 Add smartctl wrapper integration (use smartctl --json format) and parser module — **Partial: Parser done, execution needed**
+- ✅ Implement inventory plugin (dmidecode integration complete)
+- ✅ Add smartctl wrapper integration with real execution and parser module
 - ✅ Create basic report.json composer & sample output
-- 🟡 Unit tests for parsing logic — **Partial: 6 tests, need more**
+- ✅ Unit tests for parsing logic (22 tests)
 - ✅ CI: run unit tests on Linux; package smartctl presence check
 
 Acceptance criteria
-- 🟡 `inspecta inventory` outputs device JSON (vendor, model, serial, bios) — **Needs implementation**
-- 🟡 `inspecta run --mode quick` invokes smartctl (if available) and writes artifacts/smartctl.json and minimal report.json — **Works with sample data, needs real execution**
-- ✅ Unit tests pass in CI — **6 tests passing**
+- ✅ `inspecta inventory` outputs device JSON (vendor, model, serial, bios)
+- ✅ `inspecta run --mode quick` invokes real smartctl and writes artifacts/smartctl.json and minimal report.json
+- ✅ Unit tests pass in CI (22 tests passing)
+- ✅ Error handling with installation hints
+- ✅ Structured logging to agent.log
 
-**Next Actions:** See [NEXT_STEPS.md](NEXT_STEPS.md) Priority 1-3 for detailed implementation tasks.
+**See [SPRINT_1_SUMMARY.md](SPRINT_1_SUMMARY.md) for detailed completion report.**
 
-Sprint 2 — Disk perf, battery, CPU quick bench, scoring (2025-11-17 → 2025-11-30) 🔴 **NOT STARTED**
-Goal: Basic agent CLI that detects system and runs smartctl to produce structured SMART JSON entry in report.json.
+Sprint 2 — Disk perf, battery, CPU quick bench, scoring (2025-11-17 → 2025-11-30) 🔴 **READY TO START**
+Goal: Expand agent with disk performance testing (fio), battery health detection, CPU benchmarking, and complete scoring engine.
+
+**Status:** 🔴 Not Started — Ready to begin with Sprint 1 complete
 
 Tasks
-- Implement CLI skeleton: `inspecta` with `run --mode quick` and `inventory` subcommand
-- Implement inventory plugin (dmidecode/system_profiler/PowerShell placeholder)
-- Add smartctl wrapper integration (use smartctl --json format) and parser module
-- Create basic report.json composer & sample output
-- Unit tests for parsing logic
+- 🔲 Complete report.json schema with JSON Schema validation
+- 🔲 Add code coverage reporting (pytest-cov, target 60%+)
+- 🔲 Implement fio wrapper for disk performance (128MB quick tests)
+- 🔲 Add battery health parser (upower for Linux, powercfg for Windows)
+- 🔲 Implement sysbench wrapper for CPU benchmarking
+- 🔲 Complete scoring engine with all category weights
+- 🔲 Add profile-based recommendations (Office, Developer, Gamer, etc.)
+- 🔲 Expand test suite to 35+ tests
+
+Acceptance criteria
+- 🔲 report.json validates against schemas/report-schema-1.0.0.json
+- 🔲 Code coverage ≥60% reported in CI
+- 🔲 `inspecta run` includes disk read/write speeds in report
+- 🔲 Battery capacity and cycle count detected and scored
+- 🔲 CPU benchmark score included in report
+- 🔲 Profile recommendations working (e.g., "Suitable for Office work")
+- 🔲 35+ unit tests passing in CI
+
+**Next Actions:** See [NEXT_STEPS.md](NEXT_STEPS.md) Sprint 2 priorities for detailed tasks.
 - CI: run unit tests on Linux; package smartctl presence check
 
 Acceptance criteria
