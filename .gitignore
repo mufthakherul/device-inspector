@@ -91,6 +91,7 @@ build/
 dist/
 release/
 out/
+test-output/
 
 # signed bundles / keys created during runs
 *.sig
