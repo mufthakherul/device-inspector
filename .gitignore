@@ -77,6 +77,11 @@ reports-*/         # any variant folder
 samples/*.log
 samples/*.json
 
+# Allow sample artifacts to be tracked
+!samples/artifacts/*.json
+!samples/artifacts/*.log
+!samples/artifacts/*.csv
+
 # temporary test output directories
 tmp/
 tmp-*/
