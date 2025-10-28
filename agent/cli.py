@@ -32,7 +32,9 @@ def cli() -> None:
 
 
 @cli.command()
-@click.option("--use-sample", is_flag=True, help="Use sample data instead of executing dmidecode")
+@click.option(
+    "--use-sample", is_flag=True, help="Use sample data instead of executing dmidecode"
+)
 def inventory_cmd(use_sample: bool) -> None:
     """Detect and display device hardware information.
 
@@ -57,9 +59,18 @@ def inventory_cmd(use_sample: bool) -> None:
     "--profile", default="default", help="Buyer profile (Office, Gamer, etc.)"
 )
 @click.option("--no-prompt", is_flag=True, help="Don't prompt for consent (for CI).")
-@click.option("--use-sample", is_flag=True, help="Use sample data for testing (no root required)")
+@click.option(
+    "--use-sample", is_flag=True, help="Use sample data for testing (no root required)"
+)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose debug logging")
-def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool, verbose: bool) -> None:
+def run(
+    mode: str,
+    output: Path,
+    profile: str,
+    no_prompt: bool,
+    use_sample: bool,
+    verbose: bool,
+) -> None:
     """Run an inspection. In this scaffold only `quick` is implemented.
 
     The command writes <output>/report.json and an `artifacts/` folder with
@@ -74,11 +85,15 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool
     # Set up structured logging to file
     log_file = artifacts_dir / "agent.log"
     log_level = logging.DEBUG if verbose else logging.INFO
-    inspector_logger = setup_logging(log_file, console_level=log_level, file_level=logging.DEBUG)
+    inspector_logger = setup_logging(
+        log_file, console_level=log_level, file_level=logging.DEBUG
+    )
 
     inspector_logger.info("=" * 60)
     inspector_logger.info("INSPECTA AGENT v%s", __version__)
-    inspector_logger.info("Mode: %s | Profile: %s | Sample: %s", mode, profile, use_sample)
+    inspector_logger.info(
+        "Mode: %s | Profile: %s | Sample: %s", mode, profile, use_sample
+    )
     inspector_logger.info("=" * 60)
 
     logger.info("Starting inspecta run (mode=%s, profile=%s)", mode, profile)
@@ -97,7 +112,11 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool
     inspector_logger.info("Step 1: Detecting device inventory...")
     try:
         device_info = inventory.get_inventory(use_sample=use_sample)
-        logger.info("Detected device: %s %s", device_info.get("vendor"), device_info.get("model"))
+        logger.info(
+            "Detected device: %s %s",
+            device_info.get("vendor"),
+            device_info.get("model"),
+        )
         inspector_logger.info(
             "Device detected: %s %s (Serial: %s, BIOS: %s)",
             device_info.get("vendor"),
@@ -137,15 +156,20 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool
                 )
 
                 # Add to tests list
-                tests_list.append({
-                    "name": f"smartctl_{device_name}",
-                    "status": "ok",
-                    "data": result["data"],
-                    "status_detail": "sample" if use_sample else "executed",
-                })
+                tests_list.append(
+                    {
+                        "name": f"smartctl_{device_name}",
+                        "status": "ok",
+                        "data": result["data"],
+                        "status_detail": "sample" if use_sample else "executed",
+                    }
+                )
 
-                logger.info("Collected SMART data for %s: %s",
-                           result["device"], result["data"].get("model", "unknown"))
+                logger.info(
+                    "Collected SMART data for %s: %s",
+                    result["device"],
+                    result["data"].get("model", "unknown"),
+                )
                 inspector_logger.info(
                     "SMART OK: %s - %s (Serial: %s)",
                     result["device"],
@@ -154,13 +178,18 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool
                 )
             else:
                 # Add error to tests list
-                tests_list.append({
-                    "name": f"smartctl_{device_name}",
-                    "status": "error",
-                    "error": result.get("error", "Unknown error"),
-                })
-                logger.error("Failed to get SMART data for %s: %s",
-                            result["device"], result.get("error", "Unknown"))
+                tests_list.append(
+                    {
+                        "name": f"smartctl_{device_name}",
+                        "status": "error",
+                        "error": result.get("error", "Unknown error"),
+                    }
+                )
+                logger.error(
+                    "Failed to get SMART data for %s: %s",
+                    result["device"],
+                    result.get("error", "Unknown"),
+                )
                 inspector_logger.error(
                     "SMART FAILED: %s - %s",
                     result["device"],

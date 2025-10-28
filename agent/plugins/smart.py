@@ -116,7 +116,9 @@ def execute_smartctl(device: str, use_sample: bool = False) -> Dict[str, Any]:
         # Higher values indicate various failures
 
         if result.returncode == 1:
-            raise SmartError(f"smartctl command line error for {device}: {result.stderr}")
+            raise SmartError(
+                f"smartctl command line error for {device}: {result.stderr}"
+            )
         elif result.returncode == 2:
             raise SmartError(
                 f"Could not open device {device}. "
@@ -129,7 +131,11 @@ def execute_smartctl(device: str, use_sample: bool = False) -> Dict[str, Any]:
         # (smartctl can return data with non-zero exit codes)
         try:
             data = json.loads(result.stdout)
-            logger.info("Executed smartctl successfully for %s (exit code: %d)", device, result.returncode)
+            logger.info(
+                "Executed smartctl successfully for %s (exit code: %d)",
+                device,
+                result.returncode,
+            )
             return data
         except json.JSONDecodeError as e:
             raise SmartError(
@@ -205,13 +211,15 @@ def scan_all_devices(use_sample: bool = False) -> List[Dict[str, Any]]:
         try:
             data = execute_smartctl("/dev/nvme0n1", use_sample=True)
             parsed = parse_smart_json(data)
-            results.append({
-                "device": "/dev/nvme0n1",
-                "type": "nvme",
-                "status": "ok",
-                "data": parsed,
-                "raw_json": data,
-            })
+            results.append(
+                {
+                    "device": "/dev/nvme0n1",
+                    "type": "nvme",
+                    "status": "ok",
+                    "data": parsed,
+                    "raw_json": data,
+                }
+            )
         except SmartError as e:
             logger.error("Failed to load sample SMART data: %s", e)
         return results
@@ -235,21 +243,25 @@ def scan_all_devices(use_sample: bool = False) -> List[Dict[str, Any]]:
 
             device_type = "nvme" if "nvme" in device else "sata"
 
-            results.append({
-                "device": device,
-                "type": device_type,
-                "status": "ok",
-                "data": parsed,
-                "raw_json": data,
-            })
+            results.append(
+                {
+                    "device": device,
+                    "type": device_type,
+                    "status": "ok",
+                    "data": parsed,
+                    "raw_json": data,
+                }
+            )
 
         except SmartError as e:
             logger.warning("Failed to get SMART data for %s: %s", device, e)
-            results.append({
-                "device": device,
-                "type": "unknown",
-                "status": "error",
-                "error": str(e),
-            })
+            results.append(
+                {
+                    "device": device,
+                    "type": "unknown",
+                    "status": "error",
+                    "error": str(e),
+                }
+            )
 
     return results

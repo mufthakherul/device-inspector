@@ -21,7 +21,7 @@ def test_detect_storage_devices_mock():
                 MagicMock(name="sdb"),
                 MagicMock(name="nvme0n1"),
                 MagicMock(name="loop0"),  # Should be filtered
-                MagicMock(name="ram0"),   # Should be filtered
+                MagicMock(name="ram0"),  # Should be filtered
             ]
             for entry in mock_entries:
                 entry.name = entry._mock_name
@@ -93,10 +93,7 @@ def test_parse_smart_json_sata_failing():
 def test_parse_smart_json_nvme():
     """Test parsing NVMe SMART data."""
     sample_path = (
-        Path(__file__).parent.parent
-        / "samples"
-        / "artifacts"
-        / "smart_nvme0.json"
+        Path(__file__).parent.parent / "samples" / "artifacts" / "smart_nvme0.json"
     )
 
     with open(sample_path, "r", encoding="utf-8") as f:
@@ -155,6 +152,7 @@ def test_execute_smartctl_not_found(mock_run):
 def test_execute_smartctl_timeout(mock_run):
     """Test smartctl execution timeout."""
     import subprocess
+
     mock_run.side_effect = subprocess.TimeoutExpired("smartctl", 30)
 
     with pytest.raises(smart.SmartError, match="timed out"):
