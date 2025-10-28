@@ -64,6 +64,7 @@ System Information
 
 def test_inventory_error_on_missing_sample(monkeypatch):
     """Test that InventoryError is raised when sample is missing."""
+
     # Mock Path.exists to return False for the sample file
     def mock_exists(self):
         return False
