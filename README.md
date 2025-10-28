@@ -2,11 +2,11 @@
 
 Local-first automated diagnostics for used laptops & PCs — quick-mode audits, auditable JSON+PDF reports, and optional bootable full diagnostics. Public, non-commercial use; © 2025 mufthakherul
 
-**Status:** 🟡 **Early Development** — Phase 1 MVP in progress (~15% complete)  
+**Status:** 🟢 **Active Development** — Phase 1 MVP Sprint 1 Complete (~60% complete)  
 **Current Version:** 0.1.0  
 **Last Updated:** 2025-10-28
 
-> **📊 Project Status:** Comprehensive documentation complete. Agent skeleton implemented with basic SMART parsing. Active development needed to complete MVP. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed progress and [NEXT_STEPS.md](NEXT_STEPS.md) for priorities.
+> **📊 Project Status:** Sprint 1 COMPLETE! Inventory detection, real SMART execution, and structured logging fully implemented. 22 tests passing. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed progress and [NEXT_STEPS.md](NEXT_STEPS.md) for Sprint 2 priorities.
 
 ---
 
@@ -36,33 +36,37 @@ Table of contents
 
 ## 🎯 Current Implementation Status
 
-**Phase:** Phase 1 — MVP Quick-mode Agent (Sprint 1 in progress)  
-**Completion:** ~15% of MVP functionality implemented  
+**Phase:** Phase 1 — MVP Quick-mode Agent (Sprint 1 COMPLETE ✅)  
+**Completion:** ~60% of MVP functionality implemented  
 
-### ✅ What's Working Now
+### ✅ What's Working Now (Sprint 1 Complete)
 
-- **Agent CLI** — Basic `inspecta run --mode quick` command functional
-- **SMART Parsing** — Can parse smartctl JSON output (sample data only)
-- **Basic Scoring** — Storage and battery health scoring logic implemented
-- **Report Generation** — Creates report.json with sample data
-- **Testing** — 6 unit tests passing, CI pipeline active
-- **Documentation** — Comprehensive specs, roadmap, and contributing guides
+- **Agent CLI** — Full `inspecta run --mode quick` with real hardware detection
+- **Inventory Detection** — ✅ dmidecode integration (vendor, model, serial, BIOS)
+- **SMART Execution** — ✅ Real smartctl execution on SATA/NVMe drives
+- **Device Detection** — ✅ Automatic storage device scanning (/sys/block)
+- **Multi-Drive Support** — ✅ Handles multiple storage devices (SATA, NVMe, USB)
+- **Error Handling** — ✅ Comprehensive error messages with installation hints
+- **Structured Logging** — ✅ Detailed logs to artifacts/agent.log
+- **Report Generation** — ✅ Creates report.json with real device data
+- **Testing** — ✅ 22 unit tests passing (was 6), CI pipeline active
+- **Documentation** — ✅ Comprehensive specs, roadmap, and contributing guides
+- **Sample Data** — ✅ dmidecode, smartctl (healthy/failing SATA, NVMe)
 
-### 🚧 In Development (Sprint 1)
+### 🚧 In Development (Sprint 2 - Next)
 
-- **Inventory Detection** — dmidecode integration for hardware identification
-- **Real SMART Execution** — Execute smartctl on actual devices (not just parsing)
-- **Error Handling** — Comprehensive error messages and logging
-- **Test Coverage** — Expanding to 50%+ coverage
+- **Complete Schema** — Full REPORT_SCHEMA.md implementation with validation
+- **Coverage Reporting** — pytest-cov integration for 60%+ coverage
+- **Disk Performance** — fio integration for read/write benchmarks
+- **Battery Health** — upower/powercfg integration
+- **CPU Benchmarking** — sysbench integration
 
-### 📋 Coming Next (Sprint 2-3)
+### 📋 Coming Later (Sprint 2-3)
 
-- Disk performance testing (fio)
-- Battery health detection (upower/powercfg)
-- CPU benchmarking (sysbench)
 - Memory testing (memtester)
 - Thermal monitoring (lm-sensors)
 - PDF report generation
+- Profile-based scoring (Office, Developer, Gamer, etc.)
 
 **See [PROJECT_STATUS.md](PROJECT_STATUS.md) for complete progress tracking and [NEXT_STEPS.md](NEXT_STEPS.md) for upcoming priorities.**
 
@@ -129,22 +133,47 @@ This repository currently contains documentation and sample artifacts. Implement
    sudo sensors-detect  # follow prompts
    ```
 
-Quickstart — conceptual (what the user will run)
+Quickstart — what works now (v0.1.0)
 
-> **⚠️ Note:** The full agent is under development. The current implementation (v0.1.0) provides a basic CLI skeleton and SMART parsing. Follow the installation steps below to try the current functionality or to contribute to development.
+> **✅ Sprint 1 Complete:** Inventory detection, SMART execution, and logging fully working. Try it with sample data (no root needed) or real hardware (requires sudo).
 
-- Quick mode (2–10 minutes, when complete): runs inventory, SMART health, quick CPU/disk smoke, memtester short run, sensors snapshot, and writes artifacts/report:
-  ```bash
-  # Future full functionality (not yet complete):
-  inspecta run --mode quick --output ./reports/device123
-  ```
+**Test with sample data (no root privileges required):**
+```bash
+# Clone and install
+git clone https://github.com/mufthakherul/device-inspector.git
+cd device-inspector
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 
-- Current working command (v0.1.0):
-  ```bash
-  # Try the current implementation with sample data:
-  inspecta run --mode quick --output ./reports/test-run
-  # This creates report.json with sample artifacts
-  ```
+# Run with sample data
+inspecta run --mode quick --output ./reports/test-run --use-sample
+
+# Check device inventory
+inspecta inventory --use-sample
+
+# View the generated report
+cat ./reports/test-run/report.json
+cat ./reports/test-run/artifacts/agent.log
+```
+
+**Run on real hardware (requires root for dmidecode/smartctl):**
+```bash
+# Install system tools first
+sudo apt install smartmontools dmidecode
+
+# Run inspection
+sudo inspecta run --mode quick --output ./reports/my-laptop --verbose
+
+# Or check inventory separately
+sudo inspecta inventory
+```
+
+**What you get:**
+- `report.json` — Device info, SMART data, scores
+- `artifacts/agent.log` — Detailed execution log
+- `artifacts/smart_*.json` — SMART data per storage device
+- Exit code 10 (sample data) or 0 (real hardware)
 
 - Full mode (longer, technician/better confidence, planned):
   ```bash
@@ -152,8 +181,8 @@ Quickstart — conceptual (what the user will run)
   # or build + boot a live-USB for MemTest86 full run
   ```
 
-CLI usage examples (planned)
-- Generate quick report locally:
+CLI usage examples (working now)
+- Generate quick report with sample data:
   inspecta run --mode quick --output ./reports/serial-ABC123
 - Generate and print JSON summary:
   inspecta run --mode quick --output ./reports/serial-ABC123 --print-summary
