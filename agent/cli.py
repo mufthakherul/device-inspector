@@ -82,22 +82,51 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool
         logger.warning("Inventory detection failed: %s. Using placeholder.", e)
         device_info = {"vendor": "unknown", "model": "unknown", "serial": None}
 
-    # Try to use smartctl wrapper to parse a system file; fallback to sample
-    sample_smart = (
-        Path(__file__).parent.parent / "samples" / "artifacts" / "smart_nvme0.json"
-    )
-    if sample_smart.exists():
-        with open(sample_smart, "r", encoding="utf-8") as fh:
-            smart_json = json.load(fh)
-        parsed = smart.parse_smart_json(smart_json)
-        # write artifact copy
-        (artifacts_dir / "smart_nvme0.json").write_text(
-            json.dumps(smart_json, indent=2), encoding="utf-8"
-        )
-        smart_status = "sample"
-    else:
-        parsed = {"note": "smartctl not available; sample not found"}
+    # Scan storage devices with SMART
+    logger.info("Scanning storage devices...")
+    smart_results = smart.scan_all_devices(use_sample=use_sample)
+
+    if not smart_results:
+        logger.warning("No storage devices found or SMART data unavailable")
         smart_status = "missing"
+        tests_list = []
+    else:
+        smart_status = "ok"
+        tests_list = []
+
+        # Write SMART artifacts and build tests list
+        for idx, result in enumerate(smart_results):
+            device_name = result["device"].replace("/dev/", "")
+
+            if result["status"] == "ok":
+                # Write raw JSON artifact
+                artifact_name = f"smart_{device_name}.json"
+                (artifacts_dir / artifact_name).write_text(
+                    json.dumps(result["raw_json"], indent=2), encoding="utf-8"
+                )
+
+                # Add to tests list
+                tests_list.append({
+                    "name": f"smartctl_{device_name}",
+                    "status": "ok",
+                    "data": result["data"],
+                    "status_detail": "sample" if use_sample else "executed",
+                })
+
+                logger.info("Collected SMART data for %s: %s",
+                           result["device"], result["data"].get("model", "unknown"))
+            else:
+                # Add error to tests list
+                tests_list.append({
+                    "name": f"smartctl_{device_name}",
+                    "status": "error",
+                    "error": result.get("error", "Unknown error"),
+                })
+                logger.error("Failed to get SMART data for %s: %s",
+                            result["device"], result.get("error", "Unknown"))
+
+        if use_sample:
+            smart_status = "sample"
 
     # Write placeholder memtester log and sensors CSV
     (artifacts_dir / "memtest.log").write_text(
@@ -111,7 +140,7 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool
         agent_version=__version__,
         device=device_info,
         artifacts=[str(p.relative_to(out_dir)) for p in artifacts_dir.iterdir()],
-        smart=parsed,
+        tests=tests_list,
         mode=mode,
         profile=profile,
         smart_status=smart_status,
@@ -122,6 +151,7 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool
         json.dump(report, fh, indent=2)
 
     logger.info("Report written to %s", report_path)
+
     # Exit codes: 0 success, 10 partial/warn, 20 failure
     # For scaffold, treat sample smart as WARN (10)
     if smart_status == "sample":
