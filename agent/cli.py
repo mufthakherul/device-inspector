@@ -13,7 +13,7 @@ from pathlib import Path
 import click
 
 from . import __version__
-from .plugins import smart
+from .plugins import inventory, smart
 from .report import compose_report
 
 logger = logging.getLogger("inspecta")
@@ -30,6 +30,21 @@ def cli() -> None:
 
 
 @cli.command()
+@click.option("--use-sample", is_flag=True, help="Use sample data instead of executing dmidecode")
+def inventory_cmd(use_sample: bool) -> None:
+    """Detect and display device hardware information.
+
+    Requires root/sudo privileges unless --use-sample is specified.
+    """
+    try:
+        device_info = inventory.get_inventory(use_sample=use_sample)
+        print(json.dumps(device_info, indent=2))
+    except inventory.InventoryError as e:
+        logger.error("Inventory detection failed: %s", e)
+        raise SystemExit(1)
+
+
+@cli.command()
 @click.option(
     "--mode",
     type=click.Choice(["quick", "full"]),
@@ -40,7 +55,8 @@ def cli() -> None:
     "--profile", default="default", help="Buyer profile (Office, Gamer, etc.)"
 )
 @click.option("--no-prompt", is_flag=True, help="Don't prompt for consent (for CI).")
-def run(mode: str, output: Path, profile: str, no_prompt: bool) -> None:
+@click.option("--use-sample", is_flag=True, help="Use sample data for testing (no root required)")
+def run(mode: str, output: Path, profile: str, no_prompt: bool, use_sample: bool) -> None:
     """Run an inspection. In this scaffold only `quick` is implemented.
 
     The command writes <output>/report.json and an `artifacts/` folder with
@@ -57,6 +73,14 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts_dir = out_dir / "artifacts"
     artifacts_dir.mkdir(parents=True, exist_ok=True)
+
+    # Get device inventory
+    try:
+        device_info = inventory.get_inventory(use_sample=use_sample)
+        logger.info("Detected device: %s %s", device_info.get("vendor"), device_info.get("model"))
+    except inventory.InventoryError as e:
+        logger.warning("Inventory detection failed: %s. Using placeholder.", e)
+        device_info = {"vendor": "unknown", "model": "unknown", "serial": None}
 
     # Try to use smartctl wrapper to parse a system file; fallback to sample
     sample_smart = (
@@ -85,7 +109,7 @@ def run(mode: str, output: Path, profile: str, no_prompt: bool) -> None:
 
     report = compose_report(
         agent_version=__version__,
-        device={"vendor": "unknown", "model": "unknown", "serial": None},
+        device=device_info,
         artifacts=[str(p.relative_to(out_dir)) for p in artifacts_dir.iterdir()],
         smart=parsed,
         mode=mode,
