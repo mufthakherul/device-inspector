@@ -1,0 +1,4 @@
+timestamp,sensor,value
+2025-10-18T00:00:00Z,cpu_temp,45.0
+2025-10-18T00:00:00Z,gpu_temp,40.0
+2025-10-18T00:00:00Z,fan_rpm,1500
