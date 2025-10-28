@@ -2,11 +2,16 @@
 
 Local-first automated diagnostics for used laptops & PCs — quick-mode audits, auditable JSON+PDF reports, and optional bootable full diagnostics. Public, non-commercial use; © 2025 mufthakherul
 
-Status: Documentation & project scaffold — agent & implementation coming next.
+**Status:** 🟡 **Early Development** — Phase 1 MVP in progress (~15% complete)  
+**Current Version:** 0.1.0  
+**Last Updated:** 2025-10-28
+
+> **📊 Project Status:** Comprehensive documentation complete. Agent skeleton implemented with basic SMART parsing. Active development needed to complete MVP. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed progress and [NEXT_STEPS.md](NEXT_STEPS.md) for priorities.
 
 ---
 
 Table of contents
+- 🎯 [Current Implementation Status](#current-implementation-status)
 - Overview
 - Key features
 - Quick facts
@@ -26,6 +31,40 @@ Table of contents
 - Troubleshooting & FAQ
 - Acknowledgements & resources
 - Contact
+
+---
+
+## 🎯 Current Implementation Status
+
+**Phase:** Phase 1 — MVP Quick-mode Agent (Sprint 1 in progress)  
+**Completion:** ~15% of MVP functionality implemented  
+
+### ✅ What's Working Now
+
+- **Agent CLI** — Basic `inspecta run --mode quick` command functional
+- **SMART Parsing** — Can parse smartctl JSON output (sample data only)
+- **Basic Scoring** — Storage and battery health scoring logic implemented
+- **Report Generation** — Creates report.json with sample data
+- **Testing** — 6 unit tests passing, CI pipeline active
+- **Documentation** — Comprehensive specs, roadmap, and contributing guides
+
+### 🚧 In Development (Sprint 1)
+
+- **Inventory Detection** — dmidecode integration for hardware identification
+- **Real SMART Execution** — Execute smartctl on actual devices (not just parsing)
+- **Error Handling** — Comprehensive error messages and logging
+- **Test Coverage** — Expanding to 50%+ coverage
+
+### 📋 Coming Next (Sprint 2-3)
+
+- Disk performance testing (fio)
+- Battery health detection (upower/powercfg)
+- CPU benchmarking (sysbench)
+- Memory testing (memtester)
+- Thermal monitoring (lm-sensors)
+- PDF report generation
+
+**See [PROJECT_STATUS.md](PROJECT_STATUS.md) for complete progress tracking and [NEXT_STEPS.md](NEXT_STEPS.md) for upcoming priorities.**
 
 ---
 
@@ -91,11 +130,23 @@ This repository currently contains documentation and sample artifacts. Implement
    ```
 
 Quickstart — conceptual (what the user will run)
-- Quick mode (2–10 minutes): runs inventory, SMART health, quick CPU/disk smoke, memtester short run, sensors snapshot, and writes artifacts/report:
+
+> **⚠️ Note:** The full agent is under development. The current implementation (v0.1.0) provides a basic CLI skeleton and SMART parsing. Follow the installation steps below to try the current functionality or to contribute to development.
+
+- Quick mode (2–10 minutes, when complete): runs inventory, SMART health, quick CPU/disk smoke, memtester short run, sensors snapshot, and writes artifacts/report:
   ```bash
+  # Future full functionality (not yet complete):
   inspecta run --mode quick --output ./reports/device123
   ```
-- Full mode (longer, technician/better confidence):
+
+- Current working command (v0.1.0):
+  ```bash
+  # Try the current implementation with sample data:
+  inspecta run --mode quick --output ./reports/test-run
+  # This creates report.json with sample artifacts
+  ```
+
+- Full mode (longer, technician/better confidence, planned):
   ```bash
   inspecta run --mode full --output ./reports/device123
   # or build + boot a live-USB for MemTest86 full run
