@@ -43,7 +43,9 @@ def test_execute_smartctl_with_sample():
 
     assert isinstance(result, dict)
     assert "device" in result
-    assert result["device"]["name"] == "nvme0"
+    # Updated to match realistic sample data
+    assert result["device"]["name"] == "/dev/nvme0n1"
+    assert result.get("model_name") == "Samsung SSD 980 PRO 1TB"
 
 
 def test_parse_smart_json_sata_healthy():

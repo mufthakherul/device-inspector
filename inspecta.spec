@@ -19,7 +19,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('samples/', 'samples/'),  # Include sample data for testing
+        # Sample data excluded from production builds - only needed for development/testing
         ('LICENSE.txt', '.'),
         ('README.md', '.'),
     ],
