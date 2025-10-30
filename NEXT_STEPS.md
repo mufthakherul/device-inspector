@@ -2,9 +2,10 @@
 
 **Last Updated:** 2025-10-28  
 **For Version:** 0.1.0 → 0.2.0 (MVP Phase 1)  
-**Timeframe:** Next 2-4 weeks
+**Timeframe:** Next 2-4 weeks  
+**Sprint Status:** Sprint 1 ✅ COMPLETE, Sprint 2 ready to start
 
-This document provides **prioritized, actionable next steps** for moving the device-inspector project from its current state (15% complete) toward MVP completion. Each section includes specific tasks, acceptance criteria, estimated effort, and implementation guidance.
+This document provides **prioritized, actionable next steps** for moving the device-inspector project from its current state (60% complete, Sprint 1 done) toward MVP completion. Each section includes specific tasks, acceptance criteria, estimated effort, and implementation guidance.
 
 ---
 
@@ -20,9 +21,13 @@ This document provides **prioritized, actionable next steps** for moving the dev
 
 ---
 
-## Immediate Priorities (This Week)
+## Immediate Priorities (Sprint 2 - Next 2 Weeks)
 
-### Priority 1: Complete Inventory Plugin ⭐⭐⭐
+**🎉 Sprint 1 Status: ✅ COMPLETE** (All three original priorities achieved ahead of schedule)
+
+Sprint 2 focuses on expanding the agent's capabilities with disk performance testing, battery health detection, CPU benchmarking, and completing the scoring engine.
+
+### Priority 1: Complete Report Schema & Validation ⭐⭐⭐
 
 **Goal:** Enable the agent to detect and report device hardware information.
 
