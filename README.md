@@ -1,36 +1,43 @@
 # device-inspector (inspecta)
 
+[![CI](https://github.com/mufthakherul/device-inspector/workflows/CI/badge.svg)](https://github.com/mufthakherul/device-inspector/actions)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License: Custom](https://img.shields.io/badge/License-Custom%20Non--Commercial-orange.svg)](LICENSE.txt)
+
 Local-first automated diagnostics for used laptops & PCs — quick-mode audits, auditable JSON+PDF reports, and optional bootable full diagnostics. Public, non-commercial use; © 2025 mufthakherul
 
 **Status:** 🟢 **Active Development** — Phase 1 MVP Sprint 1 Complete (~60% complete)  
 **Current Version:** 0.1.0  
-**Last Updated:** 2025-10-28
+**Last Updated:** 2025-10-30
 
-> **📊 Project Status:** Sprint 1 COMPLETE! Inventory detection, real SMART execution, and structured logging fully implemented. 22 tests passing. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed progress and [NEXT_STEPS.md](NEXT_STEPS.md) for Sprint 2 priorities.
+> **📊 Project Status:** Sprint 1 COMPLETE! Inventory detection, real SMART execution, and structured logging fully implemented. 22 tests passing with CI/CD. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed progress and [NEXT_STEPS.md](NEXT_STEPS.md) for Sprint 2 priorities.
 
 ---
 
-Table of contents
+## Table of Contents
+
 - 🎯 [Current Implementation Status](#current-implementation-status)
-- Overview
-- Key features
-- Quick facts
-- Project goals
-- Installation (prep)
-- Quickstart (run a quick-mode check)
-- CLI usage examples
-- Report output (what you get)
-- Scoring & recommendations
-- Operational modes: Quick vs Full
-- Bootable live-USB (high-level)
-- Architecture overview
-- Privacy, security & evidence
-- License & legal notes
-- Contributing
-- Roadmap & milestones
-- Troubleshooting & FAQ
-- Acknowledgements & resources
-- Contact
+- [Overview](#overview)
+- [Key Features](#key-features-mvp-focus)
+- [Quick Facts](#quick-facts)
+- [Installation](#installation-prep)
+- [Quickstart](#quickstart-run-a-quick-mode-check)
+- [CLI Usage](#cli-usage-examples)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license--legal-notes)
+
+## Documentation
+
+- 📖 **[Developer Setup Guide](docs/DEV_SETUP.md)** - Complete setup instructions for contributors
+- 🏗️ **[Architecture Overview](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
+- 📋 **[Project Status](PROJECT_STATUS.md)** - Detailed implementation progress
+- 🚀 **[Next Steps](NEXT_STEPS.md)** - Prioritized action items for Sprint 2
+- 🗺️ **[Roadmap](ROADMAP.md)** - Sprint-by-sprint implementation plan
+- 🎯 **[Features](FEATURES.md)** - Complete feature specifications
+- 🤝 **[Contributing](CONTRIBUTING.md)** - Contribution guidelines and workflow
+- 🔒 **[Security](SECURITY.md)** - Security policy and vulnerability reporting
 
 ---
 
