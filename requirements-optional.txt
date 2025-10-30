@@ -1,0 +1,4 @@
+# Optional dependencies for enhanced functionality
+
+# PDF report generation (without this, only TXT reports are generated)
+reportlab>=4.0.0

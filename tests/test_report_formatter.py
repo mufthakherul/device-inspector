@@ -1,7 +1,5 @@
 # Copyright (c) 2025 mufthakherul — see LICENSE.txt
 """Tests for report formatting utilities."""
-import json
-from pathlib import Path
 
 import pytest
 
@@ -115,7 +113,7 @@ def test_generate_pdf_report(sample_report, tmp_path):
         # Check file was created
         assert pdf_path.exists()
         assert pdf_path.name == "report.pdf"
-        
+
         # Check it's a valid PDF (starts with PDF magic bytes)
         with open(pdf_path, "rb") as f:
             header = f.read(4)
@@ -129,6 +127,7 @@ def test_generate_pdf_report_without_reportlab(sample_report, tmp_path, monkeypa
     """Test PDF report generation when reportlab is not available."""
     # Mock the import to fail
     import builtins
+
     original_import = builtins.__import__
 
     def mock_import(name, *args, **kwargs):

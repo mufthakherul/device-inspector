@@ -130,7 +130,10 @@ def inventory_cmd(use_sample: bool) -> None:
     "--format",
     type=click.Choice(["txt", "pdf", "both"]),
     default="txt",
-    help="Report format: 'txt' for text, 'pdf' for PDF (requires reportlab), 'both' for both formats",
+    help=(
+        "Report format: 'txt' for text, 'pdf' for PDF (requires reportlab), "
+        "'both' for both formats"
+    ),
 )
 def run(
     mode: str,
@@ -352,7 +355,7 @@ def run(
     # Generate human-readable report(s)
     inspector_logger.info("Step 5: Generating human-readable report(s)...")
     report_to_open = None
-    
+
     # Determine if auto-open should be enabled
     should_auto_open = auto_open and not no_auto_open
 
@@ -394,7 +397,10 @@ def run(
             logger.info("Report opened successfully: %s", report_to_open)
             inspector_logger.info("Report opened in default application")
         else:
-            logger.warning("Failed to open report automatically. Please open manually: %s", report_to_open)
+            logger.warning(
+                "Failed to open report automatically. Please open manually: %s",
+                report_to_open,
+            )
             inspector_logger.warning("Failed to auto-open report")
 
     inspector_logger.info("=" * 60)

@@ -5,11 +5,9 @@ Generates TXT and PDF reports from inspection data.
 """
 from __future__ import annotations
 
-import datetime
 import os
 import platform
 import subprocess
-import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -31,8 +29,10 @@ def format_txt_report(report: Dict[str, Any]) -> str:
 
     # Header information
     lines.append(f"Generated: {report.get('generated_at', 'N/A')}")
-    lines.append(f"Agent: {report.get('agent', {}).get('name', 'N/A')} "
-                 f"v{report.get('agent', {}).get('version', 'N/A')}")
+    lines.append(
+        f"Agent: {report.get('agent', {}).get('name', 'N/A')} "
+        f"v{report.get('agent', {}).get('version', 'N/A')}"
+    )
     lines.append(f"Mode: {report.get('mode', 'N/A')}")
     lines.append(f"Profile: {report.get('profile', 'N/A')}")
     lines.append("")
@@ -82,14 +82,14 @@ def format_txt_report(report: Dict[str, Any]) -> str:
             test_name = test.get("name", "Unknown")
             status = test.get("status", "unknown")
             status_detail = test.get("status_detail", "")
-            
+
             status_symbol = "✓" if status == "ok" else "✗"
             status_text = status.upper()
             if status_detail:
                 status_text += f" ({status_detail})"
-            
+
             lines.append(f"{status_symbol} {test_name:40s} {status_text}")
-            
+
             # Show device info for SMART tests
             if status == "ok" and "data" in test:
                 data = test["data"]
@@ -97,7 +97,7 @@ def format_txt_report(report: Dict[str, Any]) -> str:
                     lines.append(f"  Model: {data['model']}")
                 if "serial" in data:
                     lines.append(f"  Serial: {data['serial']}")
-            
+
             # Show errors
             if status == "error" and "error" in test:
                 lines.append(f"  Error: {test['error']}")
@@ -153,7 +153,6 @@ def generate_pdf_report(report: Dict[str, Any], output_path: Path) -> Optional[P
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import inch
         from reportlab.platypus import (
-            PageBreak,
             Paragraph,
             SimpleDocTemplate,
             Spacer,
@@ -197,7 +196,10 @@ def generate_pdf_report(report: Dict[str, Any], output_path: Path) -> Optional[P
         ["Generated:", report.get("generated_at", "N/A")],
         [
             "Agent:",
-            f"{report.get('agent', {}).get('name', 'N/A')} v{report.get('agent', {}).get('version', 'N/A')}",
+            (
+                f"{report.get('agent', {}).get('name', 'N/A')} "
+                f"v{report.get('agent', {}).get('version', 'N/A')}"
+            ),
         ],
         ["Mode:", report.get("mode", "N/A")],
         ["Profile:", report.get("profile", "N/A")],
