@@ -146,7 +146,8 @@ ipython_config.py
 # PyInstaller
 #  Usually these files are written by a python script from a template
 *.manifest
-*.spec
+# Keep inspecta.spec for building releases
+# *.spec
 
 # Mypy cache
 .mypy_cache/
