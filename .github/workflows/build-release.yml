@@ -38,7 +38,7 @@ jobs:
           python scripts/build_release.py --platform windows
       
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: inspecta-windows
           path: dist/inspecta-*-windows.zip
@@ -70,7 +70,7 @@ jobs:
           python scripts/build_release.py --platform macos
       
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: inspecta-macos
           path: dist/inspecta-*-macos.zip
@@ -102,7 +102,7 @@ jobs:
           python scripts/build_release.py --platform linux
       
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: inspecta-linux
           path: dist/inspecta-*-linux.zip
