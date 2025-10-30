@@ -1,0 +1,57 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2025-10-30T20:25:11Z",
+  "agent": {
+    "name": "inspecta",
+    "version": "0.1.0"
+  },
+  "device": {
+    "vendor": "Dell Inc.",
+    "model": "XPS 15 9560",
+    "serial": "ABC12345",
+    "bios_version": "1.21.0",
+    "bios_date": "05/15/2023",
+    "chassis_type": "Notebook",
+    "sku": "078B",
+    "uuid": "4c4c4544-0042-4310-8034-b2c04f323142",
+    "family": "XPS"
+  },
+  "mode": "quick",
+  "profile": "default",
+  "summary": {
+    "overall_score": 83,
+    "grade": "Good",
+    "recommendation": "Profile: default"
+  },
+  "scores": {
+    "storage": 80,
+    "battery": 80,
+    "memory": 90,
+    "cpu_thermal": 85
+  },
+  "tests": [
+    {
+      "name": "smartctl_nvme0n1",
+      "status": "ok",
+      "data": {
+        "name": "nvme0",
+        "model": "Example NVMe SSD",
+        "serial": "SN123",
+        "nvme_percentage_used": 5,
+        "nvme_critical_warning": 0,
+        "attributes": {}
+      },
+      "status_detail": "sample"
+    }
+  ],
+  "artifacts": [
+    "artifacts/agent.log",
+    "artifacts/memtest.log",
+    "artifacts/sensors.csv",
+    "artifacts/smart_nvme0n1.json"
+  ],
+  "evidence": {
+    "manifest_sha256": null,
+    "signed": false
+  }
+}
