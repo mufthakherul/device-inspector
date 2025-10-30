@@ -28,17 +28,49 @@ logger.setLevel(logging.INFO)
 @click.group()
 @click.version_option(version=__version__)
 def cli() -> None:
-    """inspecta — local-first device inspection (quick-mode scaffold)."""
+    """inspecta — local-first device inspection toolkit.
+
+    Automated diagnostics for used laptops and PCs.
+    Generates auditable JSON reports with hardware health scores.
+
+    \b
+    Common Usage:
+      inspecta run --mode quick --output ./output
+      inspecta inventory
+
+    \b
+    Documentation:
+      GitHub: https://github.com/mufthakherul/device-inspector
+      Docs: See README.md for complete guide
+
+    \b
+    Note: Most commands require root/sudo privileges to access
+    hardware information (dmidecode, smartctl). Use --use-sample
+    flag for testing without root access.
+    """
 
 
-@cli.command()
+@cli.command("inventory")
 @click.option(
     "--use-sample", is_flag=True, help="Use sample data instead of executing dmidecode"
 )
 def inventory_cmd(use_sample: bool) -> None:
     """Detect and display device hardware information.
 
-    Requires root/sudo privileges unless --use-sample is specified.
+    Detects system vendor, model, serial number, BIOS version, and
+    other hardware identifiers using dmidecode.
+
+    \b
+    Examples:
+      sudo inspecta inventory              # Real hardware detection
+      inspecta inventory --use-sample      # Test with sample data
+
+    \b
+    Requirements:
+      - dmidecode (install: apt-get install dmidecode)
+      - root/sudo privileges (unless --use-sample)
+
+    Output: JSON with vendor, model, serial, BIOS, SKU, and other fields
     """
     try:
         device_info = inventory.get_inventory(use_sample=use_sample)
@@ -53,16 +85,35 @@ def inventory_cmd(use_sample: bool) -> None:
     "--mode",
     type=click.Choice(["quick", "full"]),
     default="quick",
+    help="Inspection mode: 'quick' for fast check, 'full' for comprehensive (future)",
 )
-@click.option("--output", required=True, type=click.Path(path_type=Path))
 @click.option(
-    "--profile", default="default", help="Buyer profile (Office, Gamer, etc.)"
+    "--output",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Output directory for report.json and artifacts/",
 )
-@click.option("--no-prompt", is_flag=True, help="Don't prompt for consent (for CI).")
 @click.option(
-    "--use-sample", is_flag=True, help="Use sample data for testing (no root required)"
+    "--profile",
+    default="default",
+    help="Target usage profile: default, office, developer, gamer, server",
 )
-@click.option("--verbose", "-v", is_flag=True, help="Enable verbose debug logging")
+@click.option(
+    "--no-prompt",
+    is_flag=True,
+    help="Skip interactive prompts (useful for CI/automated runs)",
+)
+@click.option(
+    "--use-sample",
+    is_flag=True,
+    help="Use sample data for testing (no root/hardware access required)",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Enable verbose debug logging to console and agent.log",
+)
 def run(
     mode: str,
     output: Path,
@@ -71,11 +122,48 @@ def run(
     use_sample: bool,
     verbose: bool,
 ) -> None:
-    """Run an inspection. In this scaffold only `quick` is implemented.
+    """Run a complete device inspection and generate report.
 
-    The command writes <output>/report.json and an `artifacts/` folder with
-    small sample artifacts (or mocked outputs) so tests and CI can validate
-    the pipeline without requiring native binaries.
+    Performs automated hardware health checks including:
+    - Device inventory (vendor, model, serial, BIOS)
+    - Storage SMART health (all drives: SATA, NVMe, USB)
+    - Battery health (cycle count, capacity) [future]
+    - Memory testing [future]
+    - CPU benchmarking [future]
+
+    Generates report.json with scores, recommendations, and raw artifacts.
+
+    \b
+    Examples:
+      sudo inspecta run --mode quick --output ./output
+      inspecta run --mode quick --output ./test --use-sample
+      sudo inspecta run --mode quick --output ./out --profile gamer --verbose
+
+    \b
+    Requirements (for real hardware inspection):
+      - smartctl (install: apt-get install smartmontools)
+      - dmidecode (install: apt-get install dmidecode)
+      - root/sudo privileges
+
+    \b
+    Output Structure:
+      <output>/
+        report.json          # Main inspection report with scores
+        artifacts/
+          agent.log          # Detailed execution log
+          smart_*.json       # Raw SMART data per device
+          memtest.log        # Memory test results [future]
+          sensors.csv        # Temperature/fan data [future]
+
+    \b
+    Exit Codes:
+      0   - Success (full hardware inspection)
+      10  - Partial success (sample data used or warnings)
+      20  - Failure (unsupported mode or critical errors)
+
+    \b
+    Note: Currently only 'quick' mode is implemented. 'full' mode
+    (bootable diagnostics) is planned for future releases.
     """
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)

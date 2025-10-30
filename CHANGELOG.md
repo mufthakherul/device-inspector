@@ -43,11 +43,59 @@ All notable changes to this project will be documented in this file.
 - Development guidelines and contribution workflow
 - Pre-commit hooks configuration
 
-## Unreleased
+## [Unreleased] - 2025-10-30
+
+### Added - Infrastructure & Quality Improvements
+
+#### Testing & Coverage
+- **pytest-cov Integration**: Added coverage reporting to test suite
+  - HTML, XML, and terminal coverage reports
+  - Coverage threshold set at 35% (current: 36.26%)
+  - Coverage reports uploaded as CI artifacts
+- **Additional Sample Data**: Added NVMe SMART sample output
+- **Sample Documentation**: Created comprehensive samples/README.md
+
+#### Security & Code Quality
+- **Security Scanning**: Integrated Bandit for Python security analysis
+- **Dependency Scanning**: Added Safety for vulnerability detection
+- **Dependabot**: Configured automated dependency updates for Python and GitHub Actions
+- **Enhanced Pre-commit Hooks**: 
+  - Added file checks (trailing whitespace, EOF, large files)
+  - Added security checks (detect-private-key)
+  - Added YAML/JSON validation
+  - Integrated Bandit security scanning
+
+#### CI/CD Improvements
+- **Matrix Testing**: Added Python 3.11 and 3.12 testing
+- **Pip Caching**: Improved CI performance with dependency caching
+- **Coverage Reporting**: Coverage reports in CI with artifacts
+- **Security Scans**: Bandit runs on every CI build
+
+#### CLI Improvements
+- **Enhanced Help Text**: Comprehensive documentation in CLI commands
+  - Detailed usage examples
+  - Installation requirements
+  - Exit code documentation
+  - Output structure explanation
+- **Better Command Organization**: Improved option descriptions and formatting
+
+#### Documentation
+- **samples/README.md**: Complete guide to sample data and test fixtures
+- **Updated Configuration**: Enhanced pyproject.toml with coverage and bandit settings
+
+### Changed
+- **Coverage Threshold**: Set initial threshold at 35% (target: 60%+)
+- **Linting Configuration**: Ignore complexity warnings temporarily (C901)
+- **Pre-commit Configuration**: Modernized with additional security checks
+
+### Infrastructure
+- **Dependabot**: Weekly automated dependency updates
+- **CI Matrix**: Multi-version Python testing (3.11, 3.12)
+- **Security Pipeline**: Automated security scanning in CI
 
 ### Planned for Sprint 2
 - Complete report.json schema with validation
-- Code coverage reporting (pytest-cov)
+- Increase test coverage to 60%+
 - Disk performance testing (fio integration)
 - Battery health detection (upower/powercfg)
 - CPU benchmarking (sysbench)
