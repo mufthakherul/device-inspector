@@ -15,7 +15,7 @@ block_cipher = None
 
 # Define the analysis configuration
 a = Analysis(
-    ['agent/cli.py'],
+    ['cli.py'],
     pathex=[],
     binaries=[],
     datas=[
