@@ -121,7 +121,14 @@ def create_distribution_package(root_dir: Path, platform_name: str):
     
     # Copy documentation
     print("  - Copying documentation")
-    for doc in ["README.md", "LICENSE.txt", "CHANGELOG.md"]:
+    
+    # Use distribution-specific README for the package
+    dist_readme = root_dir / "DISTRIBUTION_README.md"
+    if dist_readme.exists():
+        shutil.copy2(dist_readme, package_dir / "README.md")
+    
+    # Copy other documentation
+    for doc in ["LICENSE.txt", "CHANGELOG.md"]:
         src = root_dir / doc
         if src.exists():
             shutil.copy2(src, package_dir / doc)
