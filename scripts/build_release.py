@@ -477,12 +477,7 @@ def create_zip_package(package_dir: Path):
 
     # Create zip
     print(f"\nCreating: {zip_path.name}")
-    shutil.make_archive(
-        str(package_dir),
-        "zip",
-        package_dir.parent,
-        package_dir.name
-    )
+    shutil.make_archive(str(package_dir), "zip", package_dir.parent, package_dir.name)
 
     # Get size
     size_mb = zip_path.stat().st_size / (1024 * 1024)
@@ -500,17 +495,13 @@ def main():
         "--platform",
         choices=["windows", "macos", "linux", "auto"],
         default="auto",
-        help="Target platform (default: auto-detect)"
+        help="Target platform (default: auto-detect)",
     )
     parser.add_argument(
-        "--no-clean",
-        action="store_true",
-        help="Don't clean previous build artifacts"
+        "--no-clean", action="store_true", help="Don't clean previous build artifacts"
     )
     parser.add_argument(
-        "--no-zip",
-        action="store_true",
-        help="Don't create zip package"
+        "--no-zip", action="store_true", help="Don't create zip package"
     )
 
     args = parser.parse_args()
