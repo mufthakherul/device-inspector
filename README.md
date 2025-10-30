@@ -241,7 +241,7 @@ Report output (what you receive)
 The agent produces:
 - report.json — canonical, machine-readable report (see REPORT_SCHEMA.md)
 - report.txt — human-friendly text summary with scoring and recommendations (auto-opens by default)
-- report.pdf — human-friendly PDF summary (optional, requires reportlab: pip install reportlab)
+- report.pdf — human-friendly PDF summary (optional, requires reportlab: pip install -r requirements-optional.txt)
 - artifacts/ — directory with raw logs: agent.log, smartctl.txt, memtest.log, sensors.csv
 
 Sample top-level JSON fields (excerpt)
