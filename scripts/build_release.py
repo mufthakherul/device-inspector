@@ -65,10 +65,10 @@ def build_executable(root_dir: Path, clean: bool = True):
     
     try:
         result = subprocess.run(cmd, cwd=root_dir, check=True)
-        print("\n✓ Executable built successfully!")
+        print("\n[OK] Executable built successfully!")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"\n✗ Build failed: {e}")
+        print(f"\n[ERROR] Build failed: {e}")
         return False
 
 
@@ -486,7 +486,7 @@ def create_zip_package(package_dir: Path):
     
     # Get size
     size_mb = zip_path.stat().st_size / (1024 * 1024)
-    print(f"✓ Package created: {zip_path}")
+    print(f"[OK] Package created: {zip_path}")
     print(f"  Size: {size_mb:.2f} MB")
     
     return zip_path
@@ -530,7 +530,7 @@ def main():
     
     # Check dependencies
     if not check_pyinstaller():
-        print("\n✗ Error: PyInstaller not found!")
+        print("\n[ERROR] PyInstaller not found!")
         print("Install with: pip install pyinstaller")
         return 1
     
@@ -553,7 +553,7 @@ def main():
             return 1
         
         print("\n" + "=" * 60)
-        print("✓ BUILD COMPLETE!")
+        print("[SUCCESS] BUILD COMPLETE!")
         print("=" * 60)
         print(f"\nRelease package: {zip_path}")
         print(f"Distribution folder: {package_dir}")
@@ -561,7 +561,7 @@ def main():
         print("Users can extract and run without installing anything!")
     else:
         print("\n" + "=" * 60)
-        print("✓ BUILD COMPLETE!")
+        print("[SUCCESS] BUILD COMPLETE!")
         print("=" * 60)
         print(f"\nDistribution folder: {package_dir}")
     
