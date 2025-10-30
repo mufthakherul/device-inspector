@@ -30,8 +30,14 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 
 ## Documentation
 
+### For End Users
+- 📦 **[Distribution Guide](docs/DISTRIBUTION.md)** - Download and use standalone executables (v1)
+- 🚀 **Quick Start** - See download links in [Releases](https://github.com/mufthakherul/device-inspector/releases)
+
+### For Developers
 - 📖 **[Developer Setup Guide](docs/DEV_SETUP.md)** - Complete setup instructions for contributors
 - 🏗️ **[Architecture Overview](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
+- 🔨 **[Building Guide](docs/BUILDING.md)** - How to build standalone executables
 - 📋 **[Project Status](PROJECT_STATUS.md)** - Detailed implementation progress
 - 🚀 **[Next Steps](NEXT_STEPS.md)** - Prioritized action items for Sprint 2
 - 🗺️ **[Roadmap](ROADMAP.md)** - Sprint-by-sprint implementation plan
@@ -120,25 +126,54 @@ Prerequisites (what your machine needs to run quick tests)
   - python3 (for agent CLI and report generation)
 - NOTE: full MemTest requires booting from USB (MemTest86 or MemTest86+)
 
-Installation (developer / local)
-This repository currently contains documentation and sample artifacts. Implementation will include a Python CLI agent. Expected installation steps for the agent (future):
+## Installation Options
+
+### Option 1: Standalone Executables (Recommended for End Users) 🎯
+
+**No Python or dependencies required!** Download pre-built executables for Windows or macOS:
+
+1. **Download** the latest release for your platform:
+   - Windows: `inspecta-0.1.0-windows.zip`
+   - macOS: `inspecta-0.1.0-macos.zip`
+   - Linux: `inspecta-0.1.0-linux.zip`
+   
+   Get them from [Releases](https://github.com/mufthakherul/device-inspector/releases)
+
+2. **Extract** the zip file to any folder
+
+3. **Run** with a single click:
+   - Windows: Double-click `Run_Inspecta.bat`
+   - macOS/Linux: Run `./run_inspecta.sh`
+
+**That's it!** No installation, no dependencies, no Python needed.
+
+📖 **Full instructions:** See [Distribution Guide](docs/DISTRIBUTION.md)
+
+---
+
+### Option 2: From Source (For Developers)
+
+This repository contains the full Python source code. To run from source:
+
 1. Clone the repo:
    ```bash
    git clone https://github.com/mufthakherul/device-inspector.git
    cd device-inspector
    ```
-2. (Optional) Create a Python virtual environment:
+2. Create a Python virtual environment:
    ```bash
    python3 -m venv .venv
-   source .venv/bin/activate
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    pip install -r requirements.txt
+   pip install -e .
    ```
-3. Install native tools (example for Debian/Ubuntu):
+3. (Optional) Install native tools for hardware access (example for Debian/Ubuntu):
    ```bash
    sudo apt update
-   sudo apt install smartmontools fio sysbench memtester lm-sensors ffmpeg
-   sudo sensors-detect  # follow prompts
+   sudo apt install smartmontools dmidecode fio sysbench memtester lm-sensors
    ```
+
+📖 **Full instructions:** See [Developer Setup Guide](docs/DEV_SETUP.md)
 
 Quickstart — what works now (v0.1.0)
 
