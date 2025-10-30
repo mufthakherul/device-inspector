@@ -61,12 +61,15 @@ Phase 0: Documentation ✅ DONE
 | Task | Priority | Status | ETA |
 |------|----------|--------|-----|
 | Complete report schema | ⭐⭐⭐ High | 🔴 Not started | Week 3 |
-| Coverage reporting | ⭐⭐ Medium | 🔴 Not started | Week 3 |
+| Coverage reporting | ⭐⭐ Medium | ✅ Complete | Done 2025-10-30 |
 | Disk performance (fio) | ⭐⭐⭐ High | 🔴 Not started | Week 3-4 |
 | Battery health | ⭐⭐ Medium | 🔴 Not started | Week 3-4 |
 | CPU benchmarking | ⭐⭐ Medium | 🔴 Not started | Week 4 |
+| Infrastructure improvements | ⭐⭐ Medium | ✅ Complete | Done 2025-10-30 |
+| Developer documentation | ⭐ Low | ✅ Complete | Done 2025-10-30 |
 
-**Sprint 1 Status:** ✅ COMPLETE (2025-10-28)
+**Sprint 1 Status:** ✅ COMPLETE (2025-10-28)  
+**Infrastructure Improvements:** ✅ COMPLETE (2025-10-30)
 
 ---
 

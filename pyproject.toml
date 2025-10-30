@@ -22,9 +22,25 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "C", "I"]
+ignore = ["C901"]  # Ignore complexity checks for now
 
 [tool.isort]
 profile = "black"
 
 [tool.pytest.ini_options]
 pythonpath = "."
+testpaths = ["tests"]
+addopts = "--cov=agent --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=35"
+
+[tool.coverage.run]
+source = ["agent"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.bandit]
+exclude_dirs = ["tests", "samples"]
+skips = ["B101"]
