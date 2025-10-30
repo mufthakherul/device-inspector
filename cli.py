@@ -11,4 +11,5 @@ error that occurs when agent/cli.py is used directly as the entry point.
 
 if __name__ == "__main__":
     from agent.cli import cli
+
     cli()
