@@ -62,7 +62,8 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 - **Error Handling** — ✅ Comprehensive error messages with installation hints
 - **Structured Logging** — ✅ Detailed logs to artifacts/agent.log
 - **Report Generation** — ✅ Creates report.json with real device data
-- **Testing** — ✅ 22 unit tests passing (was 6), CI pipeline active
+- **Human-Readable Reports** — ✅ TXT and PDF reports with auto-open functionality
+- **Testing** — ✅ 29 unit tests passing (was 22), CI pipeline active
 - **Documentation** — ✅ Comprehensive specs, roadmap, and contributing guides
 - **Sample Data** — ✅ dmidecode, smartctl (healthy/failing SATA, NVMe)
 
@@ -78,7 +79,6 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 
 - Memory testing (memtester)
 - Thermal monitoring (lm-sensors)
-- PDF report generation
 - Profile-based scoring (Office, Developer, Gamer, etc.)
 
 **See [PROJECT_STATUS.md](PROJECT_STATUS.md) for complete progress tracking and [NEXT_STEPS.md](NEXT_STEPS.md) for upcoming priorities.**
@@ -167,7 +167,11 @@ This repository contains the full Python source code. To run from source:
    pip install -r requirements.txt
    pip install -e .
    ```
-3. (Optional) Install native tools for hardware access (example for Debian/Ubuntu):
+3. (Optional) Install PDF report support:
+   ```bash
+   pip install -r requirements-optional.txt  # Adds reportlab for PDF reports
+   ```
+4. (Optional) Install native tools for hardware access (example for Debian/Ubuntu):
    ```bash
    sudo apt update
    sudo apt install smartmontools dmidecode fio sysbench memtester lm-sensors
@@ -224,18 +228,21 @@ sudo inspecta inventory
   ```
 
 CLI usage examples (working now)
-- Generate quick report with sample data:
-  inspecta run --mode quick --output ./reports/serial-ABC123
-- Generate and print JSON summary:
-  inspecta run --mode quick --output ./reports/serial-ABC123 --print-summary
-- Create bootable diagnostic USB image (linux host):
-  inspecta build-iso --include-memtest --output diagnostic.iso
+- Generate quick report with sample data (auto-opens TXT report by default):
+  inspecta run --mode quick --output ./reports/serial-ABC123 --use-sample
+- Generate PDF report and open automatically:
+  inspecta run --mode quick --output ./reports/serial-ABC123 --use-sample --format pdf
+- Generate both TXT and PDF reports (opens PDF):
+  inspecta run --mode quick --output ./reports/serial-ABC123 --use-sample --format both
+- Disable auto-open feature:
+  inspecta run --mode quick --output ./reports/serial-ABC123 --use-sample --no-auto-open
 
 Report output (what you receive)
 The agent produces:
 - report.json — canonical, machine-readable report (see REPORT_SCHEMA.md)
-- report.pdf — human-friendly summary with scoring, recommendations, and included evidence thumbnails
-- artifacts/ — directory with raw logs: smartctl.txt, memtest.log, cpu_bench.txt, sensors.csv, camera.jpg (if applicable)
+- report.txt — human-friendly text summary with scoring and recommendations (auto-opens by default)
+- report.pdf — human-friendly PDF summary (optional, requires reportlab: pip install -r requirements-optional.txt)
+- artifacts/ — directory with raw logs: agent.log, smartctl.txt, memtest.log, sensors.csv
 
 Sample top-level JSON fields (excerpt)
 ```json
