@@ -19,10 +19,11 @@ line-length = 88
 
 [tool.ruff]
 line-length = 88
+extend-exclude = ["scripts/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "C", "I"]
-ignore = ["C901", "E501"]  # Ignore complexity checks and line length for now
+ignore = ["C901"]  # Ignore complexity checks for now
 
 [tool.isort]
 profile = "black"
