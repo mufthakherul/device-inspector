@@ -16,6 +16,7 @@ from . import __version__
 from .logging_utils import setup_logging
 from .plugins import inventory, smart
 from .report import compose_report
+from .report_formatter import generate_pdf_report, generate_txt_report, open_file
 
 # Simple console logger for CLI (detailed logging set up in run command)
 logger = logging.getLogger("inspecta")
@@ -114,6 +115,23 @@ def inventory_cmd(use_sample: bool) -> None:
     is_flag=True,
     help="Enable verbose debug logging to console and agent.log",
 )
+@click.option(
+    "--auto-open",
+    is_flag=True,
+    default=True,
+    help="Automatically open the report after inspection (default: enabled)",
+)
+@click.option(
+    "--no-auto-open",
+    is_flag=True,
+    help="Disable automatic opening of the report after inspection",
+)
+@click.option(
+    "--format",
+    type=click.Choice(["txt", "pdf", "both"]),
+    default="txt",
+    help="Report format: 'txt' for text, 'pdf' for PDF (requires reportlab), 'both' for both formats",
+)
 def run(
     mode: str,
     output: Path,
@@ -121,6 +139,9 @@ def run(
     no_prompt: bool,
     use_sample: bool,
     verbose: bool,
+    auto_open: bool,
+    no_auto_open: bool,
+    format: str,
 ) -> None:
     """Run a complete device inspection and generate report.
 
@@ -132,23 +153,29 @@ def run(
     - CPU benchmarking [future]
 
     Generates report.json with scores, recommendations, and raw artifacts.
+    Also generates human-readable report (TXT or PDF) that automatically opens.
 
     \b
     Examples:
       sudo inspecta run --mode quick --output ./output
       inspecta run --mode quick --output ./test --use-sample
       sudo inspecta run --mode quick --output ./out --profile gamer --verbose
+      inspecta run --mode quick --output ./out --use-sample --format pdf
+      inspecta run --mode quick --output ./out --use-sample --no-auto-open
 
     \b
     Requirements (for real hardware inspection):
       - smartctl (install: apt-get install smartmontools)
       - dmidecode (install: apt-get install dmidecode)
       - root/sudo privileges
+      - reportlab (optional, for PDF reports: pip install reportlab)
 
     \b
     Output Structure:
       <output>/
         report.json          # Main inspection report with scores
+        report.txt           # Human-readable text report (auto-opens by default)
+        report.pdf           # Human-readable PDF report (if --format pdf)
         artifacts/
           agent.log          # Detailed execution log
           smart_*.json       # Raw SMART data per device
@@ -321,6 +348,55 @@ def run(
         100,
         report["summary"]["grade"],
     )
+
+    # Generate human-readable report(s)
+    inspector_logger.info("Step 5: Generating human-readable report(s)...")
+    report_to_open = None
+    
+    # Determine if auto-open should be enabled
+    should_auto_open = auto_open and not no_auto_open
+
+    if format in ["txt", "both"]:
+        try:
+            txt_report_path = generate_txt_report(report, out_dir)
+            logger.info("Text report written to %s", txt_report_path)
+            inspector_logger.info("Text report generated: %s", txt_report_path)
+            if report_to_open is None:
+                report_to_open = txt_report_path
+        except Exception as e:
+            logger.warning("Failed to generate text report: %s", e)
+            inspector_logger.warning("Text report generation failed: %s", e)
+
+    if format in ["pdf", "both"]:
+        try:
+            pdf_report_path = generate_pdf_report(report, out_dir)
+            if pdf_report_path:
+                logger.info("PDF report written to %s", pdf_report_path)
+                inspector_logger.info("PDF report generated: %s", pdf_report_path)
+                # Prefer PDF over TXT if both are generated
+                report_to_open = pdf_report_path
+            else:
+                logger.warning(
+                    "PDF generation skipped: reportlab not installed. "
+                    "Install with: pip install reportlab"
+                )
+                inspector_logger.warning(
+                    "PDF report generation skipped: reportlab not available"
+                )
+        except Exception as e:
+            logger.warning("Failed to generate PDF report: %s", e)
+            inspector_logger.warning("PDF report generation failed: %s", e)
+
+    # Auto-open the report if requested
+    if should_auto_open and report_to_open:
+        inspector_logger.info("Opening report: %s", report_to_open)
+        if open_file(report_to_open):
+            logger.info("Report opened successfully: %s", report_to_open)
+            inspector_logger.info("Report opened in default application")
+        else:
+            logger.warning("Failed to open report automatically. Please open manually: %s", report_to_open)
+            inspector_logger.warning("Failed to auto-open report")
+
     inspector_logger.info("=" * 60)
     inspector_logger.info("Inspection complete. Log file: %s", log_file)
     inspector_logger.info("=" * 60)
