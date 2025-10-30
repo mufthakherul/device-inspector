@@ -74,12 +74,12 @@ def execute_smartctl(device: str, use_sample: bool = False) -> Dict[str, Any]:
         SmartError: If smartctl execution fails
     """
     if use_sample:
-        # Load sample data
+        # Load realistic sample data from tool_outputs
         sample_path = (
             Path(__file__).parent.parent.parent
             / "samples"
-            / "artifacts"
-            / "smart_nvme0.json"
+            / "tool_outputs"
+            / "smartctl_nvme_healthy.json"
         )
         if not sample_path.exists():
             raise SmartError(f"Sample file not found: {sample_path}")
@@ -167,8 +167,14 @@ def parse_smart_json(data: Dict[str, Any]) -> Dict[str, Any]:
     # device identification
     device = data.get("device") or {}
     out["name"] = device.get("name")
-    out["model"] = device.get("model_name") or device.get("product")
-    out["serial"] = device.get("serial_number")
+    # Check both device-nested and root-level for model/serial (different smartctl versions)
+    out["model"] = (
+        device.get("model_name")
+        or device.get("product")
+        or data.get("model_name")
+        or data.get("model_family")
+    )
+    out["serial"] = device.get("serial_number") or data.get("serial_number")
 
     # try to extract attributes
     ata_smart = data.get("ata_smart_attributes") or {}
