@@ -294,7 +294,8 @@ helmfile.*.yaml
 # -------------------------
 # GitHub Actions
 /.github/actions/**
-/.github/workflows/*.yml
+# Note: We keep workflow files in the repo for CI/CD
+# /.github/workflows/*.yml  # Commented out to track workflows
 # GitHub Actions caches
 .github/cache/
 
