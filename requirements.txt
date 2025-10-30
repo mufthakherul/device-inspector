@@ -2,5 +2,8 @@ click>=8.0.0
 jsonschema>=4.0.0
 pytest>=7.0.0
 pytest-mock
+pytest-cov>=4.0.0
 ruff
 black
+bandit>=1.7.0
+safety>=2.0.0
