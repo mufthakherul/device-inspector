@@ -9,7 +9,7 @@ This script:
 
 Usage:
     python scripts/build_release.py [--platform PLATFORM]
-    
+
     PLATFORM: windows, macos, or auto-detect
 """
 
@@ -52,19 +52,19 @@ def build_executable(root_dir: Path, clean: bool = True):
     print("=" * 60)
     print("Building executable with PyInstaller...")
     print("=" * 60)
-    
+
     spec_file = root_dir / "inspecta.spec"
     if not spec_file.exists():
         print(f"Error: {spec_file} not found!")
         return False
-    
+
     cmd = ["pyinstaller"]
     if clean:
         cmd.append("--clean")
     cmd.append(str(spec_file))
-    
+
     try:
-        result = subprocess.run(cmd, cwd=root_dir, check=True)
+        subprocess.run(cmd, cwd=root_dir, check=True)
         print("\n[OK] Executable built successfully!")
         return True
     except subprocess.CalledProcessError as e:
@@ -77,12 +77,12 @@ def create_distribution_package(root_dir: Path, platform_name: str):
     print("\n" + "=" * 60)
     print("Creating distribution package...")
     print("=" * 60)
-    
+
     dist_dir = root_dir / "dist"
     if not dist_dir.exists():
         print(f"Error: dist directory not found at {dist_dir}")
         return None
-    
+
     # Find the executable
     if platform_name == "windows":
         exe_name = "inspecta.exe"
@@ -90,70 +90,70 @@ def create_distribution_package(root_dir: Path, platform_name: str):
         exe_name = "inspecta"  # Or inspecta.app for bundle
     else:
         exe_name = "inspecta"
-    
+
     exe_path = dist_dir / exe_name
     if not exe_path.exists() and platform_name == "macos":
         # Check for .app bundle
         exe_path = dist_dir / "inspecta.app"
-    
+
     if not exe_path.exists():
         print(f"Error: Executable not found at {exe_path}")
         return None
-    
+
     # Create package directory
     version = "0.1.0"
     package_name = f"inspecta-{version}-{platform_name}"
     package_dir = dist_dir / package_name
-    
+
     # Clean existing package directory
     if package_dir.exists():
         shutil.rmtree(package_dir)
     package_dir.mkdir(parents=True)
-    
+
     print(f"\nPackaging to: {package_dir}")
-    
+
     # Copy executable
     print(f"  - Copying executable: {exe_name}")
     if exe_path.is_dir():
         shutil.copytree(exe_path, package_dir / exe_name)
     else:
         shutil.copy2(exe_path, package_dir / exe_name)
-    
+
     # Copy documentation
     print("  - Copying documentation")
-    
+
     # Use distribution-specific README for the package
     dist_readme = root_dir / "DISTRIBUTION_README.md"
     if dist_readme.exists():
         shutil.copy2(dist_readme, package_dir / "README.md")
-    
+
     # Copy other documentation
     for doc in ["LICENSE.txt", "CHANGELOG.md"]:
         src = root_dir / doc
         if src.exists():
             shutil.copy2(src, package_dir / doc)
-    
+
     # Copy samples for testing
     print("  - Copying sample data")
     samples_src = root_dir / "samples"
     samples_dst = package_dir / "samples"
     if samples_src.exists():
         shutil.copytree(samples_src, samples_dst)
-    
+
     # Create launcher scripts
     print("  - Creating launcher scripts")
     create_launcher_scripts(package_dir, platform_name)
-    
+
     # Create quick start guide
     print("  - Creating quick start guide")
     create_quick_start_guide(package_dir, platform_name)
-    
+
     return package_dir
 
 
 def create_launcher_scripts(package_dir: Path, platform_name: str):
     """Create easy-to-use launcher scripts for users."""
-    
+
     if platform_name == "windows":
         # Create Windows batch file
         launcher = package_dir / "Run_Inspecta.bat"
@@ -198,7 +198,7 @@ echo.
 pause
 """
         launcher.write_text(launcher_content, encoding="utf-8")
-        
+
         # Create direct executable launcher
         real_launcher = package_dir / "Run_Hardware_Inspection.bat"
         real_content = """@echo off
@@ -238,7 +238,7 @@ echo.
 pause
 """
         real_launcher.write_text(real_content, encoding="utf-8")
-        
+
     elif platform_name in ["macos", "linux"]:
         # Create shell script launcher
         launcher = package_dir / "run_inspecta.sh"
@@ -278,7 +278,7 @@ echo "============================================================"
 
 def create_quick_start_guide(package_dir: Path, platform_name: str):
     """Create a quick start guide for users."""
-    
+
     if platform_name == "windows":
         guide_content = """# Inspecta Device Inspector - Quick Start Guide (Windows)
 
@@ -457,7 +457,7 @@ This software is provided for non-commercial use. See LICENSE.txt for details.
 © 2025 mufthakherul
 Version 0.1.0
 """
-    
+
     guide_path = package_dir / "QUICK_START.txt"
     guide_path.write_text(guide_content, encoding="utf-8")
 
@@ -467,14 +467,14 @@ def create_zip_package(package_dir: Path):
     print("\n" + "=" * 60)
     print("Creating zip package...")
     print("=" * 60)
-    
+
     zip_name = package_dir.name
     zip_path = package_dir.parent / f"{zip_name}.zip"
-    
+
     # Remove existing zip
     if zip_path.exists():
         zip_path.unlink()
-    
+
     # Create zip
     print(f"\nCreating: {zip_path.name}")
     shutil.make_archive(
@@ -483,12 +483,12 @@ def create_zip_package(package_dir: Path):
         package_dir.parent,
         package_dir.name
     )
-    
+
     # Get size
     size_mb = zip_path.stat().st_size / (1024 * 1024)
     print(f"[OK] Package created: {zip_path}")
     print(f"  Size: {size_mb:.2f} MB")
-    
+
     return zip_path
 
 
@@ -512,46 +512,46 @@ def main():
         action="store_true",
         help="Don't create zip package"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Detect platform
     if args.platform == "auto":
         platform_name = get_platform()
     else:
         platform_name = args.platform
-    
+
     print("=" * 60)
     print("Inspecta Release Builder")
     print("=" * 60)
     print(f"Platform: {platform_name}")
     print(f"Clean build: {not args.no_clean}")
     print("=" * 60)
-    
+
     # Check dependencies
     if not check_pyinstaller():
         print("\n[ERROR] PyInstaller not found!")
         print("Install with: pip install pyinstaller")
         return 1
-    
+
     # Get root directory
     root_dir = Path(__file__).parent.parent
-    
+
     # Build executable
     if not build_executable(root_dir, clean=not args.no_clean):
         return 1
-    
+
     # Create distribution package
     package_dir = create_distribution_package(root_dir, platform_name)
     if not package_dir:
         return 1
-    
+
     # Create zip
     if not args.no_zip:
         zip_path = create_zip_package(package_dir)
         if not zip_path:
             return 1
-        
+
         print("\n" + "=" * 60)
         print("[SUCCESS] BUILD COMPLETE!")
         print("=" * 60)
@@ -564,7 +564,7 @@ def main():
         print("[SUCCESS] BUILD COMPLETE!")
         print("=" * 60)
         print(f"\nDistribution folder: {package_dir}")
-    
+
     return 0
 
 
