@@ -146,7 +146,8 @@ ipython_config.py
 # PyInstaller
 #  Usually these files are written by a python script from a template
 *.manifest
-*.spec
+# Keep inspecta.spec for building releases
+# *.spec
 
 # Mypy cache
 .mypy_cache/
@@ -293,7 +294,8 @@ helmfile.*.yaml
 # -------------------------
 # GitHub Actions
 /.github/actions/**
-/.github/workflows/*.yml
+# Note: We keep workflow files in the repo for CI/CD
+# /.github/workflows/*.yml  # Commented out to track workflows
 # GitHub Actions caches
 .github/cache/
 
