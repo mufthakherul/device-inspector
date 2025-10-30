@@ -184,7 +184,7 @@ if %errorLevel% == 0 (
 REM Run with sample data (no admin required)
 echo Running inspecta with sample data...
 echo.
-inspecta.exe run --mode quick --output reports --use-sample --verbose
+"%~dp0inspecta.exe" run --mode quick --output reports --use-sample --verbose
 
 echo.
 echo ============================================================
@@ -227,7 +227,7 @@ echo Inspecting hardware...
 echo This may take 2-10 minutes depending on your system.
 echo.
 
-inspecta.exe run --mode quick --output reports --verbose
+"%~dp0inspecta.exe" run --mode quick --output reports --verbose
 
 echo.
 echo ============================================================
