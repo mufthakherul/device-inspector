@@ -124,7 +124,7 @@ jobs:
           path: release-packages
       
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: release-packages/**/*.zip
           draft: false
