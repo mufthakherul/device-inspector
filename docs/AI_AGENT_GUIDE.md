@@ -1,6 +1,6 @@
 # AI & Developer Collaboration Guide
 
-Use this guide when coding directly or through AI assistants (Copilot, GPT, Claude, VS Code agents, GitHub agents, etc.). It captures the project’s ground rules so human and AI contributors stay consistent, predictable, and reviewable.
+Use this guide when coding directly or through AI assistants (Copilot, GPT, Claude, VS Code agents, GitHub agents, etc.). It captures the project’s ground rules so human and AI contributors stay consistent, predictable, and reviewable.
 
 ## Core Principles
 - Ship auditable diagnostics: every result should be backed by artifacts (logs/JSON) and transparent scoring.
