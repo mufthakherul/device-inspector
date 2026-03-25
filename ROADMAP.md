@@ -1,9 +1,9 @@
 # ROADMAP — device-inspector (inspecta)
 
-**Last updated:** 2025-10-28  
-**Status:** Phase 1 in progress — Sprint 1 COMPLETE ✅, Sprint 2 ready to start
+**Last updated:** 2026-03-25  
+**Status:** Phase 1 in progress — Sprints 0, 1, and 2 infrastructure COMPLETE ✅; Sprint 2 features are the immediate next priority
 
-> **📊 Progress Update (2025-10-28):** Sprint 0 complete (100%). Sprint 1 COMPLETE ✅ (100%) - All inventory detection, real SMART execution, and error handling fully implemented ahead of schedule. 22 tests passing. Project now at ~60% overall. Ready for Sprint 2. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed current state.
+> **📊 Progress Update (2026-03-25):** Sprint 0 ✅ (scaffold & docs). Sprint 1 ✅ (inventory, SMART execution, error handling — 22 tests passing). Sprint 2 infrastructure ✅ (pytest-cov coverage reporting, Bandit/Safety security scanning, Dependabot, multi-version CI matrix, standalone PyInstaller packaging for Windows/macOS/Linux). Project is now at **~65% of Phase 1**. Next up: Sprint 2 feature work — disk performance (fio), battery health (upower), CPU benchmark (sysbench), and complete scoring engine.
 
 This roadmap is the authoritative, actionable plan for building the device-inspector (inspecta) project. It converts the Project Goal and high-level strategy into a time-boxed implementation plan: phases, sprints, milestones, deliverables, acceptance criteria, owners, risks and mitigations, metrics, and operational playbooks for pilot and launch.
 
@@ -103,16 +103,30 @@ Acceptance criteria
 - ✅ Error handling with installation hints
 - ✅ Structured logging to agent.log
 
-**See [SPRINT_1_SUMMARY.md](SPRINT_1_SUMMARY.md) for detailed completion report.**
+**See `archives/historical/SPRINT_1_SUMMARY.md` for the detailed completion report.**
 
-Sprint 2 — Disk perf, battery, CPU quick bench, scoring (2025-11-17 → 2025-11-30) 🔴 **READY TO START**
-Goal: Expand agent with disk performance testing (fio), battery health detection, CPU benchmarking, and complete scoring engine.
+Sprint 2 — Infrastructure & quality improvements (2025-10-30) ✅ **COMPLETE**
+Goal: Establish enterprise-grade CI/CD, security scanning, coverage reporting, and standalone distribution packaging.
 
-**Status:** 🔴 Not Started — Ready to begin with Sprint 1 complete
+**Status:** ✅ 100% Complete (2025-10-30) — All infrastructure objectives achieved.  
+**What's Done:**
+- ✅ pytest-cov integration (36.26% coverage, HTML/XML/terminal reports, CI artifacts)
+- ✅ Bandit security scanning integrated in CI (no high/medium issues)
+- ✅ Safety dependency vulnerability scanning added
+- ✅ Dependabot configured for Python packages and GitHub Actions
+- ✅ Enhanced pre-commit hooks (whitespace, EOF, YAML/JSON, detect-private-key, Bandit)
+- ✅ Multi-version CI matrix (Python 3.11 + 3.12) with pip caching
+- ✅ PyInstaller standalone packaging for Windows, macOS, and Linux (no Python install required)
+- ✅ Automated release workflow (`build-release.yml`) triggered by tags
+- ✅ `DISTRIBUTION_README.md`, `docs/BUILDING.md`, `docs/DISTRIBUTION.md`, `docs/PACKAGING_CHECKLIST.md` added
+
+Sprint 2 — Features: disk perf, battery, CPU bench, scoring 🔴 **IN PROGRESS (next)**
+Goal: Expand agent with disk performance testing (fio), battery health detection, CPU benchmarking, and a complete scoring engine.
+
+**Status:** 🔴 Not Started — Ready to begin; infrastructure is fully in place
 
 Tasks
-- 🔲 Complete report.json schema with JSON Schema validation
-- 🔲 Add code coverage reporting (pytest-cov, target 60%+)
+- 🔲 Increase test coverage to 60%+ (baseline: 40%)
 - 🔲 Implement fio wrapper for disk performance (128MB quick tests)
 - 🔲 Add battery health parser (upower for Linux, powercfg for Windows)
 - 🔲 Implement sysbench wrapper for CPU benchmarking
@@ -128,30 +142,6 @@ Acceptance criteria
 - 🔲 CPU benchmark score included in report
 - 🔲 Profile recommendations working (e.g., "Suitable for Office work")
 - 🔲 35+ unit tests passing in CI
-
-**Next Actions:** See [NEXT_STEPS.md](NEXT_STEPS.md) Sprint 2 priorities for detailed tasks.
-- CI: run unit tests on Linux; package smartctl presence check
-
-Acceptance criteria
-- `inspecta inventory` outputs device JSON (vendor, model, serial, bios)
-- `inspecta run --mode quick` invokes smartctl (if available) and writes artifacts/smartctl.json and minimal report.json
-- Unit tests pass in CI
-
-Sprint 2 — Disk perf, battery, CPU quick bench, scoring (2025-11-17 → 2025-11-30)
-Goal: Add quick disk performance sample, battery parsing, CPU quick benchmark, and implement scoring engine for core categories.
-
-Tasks
-- Add disk sample wrapper (fio quick job or dd fallback)
-- Add battery health parser (powercfg report parsing & upower/system_profiler support)
-- Integrate CPU quick benchmark (sysbench or microbenchmark)
-- Implement scoring functions and weight config; add profile presets (Office, Developer, Creator, Gamer, Server)
-- Implement JSON scores in report.json and simple human summary line
-- Tests for scoring mapping and metric normalization
-
-Acceptance criteria
-- `inspecta run --mode quick` returns report.json with scores and a recommendation string
-- Score reproducible and unit-tested against mocked inputs
-- Benchmarks sample included in artifacts and referenced in JSON
 
 Sprint 3 — Memtester quick-mode, sensors snapshot, thermal smoke (2025-12-01 → 2025-12-14)
 Goal: Memory quick smoke test, sensors snapshot, short thermal stress and throttle detection.
@@ -259,11 +249,12 @@ Acceptance criteria
 ---
 
 3) MILESTONES & DELIVERABLES (concise)
-- M0: Repo scaffold and docs (README, LICENSE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) — DONE
-- M1: Agent skeleton + SMART + inventory + sample report — Sprint 1 completion
-- M2: Quick-mode features + scoring + sample PDF — Sprint 2–4 completion
-- M3: Viewer + optional server upload — Sprint 4–5 completion
-- M4: Bootable ISO builder + memtest integration — Sprint 6 completion
+- M0: Repo scaffold and docs (README, LICENSE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) — ✅ DONE
+- M1: Agent skeleton + SMART + inventory + sample report — ✅ DONE (Sprint 1)
+- M1b: CI/CD hardening + security scanning + standalone packaging — ✅ DONE (Sprint 2 infra)
+- M2: Quick-mode features + scoring + sample PDF — Sprint 2–4 (in progress)
+- M3: Viewer + optional server upload — Sprint 4–5
+- M4: Bootable ISO builder + memtest integration — Sprint 6
 - M5: Pilot complete and v1.0 release — Sprint 8 & Release
 
 ---
