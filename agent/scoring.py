@@ -5,6 +5,7 @@ Provides simple, auditable heuristics to convert parsed metrics into
 0-100 integer subscores. These are intentionally small so unit tests can
 assert exact outputs.
 """
+
 from __future__ import annotations
 
 from typing import Any, Dict

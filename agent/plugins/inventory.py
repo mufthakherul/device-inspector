@@ -4,6 +4,7 @@
 Detects hardware information using dmidecode on Linux.
 Parses vendor, model, serial number, BIOS version, and chassis type.
 """
+
 from __future__ import annotations
 
 import logging

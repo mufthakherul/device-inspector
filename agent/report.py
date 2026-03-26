@@ -5,6 +5,7 @@ Compose a canonical report.json following the project REPORT_SCHEMA.md.
 The scaffold produces minimal fields sufficient for schema validation and
 testing.
 """
+
 from __future__ import annotations
 
 import datetime

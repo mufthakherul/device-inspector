@@ -3,6 +3,7 @@
 
 Provides consistent logging with file output and structured formats.
 """
+
 from __future__ import annotations
 
 import logging

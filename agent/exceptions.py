@@ -3,6 +3,7 @@
 
 Provides clear, actionable exception classes for common error scenarios.
 """
+
 from __future__ import annotations
 
 
