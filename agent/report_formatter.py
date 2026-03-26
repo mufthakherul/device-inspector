@@ -3,6 +3,7 @@
 
 Generates TXT and PDF reports from inspection data.
 """
+
 from __future__ import annotations
 
 import os

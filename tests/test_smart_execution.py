@@ -1,5 +1,6 @@
 # Copyright (c) 2025 mufthakherul — see LICENSE.txt
 """Tests for SMART plugin execution and parsing."""
+
 from __future__ import annotations
 
 import json

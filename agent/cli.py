@@ -4,6 +4,7 @@
 Provides a minimal Click-based CLI with `run --mode quick` to produce a
 report.json and placeholder artifacts. Designed for tests and developer runs.
 """
+
 from __future__ import annotations
 
 import json
