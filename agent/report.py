@@ -26,6 +26,7 @@ def compose_report(
     mode: str = "quick",
     profile: str = "default",
     smart_status: Optional[str] = None,
+    native: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Compose a minimal report dict.
 
@@ -39,6 +40,7 @@ def compose_report(
         mode: Inspection mode (quick/full)
         profile: Buyer profile
         smart_status: Overall SMART status (ok/sample/missing)
+        native: Optional native helper metadata/capabilities
     """
     report: Dict[str, Any] = {
         "report_version": "1.0.0",
@@ -57,6 +59,9 @@ def compose_report(
         "artifacts": artifacts,
         "evidence": {"manifest_sha256": None, "signed": False},
     }
+
+    if native is not None:
+        report["native"] = native
 
     # Simple scoring heuristics based on tests
     storage_score = 50  # Default

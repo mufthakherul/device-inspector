@@ -1,9 +1,9 @@
 # ROADMAP — device-inspector (inspecta)
 
-**Last updated:** 2026-03-25  
-**Status:** Phase 1 in progress — Sprints 0, 1, and 2 infrastructure COMPLETE ✅; Sprint 2 features are the immediate next priority
+**Last updated:** 2026-03-26  
+**Status:** Phase 1 in progress — Sprints 0, 1, and 2 infrastructure COMPLETE ✅; Sprint 2 features are the immediate next priority. Native helper scaffolding added to enable a minimal polyglot stack (Python orchestrator + Rust native helper + TypeScript UI/backend) instead of a Python-only approach.
 
-> **📊 Progress Update (2026-03-25):** Sprint 0 ✅ (scaffold & docs). Sprint 1 ✅ (inventory, SMART execution, error handling — 22 tests passing). Sprint 2 infrastructure ✅ (pytest-cov coverage reporting, Bandit/Safety security scanning, Dependabot, multi-version CI matrix, standalone PyInstaller packaging for Windows/macOS/Linux). Project is now at **~65% of Phase 1**. Next up: Sprint 2 feature work — disk performance (fio), battery health (upower), CPU benchmark (sysbench), and complete scoring engine.
+> **📊 Progress Update (2026-03-26):** Sprint 0 ✅ (scaffold & docs). Sprint 1 ✅ (inventory, SMART execution, error handling — 22 tests passing). Sprint 2 infrastructure ✅ (pytest-cov coverage reporting, Bandit/Safety security scanning, Dependabot, multi-version CI matrix, standalone PyInstaller packaging for Windows/macOS/Linux). Native helper scaffolding ✅ (Rust `inspecta-native` handshake + Python detection) to move off a single-language posture while keeping languages minimal. Project is now at **~65% of Phase 1**. Next up: Sprint 2 feature work — disk performance (fio/Rust helper), battery health (upower), CPU benchmark (sysbench), and complete scoring engine.
 
 This roadmap is the authoritative, actionable plan for building the device-inspector (inspecta) project. It converts the Project Goal and high-level strategy into a time-boxed implementation plan: phases, sprints, milestones, deliverables, acceptance criteria, owners, risks and mitigations, metrics, and operational playbooks for pilot and launch.
 
@@ -22,6 +22,12 @@ Summary timeline (recommended)
 - Post-launch improvements & v2 planning: ongoing
 
 If you prefer 2-week sprints, the 16-week detailed plan below covers ~8 sprints plus pilot/launch tasks. Dates below assume an immediate start on Monday 2025-10-20; adjust to your calendar.
+
+**Language strategy (minimal polyglot stack)**
+- Agent orchestration remains Python for portability and ecosystem strength.
+- Native instrumentation is moving to Rust for performance-critical probes (disk/CPU) with a thin Python bridge and CLI fallback.
+- UI/viewer and optional backend will be implemented in TypeScript (Next.js/React + lightweight API) to keep the stack modern and multi-user ready.
+- Limit languages to these three unless a component requires a specialized runtime; prefer reusing the above before adding anything new.
 
 ---
 
@@ -47,7 +53,7 @@ Contents
 - Phase 1 — MVP Quick-mode Agent (Weeks 1–6)
   - Linux-first CLI agent delivering inventory, SMART parse, battery, CPU/disk quick bench, memtester short, sensors snapshot, report.json and report.pdf, scoring engine.
 - Phase 2 — Report/Viewer/Optional Backend (Weeks 7–12)
-  - PDF generator, static web viewer for local report.json, optional upload API & storage (opt-in), authentication for uploads.
+  - PDF generator, TypeScript/React static web viewer for local report.json, optional upload API & storage (opt-in) implemented in TypeScript/Node, authentication for uploads.
 - Phase 3 — Full-mode & Bootable Image (Weeks 13–18)
   - Bootable live-USB build scripts, MemTest86 integration guidance or open memtester boot flow, long stress tests orchestration, signed evidence bundle.
 - Phase 4 — Pilot & Release (Weeks 19–22)
@@ -131,17 +137,19 @@ Goal: Expand agent with disk performance testing (fio), battery health detection
 - ✅ Expand test suite to 46 tests (target: 35+)
 - ✅ Increase test coverage to 43.58% (baseline was 40%, target: 60%)
 - ✅ Fix CI workflow Black formatting issues
+- ✅ Add Rust native helper handshake + Python detection to enable polyglot extensions
 
 **In Progress:**
-- 🔲 Implement fio wrapper for disk performance (128MB quick tests)
+- 🔲 Implement fio wrapper for disk performance (128MB quick tests) using Rust helper where available, Python fallback otherwise
 - 🔲 Add battery health parser (upower for Linux, powercfg for Windows)
-- 🔲 Implement sysbench wrapper for CPU benchmarking
+- 🔲 Implement sysbench wrapper for CPU benchmarking with option to reuse Rust helper for microbenchmarks
 
 Acceptance criteria
 - ✅ Code coverage ≥35% reported in CI (currently 43.58%)
 - ✅ Profile recommendations working (e.g., "Suitable for Office work")
 - ✅ 35+ unit tests passing in CI (currently 46 tests)
 - ✅ Complete scoring engine with all category weights
+- ✅ Native helper handshake available and harmless when absent (polyglot-ready stack)
 - 🔲 report.json validates against schemas/report-schema-1.0.0.json (needs testing)
 - 🔲 Code coverage ≥60% reported in CI (stretch goal)
 - 🔲 `inspecta run` includes disk read/write speeds in report
@@ -169,7 +177,7 @@ Goal: Produce a human-friendly PDF, finalize JSON schema and implement a simple 
 Tasks
 - Finalize JSON Schema (report-schema.json) and tests for schema validation
 - Implement PDF report generator (Puppeteer/wkhtmltopdf or Python WeasyPrint) with templating
-- Create a minimal React static viewer that reads local report.json and displays summary and raw logs
+- Create a minimal React/TypeScript static viewer (Next.js or Vite) that reads local report.json and displays summary and raw logs
 - Add `inspecta report --open` to launch viewer against local report
 - Add sample report artifacts and screenshots for viewer demo
 
@@ -182,7 +190,7 @@ Sprint 5 — Backend API (opt-in) & upload flow (2026-01-05 → 2026-01-18)
 Goal: Build minimal secure upload API with opt-in behavior; artifact storage to S3-compatible store.
 
 Tasks
-- Implement server skeleton (Node/Express or Python/Flask/FastAPI) with POST /reports for authenticated upload
+- Implement server skeleton in TypeScript/Node (Express/Fastify/Nest) with POST /reports for authenticated upload
 - Implement token-based auth for upload (short-lived tokens)
 - Store artifacts in S3 (or local file store for dev)
 - Implement basic report retrieval endpoint GET /reports/{id} and GET /reports/{id}/pdf
