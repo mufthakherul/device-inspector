@@ -11,6 +11,8 @@ from __future__ import annotations
 import datetime
 from typing import Any, Dict, List, Optional
 
+from . import scoring
+
 
 def _now_iso() -> str:
     return datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
@@ -82,25 +84,18 @@ def compose_report(
         "battery": 80,
         "memory": 90,
         "cpu_thermal": 85,
+        "gpu": 85,
+        "network": 90,
+        "security": 75,
     }
 
-    # Compute overall score
-    report["summary"]["overall_score"] = int(
-        sum(report["scores"].values()) / len(report["scores"])
-    )
-    overall = report["summary"]["overall_score"]
+    # Compute overall score using profile weights
+    overall, grade = scoring.compute_overall_score(report["scores"], profile)
 
-    # Determine grade
-    if overall >= 90:
-        grade = "Excellent"
-    elif overall >= 75:
-        grade = "Good"
-    elif overall >= 50:
-        grade = "Fair"
-    else:
-        grade = "Poor"
-
+    report["summary"]["overall_score"] = overall
     report["summary"]["grade"] = grade
-    report["summary"]["recommendation"] = "Profile: %s" % profile
+    report["summary"]["recommendation"] = scoring.get_profile_recommendation(
+        overall, grade, profile, report["scores"]
+    )
 
     return report
