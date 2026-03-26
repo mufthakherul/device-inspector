@@ -4,6 +4,7 @@
 Usage: python scripts/validate_report.py <report.json> <schema.json>
 Exits with code 0 on success, non-zero on validation error.
 """
+
 from __future__ import annotations
 
 import json

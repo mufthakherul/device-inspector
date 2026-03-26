@@ -1,5 +1,6 @@
 # Copyright (c) 2025 mufthakherul — see LICENSE.txt
 """Tests for inventory plugin."""
+
 from __future__ import annotations
 
 from pathlib import Path

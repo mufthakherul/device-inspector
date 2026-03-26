@@ -4,6 +4,7 @@
 Functions here execute smartctl and parse the JSON output to produce
 normalized dictionaries used in report composition and tests.
 """
+
 from __future__ import annotations
 
 import json
@@ -167,7 +168,8 @@ def parse_smart_json(data: Dict[str, Any]) -> Dict[str, Any]:
     # device identification
     device = data.get("device") or {}
     out["name"] = device.get("name")
-    # Check both device-nested and root-level for model/serial (different smartctl versions)
+    # Check both device-nested and root-level for model/serial
+    # (different smartctl versions)
     out["model"] = (
         device.get("model_name")
         or device.get("product")
