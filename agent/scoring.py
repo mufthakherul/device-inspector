@@ -77,3 +77,154 @@ def score_cpu_thermal(thermal_info: Dict[str, Any]) -> int:
     Placeholder: return 85 for now.
     """
     return 85
+
+
+def score_gpu(gpu_info: Dict[str, Any]) -> int:
+    """Score GPU health and performance.
+
+    Placeholder: return 85 for now.
+    """
+    return 85
+
+
+def score_network(network_info: Dict[str, Any]) -> int:
+    """Score network connectivity and hardware.
+
+    Placeholder: return 90 for now.
+    """
+    return 90
+
+
+def score_security(security_info: Dict[str, Any]) -> int:
+    """Score security posture (firmware, TPM, secure boot, etc).
+
+    Placeholder: return 75 for now.
+    """
+    return 75
+
+
+def compute_overall_score(
+    scores: Dict[str, int], profile: str = "default"
+) -> tuple[int, str]:
+    """Compute overall score and grade from category scores.
+
+    Args:
+        scores: Dictionary of category scores (storage, battery, etc)
+        profile: User profile (Office, Developer, Gamer, Server, default)
+
+    Returns:
+        Tuple of (overall_score, grade)
+    """
+    # Category weights based on profile
+    weights = get_profile_weights(profile)
+
+    # Compute weighted average
+    total_weighted = 0
+    total_weight = 0
+    for category, weight in weights.items():
+        if category in scores:
+            total_weighted += scores[category] * weight
+            total_weight += weight
+
+    overall = int(total_weighted / total_weight) if total_weight > 0 else 50
+
+    # Determine grade
+    if overall >= 90:
+        grade = "Excellent"
+    elif overall >= 75:
+        grade = "Good"
+    elif overall >= 50:
+        grade = "Fair"
+    else:
+        grade = "Poor"
+
+    return overall, grade
+
+
+def get_profile_weights(profile: str) -> Dict[str, float]:
+    """Get category weights for a specific user profile.
+
+    Args:
+        profile: User profile (Office, Developer, Gamer, Server, default)
+
+    Returns:
+        Dictionary mapping category names to weights (0-1)
+    """
+    profiles = {
+        "Office": {
+            "storage": 0.20,
+            "battery": 0.25,
+            "memory": 0.15,
+            "cpu_thermal": 0.15,
+            "gpu": 0.05,
+            "network": 0.10,
+            "security": 0.10,
+        },
+        "Developer": {
+            "storage": 0.25,
+            "battery": 0.15,
+            "memory": 0.20,
+            "cpu_thermal": 0.20,
+            "gpu": 0.05,
+            "network": 0.10,
+            "security": 0.05,
+        },
+        "Gamer": {
+            "storage": 0.20,
+            "battery": 0.05,
+            "memory": 0.15,
+            "cpu_thermal": 0.25,
+            "gpu": 0.25,
+            "network": 0.05,
+            "security": 0.05,
+        },
+        "Server": {
+            "storage": 0.30,
+            "battery": 0.05,
+            "memory": 0.25,
+            "cpu_thermal": 0.20,
+            "gpu": 0.00,
+            "network": 0.15,
+            "security": 0.05,
+        },
+        "default": {
+            "storage": 0.22,
+            "battery": 0.15,
+            "memory": 0.12,
+            "cpu_thermal": 0.15,
+            "gpu": 0.10,
+            "network": 0.08,
+            "security": 0.18,
+        },
+    }
+
+    return profiles.get(profile, profiles["default"])
+
+
+def get_profile_recommendation(
+    overall_score: int, grade: str, profile: str, scores: Dict[str, int]
+) -> str:
+    """Generate a recommendation based on profile and scores.
+
+    Args:
+        overall_score: Overall device score (0-100)
+        grade: Overall grade (Excellent, Good, Fair, Poor)
+        profile: User profile
+        scores: Dictionary of category scores
+
+    Returns:
+        Recommendation string
+    """
+    if overall_score >= 90:
+        return f"Excellent condition — ready for {profile} use"
+    elif overall_score >= 75:
+        return f"Good condition — suitable for {profile} use with minor issues"
+    elif overall_score >= 50:
+        # Identify weak areas
+        weak_areas = [k for k, v in scores.items() if v < 60]
+        if weak_areas:
+            areas_str = ", ".join(weak_areas)
+            return f"Fair condition for {profile} — consider repairs ({areas_str})"
+        return f"Fair condition — may require attention for {profile} use"
+    else:
+        return f"Poor condition — not recommended for {profile} use without repairs"
