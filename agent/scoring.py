@@ -101,25 +101,55 @@ def score_disk_performance(perf_info: Dict[str, Any]) -> int:
 def score_cpu_thermal(thermal_info: Dict[str, Any]) -> int:
     """Score CPU category from benchmark and thermal signals.
 
-    If benchmark data is present, map events_per_second to a score band.
-    If not present, default to a neutral score.
+    Considers both CPU benchmark performance and thermal stress results.
+    Penalties applied for throttling or excessive temperatures.
     """
+    # Start with benchmark-based score
     events_per_second = thermal_info.get("events_per_second") if thermal_info else None
+
     if events_per_second is None:
-        return 85
+        base_score = 85
+    else:
+        try:
+            eps = float(events_per_second)
+            if eps >= 2000:
+                base_score = 95
+            elif eps >= 1200:
+                base_score = 85
+            elif eps >= 700:
+                base_score = 70
+            else:
+                base_score = 50
+        except Exception:
+            base_score = 85
 
-    try:
-        eps = float(events_per_second)
-    except Exception:
-        return 85
+    # Apply thermal stress penalties if data available
+    peak_temp = thermal_info.get("peak_temp")
+    throttled = thermal_info.get("throttled")
 
-    if eps >= 2000:
-        return 95
-    if eps >= 1200:
-        return 85
-    if eps >= 700:
-        return 70
-    return 50
+    if peak_temp is not None or throttled is not None:
+        # Thermal stress data available
+        penalties = 0
+
+        # Temperature-based penalties
+        if peak_temp:
+            if peak_temp >= 95:
+                penalties += 30  # Critical temp
+            elif peak_temp >= 85:
+                penalties += 15  # High temp
+            elif peak_temp >= 75:
+                penalties += 5  # Moderate temp
+
+        # Throttling penalties
+        if throttled:
+            penalties += 20  # Throttling detected
+
+        # Apply penalties but don't go below 0
+        final_score = max(0, base_score - penalties)
+        return final_score
+
+    # No thermal data, return base score
+    return base_score
 
 
 def score_gpu(gpu_info: Dict[str, Any]) -> int:

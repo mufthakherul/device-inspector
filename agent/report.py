@@ -94,8 +94,25 @@ def compose_report(
                 battery_score = 100
 
         cpu_tests = [t for t in tests if t.get("name") == "cpu_benchmark"]
+        thermal_stress_tests = [t for t in tests if t.get("name") == "thermal_stress"]
+
+        # Merge CPU benchmark and thermal stress data
+        cpu_thermal_data = {}
         if cpu_tests and cpu_tests[0].get("status") == "ok":
-            cpu_score = scoring.score_cpu_thermal(cpu_tests[0].get("data", {}))
+            cpu_thermal_data = cpu_tests[0].get("data", {})
+
+        if thermal_stress_tests and thermal_stress_tests[0].get("status") == "ok":
+            # Add thermal stress data to CPU thermal info
+            stress_data = thermal_stress_tests[0].get("data", {})
+            cpu_thermal_data.update(
+                {
+                    "peak_temp": stress_data.get("peak_temp"),
+                    "throttled": stress_data.get("throttled"),
+                }
+            )
+
+        if cpu_thermal_data:
+            cpu_score = scoring.score_cpu_thermal(cpu_thermal_data)
 
     report["scores"] = {
         "storage": storage_score,

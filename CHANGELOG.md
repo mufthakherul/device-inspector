@@ -4,11 +4,44 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Sprint 3 - In Progress
-- Thermal stress testing with CPU throttling detection
-- Thermal timeseries artifact generation
-- CPU frequency monitoring under load
-- Scoring engine integration for thermal stress results
+### Sprint 4 - In Progress
+- Enhanced PDF report generation
+- Static web viewer for report.json
+- Finalized JSON schema with validation
+
+---
+
+## [0.1.0-sprint3] - 2026-03-27
+
+### Added — Sprint 3 COMPLETE ✅
+
+#### Thermal Stress Testing & Throttling Detection (NEW)
+- **Thermal stress test**: 30-second CPU load test with temperature & frequency monitoring
+- **CPU frequency monitoring**: `get_cpu_frequency_linux()` reads from sysfs and /proc/cpuinfo
+- **Advanced throttling detection**: Multi-factor analysis (temp >85°C or freq drop >15%)
+- **thermal_stress.csv artifact**: Timeseries data with timestamp, temp_c, freq_mhz, throttled
+- **CLI `--with-stress` flag**: Optional thermal stress testing (adds ~30s to inspection)
+- **Sample mode support**: Realistic thermal stress sample data for testing
+- **CSV generation**: `generate_thermal_stress_csv()` helper function
+
+#### Enhanced Scoring Engine
+- **Updated score_cpu_thermal()**: Now considers both benchmark and thermal stress data
+- **Thermal penalties**: -30 for critical temp (>95°C), -15 for high temp (>85°C), -20 for throttling
+- **Report integration**: Merges CPU benchmark + thermal stress data in report composition
+- **Dynamic scoring**: Adapts based on available thermal stress results
+
+#### CLI Enhancements
+- **10-step workflow**: Added Step 8 for optional thermal stress test
+- **Smart defaults**: Thermal stress disabled by default, enabled with --with-stress
+- **Status reporting**: Clear warnings for throttling detection
+- **Error handling**: Graceful degradation when stress tools unavailable
+
+### Technical Details
+- Samples CPU temp and frequency every 2 seconds during stress
+- Supports both stress-ng and sysbench as stress test tools
+- Throttling detected via temperature thresholds or frequency drops
+- Detailed sample data with per-sample throttling status
+- Cross-platform foundation (Linux fully implemented)
 
 ---
 

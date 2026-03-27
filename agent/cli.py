@@ -136,6 +136,11 @@ def inventory_cmd(use_sample: bool) -> None:
         "'both' for both formats"
     ),
 )
+@click.option(
+    "--with-stress",
+    is_flag=True,
+    help="Include thermal stress test with CPU throttling detection (adds ~30s)",
+)
 def run(
     mode: str,
     output: Path,
@@ -146,6 +151,7 @@ def run(
     auto_open: bool,
     no_auto_open: bool,
     format: str,
+    with_stress: bool,
 ) -> None:
     """Run a complete device inspection and generate report.
 
@@ -594,7 +600,113 @@ def run(
         )
         inspector_logger.warning("Thermal snapshot failed: %s", str(e))
 
-    inspector_logger.info("Step 8: Generating report...")
+    # Step 8: Thermal stress test (optional, enabled with --with-stress)
+    if with_stress:
+        inspector_logger.info("Step 8: Running thermal stress test (30s)...")
+        try:
+            if use_sample:
+                # Sample thermal stress data
+                thermal_stress_result = {
+                    "baseline_max_temp": 45.0,
+                    "baseline_freq_mhz": 3600.0,
+                    "peak_temp": 78.5,
+                    "avg_stress_temp": 72.3,
+                    "min_freq_mhz": 3400.0,
+                    "avg_freq_mhz": 3500.0,
+                    "throttling_detected": False,
+                    "throttle_reason": None,
+                    "duration_seconds": 30,
+                    "num_samples": 15,
+                    "samples": [
+                        {
+                            "timestamp": "2026-03-27T13:00:00Z",
+                            "temp_c": 45.0,
+                            "freq_mhz": 3600.0,
+                            "throttled": False,
+                        },
+                        {
+                            "timestamp": "2026-03-27T13:00:02Z",
+                            "temp_c": 58.2,
+                            "freq_mhz": 3590.0,
+                            "throttled": False,
+                        },
+                        {
+                            "timestamp": "2026-03-27T13:00:04Z",
+                            "temp_c": 72.5,
+                            "freq_mhz": 3580.0,
+                            "throttled": False,
+                        },
+                    ],
+                }
+            else:
+                thermal_stress_result = sensors.detect_cpu_throttling(
+                    duration_seconds=30
+                )
+
+            # Write thermal stress CSV artifact
+            if thermal_stress_result.get("samples"):
+                thermal_csv = artifacts_dir / "thermal_stress.csv"
+                csv_content = sensors.generate_thermal_stress_csv(
+                    thermal_stress_result["samples"]
+                )
+                thermal_csv.write_text(csv_content, encoding="utf-8")
+
+            # Add test result
+            tests_list.append(
+                {
+                    "name": "thermal_stress",
+                    "status": "ok",
+                    "data": {
+                        "baseline_temp": thermal_stress_result.get("baseline_max_temp"),
+                        "peak_temp": thermal_stress_result.get("peak_temp"),
+                        "avg_temp": thermal_stress_result.get("avg_stress_temp"),
+                        "throttled": thermal_stress_result.get("throttling_detected"),
+                        "throttle_reason": thermal_stress_result.get("throttle_reason"),
+                        "baseline_freq_mhz": thermal_stress_result.get(
+                            "baseline_freq_mhz"
+                        ),
+                        "min_freq_mhz": thermal_stress_result.get("min_freq_mhz"),
+                    },
+                    "status_detail": "sample" if use_sample else "executed",
+                }
+            )
+
+            if thermal_stress_result.get("throttling_detected"):
+                inspector_logger.warning(
+                    "⚠️  Throttling detected! Peak: %.1f°C, Reason: %s",
+                    thermal_stress_result.get("peak_temp", 0),
+                    thermal_stress_result.get("throttle_reason", "Unknown"),
+                )
+            else:
+                inspector_logger.info(
+                    "Thermal stress OK: Peak=%.1f°C, no throttling detected",
+                    thermal_stress_result.get("peak_temp", 0),
+                )
+
+        except sensors.SensorError as e:
+            inspector_logger.warning("Thermal stress test skipped: %s", str(e))
+            tests_list.append(
+                {
+                    "name": "thermal_stress",
+                    "status": "skip",
+                    "reason": str(e),
+                }
+            )
+        except Exception as e:
+            inspector_logger.error("Thermal stress test failed: %s", str(e))
+            tests_list.append(
+                {
+                    "name": "thermal_stress",
+                    "status": "error",
+                    "error": str(e),
+                }
+            )
+    else:
+        inspector_logger.info(
+            "Step 8: Thermal stress test skipped (use --with-stress to enable)"
+        )
+
+    inspector_logger.info("Step 9: Generating report...")
     report = compose_report(
         agent_version=__version__,
         device=device_info,
@@ -620,7 +732,7 @@ def run(
     )
 
     # Generate human-readable report(s)
-    inspector_logger.info("Step 9: Generating human-readable report(s)...")
+    inspector_logger.info("Step 10: Generating human-readable report(s)...")
     report_to_open = None
 
     # Determine if auto-open should be enabled

@@ -12,7 +12,7 @@ import platform
 import re
 import subprocess
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger("inspecta.sensors")
 
@@ -331,7 +331,34 @@ def get_sensors_snapshot() -> Dict[str, Any]:
         raise SensorError(f"Unsupported platform: {platform.system()}")
 
 
-def detect_cpu_throttling_linux(duration_seconds: int = 30) -> Dict[str, Any]:
+def get_cpu_frequency_linux() -> Optional[float]:
+    """Get current CPU frequency in MHz from /proc/cpuinfo or cpufreq."""
+    try:
+        # Try reading from cpufreq first (more accurate)
+        freq_path = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq"
+        with open(freq_path, "r") as f:
+            # cpufreq returns kHz, convert to MHz
+            return float(f.read().strip()) / 1000.0
+    except (FileNotFoundError, PermissionError, ValueError):
+        pass
+
+    try:
+        # Fallback to parsing /proc/cpuinfo
+        with open("/proc/cpuinfo", "r") as f:
+            for line in f:
+                if line.startswith("cpu MHz"):
+                    # Format: "cpu MHz		: 2400.000"
+                    freq_str = line.split(":")[1].strip()
+                    return float(freq_str)
+    except (FileNotFoundError, PermissionError, ValueError, IndexError):
+        pass
+
+    return None
+
+
+def detect_cpu_throttling_linux(
+    duration_seconds: int = 30,
+) -> Dict[str, Any]:
     """Run a stress test and detect thermal throttling on Linux.
 
     Monitors CPU frequency during stress to detect throttling.
@@ -372,18 +399,45 @@ def detect_cpu_throttling_linux(duration_seconds: int = 30) -> Dict[str, Any]:
         stderr=subprocess.DEVNULL,
     )
 
-    # Sample temperatures during stress
+    # Sample temperatures and frequencies during stress
     samples = []
+    temp_samples = []
+    freq_samples = []
     sample_interval = 2  # seconds
     num_samples = duration_seconds // sample_interval
+
+    # Get baseline frequency
+    baseline_freq = get_cpu_frequency_linux()
 
     try:
         for i in range(num_samples):
             time.sleep(sample_interval)
             try:
                 snapshot = get_sensors_snapshot_linux()
-                if snapshot.get("max_temp"):
-                    samples.append(snapshot["max_temp"])
+                freq = get_cpu_frequency_linux()
+                temp = snapshot.get("max_temp")
+
+                if temp:
+                    temp_samples.append(temp)
+
+                if freq:
+                    freq_samples.append(freq)
+
+                # Create detailed sample with timestamp
+                from datetime import datetime, timezone
+
+                sample = {
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "temp_c": temp,
+                    "freq_mhz": freq,
+                    "throttled": False,  # Will be determined later
+                }
+
+                # Check for frequency drop (simple throttling indicator)
+                if baseline_freq and freq and freq < (baseline_freq * 0.85):
+                    sample["throttled"] = True
+
+                samples.append(sample)
             except SensorError:
                 pass
     finally:
@@ -395,23 +449,32 @@ def detect_cpu_throttling_linux(duration_seconds: int = 30) -> Dict[str, Any]:
             stress_proc.kill()
 
     # Analyze results
-    if not samples:
+    if not temp_samples:
         return {
             "baseline_max_temp": baseline_max,
+            "baseline_freq_mhz": baseline_freq,
             "peak_temp": None,
             "avg_stress_temp": None,
+            "min_freq_mhz": None,
+            "avg_freq_mhz": None,
             "throttling_detected": False,
+            "samples": [],
             "note": "No temperature samples collected during stress test",
         }
 
-    peak_temp = max(samples)
-    avg_stress_temp = round(sum(samples) / len(samples), 1)
+    peak_temp = max(temp_samples)
+    avg_stress_temp = round(sum(temp_samples) / len(temp_samples), 1)
+    min_freq = min(freq_samples) if freq_samples else None
+    avg_freq = round(sum(freq_samples) / len(freq_samples), 1) if freq_samples else None
 
-    # Simple throttling heuristic:
-    # If peak temp is > 85°C or within 5°C of critical threshold, likely throttling
+    # Determine throttling based on multiple indicators:
+    # 1. High temperature (> 85°C or within 5°C of critical)
+    # 2. Significant frequency drop (> 15% from baseline)
+    # 3. Any sample marked as throttled
     throttling_detected = False
-    throttle_reason = None
+    throttle_reason = []
 
+    # Check temperature-based throttling
     if baseline and baseline.get("sensors"):
         for sensor in baseline["sensors"]:
             if sensor.get("type") == "CPU":
@@ -419,7 +482,7 @@ def detect_cpu_throttling_linux(duration_seconds: int = 30) -> Dict[str, Any]:
                     crit = reading.get("crit")
                     if crit and peak_temp >= (crit - 5):
                         throttling_detected = True
-                        throttle_reason = (
+                        throttle_reason.append(
                             f"Temperature {peak_temp}°C within 5°C of "
                             f"critical threshold {crit}°C"
                         )
@@ -427,19 +490,65 @@ def detect_cpu_throttling_linux(duration_seconds: int = 30) -> Dict[str, Any]:
 
     if not throttling_detected and peak_temp >= 85:
         throttling_detected = True
-        throttle_reason = (
+        throttle_reason.append(
             f"Peak temperature {peak_temp}°C exceeds typical threshold (85°C)"
         )
 
+    # Check frequency-based throttling
+    if baseline_freq and min_freq:
+        freq_drop_pct = ((baseline_freq - min_freq) / baseline_freq) * 100
+        if freq_drop_pct > 15:
+            throttling_detected = True
+            throttle_reason.append(
+                f"CPU frequency dropped {freq_drop_pct:.1f}% "
+                f"({baseline_freq:.0f} → {min_freq:.0f} MHz)"
+            )
+
+    # Check if any samples detected throttling
+    throttled_samples = [s for s in samples if s.get("throttled")]
+    if throttled_samples:
+        throttling_detected = True
+        if not any("frequency" in r for r in throttle_reason):
+            throttle_reason.append(
+                f"Throttling detected in "
+                f"{len(throttled_samples)}/{len(samples)} samples"
+            )
+
     return {
         "baseline_max_temp": baseline_max,
+        "baseline_freq_mhz": baseline_freq,
         "peak_temp": peak_temp,
         "avg_stress_temp": avg_stress_temp,
+        "min_freq_mhz": min_freq,
+        "avg_freq_mhz": avg_freq,
         "samples": samples,
         "throttling_detected": throttling_detected,
-        "throttle_reason": throttle_reason,
+        "throttle_reason": "; ".join(throttle_reason) if throttle_reason else None,
         "duration_seconds": duration_seconds,
+        "num_samples": len(samples),
     }
+
+
+def generate_thermal_stress_csv(samples: list) -> str:
+    """Generate CSV content from thermal stress samples.
+
+    Args:
+        samples: List of sample dicts with timestamp, temp_c, freq_mhz, throttled
+
+    Returns:
+        CSV content as string
+    """
+    lines = ["timestamp,temp_c,freq_mhz,throttled"]
+
+    for sample in samples:
+        timestamp = sample.get("timestamp", "")
+        temp = sample.get("temp_c", "")
+        freq = sample.get("freq_mhz", "")
+        throttled = str(sample.get("throttled", False)).lower()
+
+        lines.append(f"{timestamp},{temp},{freq},{throttled}")
+
+    return "\n".join(lines) + "\n"
 
 
 def detect_cpu_throttling(duration_seconds: int = 30) -> Dict[str, Any]:
