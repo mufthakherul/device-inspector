@@ -13,7 +13,7 @@ from pathlib import Path
 
 import click
 
-from . import __version__
+from . import __version__, native_bridge
 from .logging_utils import setup_logging
 from .plugins import inventory, smart
 from .report import compose_report
@@ -215,6 +215,19 @@ def run(
     )
     inspector_logger.info("=" * 60)
 
+    native_capabilities = native_bridge.detect_native_capabilities()
+    if native_capabilities.get("available"):
+        inspector_logger.info(
+            "Native helper detected at %s (status=%s)",
+            native_capabilities.get("binary"),
+            native_capabilities.get("status"),
+        )
+    else:
+        inspector_logger.info(
+            "Native helper not available: %s",
+            native_capabilities.get("reason", "unknown"),
+        )
+
     logger.info("Starting inspecta run (mode=%s, profile=%s)", mode, profile)
 
     if mode != "quick":
@@ -338,6 +351,7 @@ def run(
         mode=mode,
         profile=profile,
         smart_status=smart_status,
+        native=native_capabilities,
     )
 
     report_path = out_dir / "report.json"
