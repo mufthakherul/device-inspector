@@ -19,3 +19,19 @@ def test_score_battery_ranges():
     assert scoring.score_battery({}) == 80
     assert scoring.score_battery({"health_pct": 95}) == 95
     assert scoring.score_battery({"health_pct": 60}) == 60
+
+
+def test_score_disk_performance_ranges():
+    assert scoring.score_disk_performance({}) == 70
+    assert scoring.score_disk_performance({"read_mbps": 500, "write_mbps": 450}) == 95
+    assert scoring.score_disk_performance({"read_mbps": 260, "write_mbps": 250}) == 85
+    assert scoring.score_disk_performance({"read_mbps": 150, "write_mbps": 120}) == 70
+    assert scoring.score_disk_performance({"read_mbps": 80, "write_mbps": 60}) == 45
+
+
+def test_score_cpu_thermal_from_sysbench_events():
+    assert scoring.score_cpu_thermal({}) == 85
+    assert scoring.score_cpu_thermal({"events_per_second": 2200}) == 95
+    assert scoring.score_cpu_thermal({"events_per_second": 1500}) == 85
+    assert scoring.score_cpu_thermal({"events_per_second": 900}) == 70
+    assert scoring.score_cpu_thermal({"events_per_second": 400}) == 50

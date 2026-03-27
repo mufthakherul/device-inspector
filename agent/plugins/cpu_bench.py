@@ -1,0 +1,111 @@
+# Copyright (c) 2025 mufthakherul — see LICENSE.txt
+"""CPU benchmark execution and parsing helpers.
+
+Quick mode uses a short sysbench CPU run and extracts summary metrics.
+"""
+
+from __future__ import annotations
+
+import logging
+import re
+import subprocess
+from typing import Any, Dict, Optional
+
+logger = logging.getLogger("inspecta.cpu_bench")
+
+
+class CpuBenchError(Exception):
+    """Raised when CPU benchmark operations fail."""
+
+
+_SAMPLE_SYSBENCH = """\
+sysbench 1.0.20 (using system LuaJIT 2.1.0-beta3)
+
+Running the test with following options:
+Number of threads: 2
+
+CPU speed:
+    events per second:  1789.35
+
+General statistics:
+    total time:                          10.0028s
+    total number of events:              17900
+"""
+
+
+def _extract_float(pattern: str, text: str) -> Optional[float]:
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+    if not match:
+        return None
+    return float(match.group(1))
+
+
+def _extract_int(pattern: str, text: str) -> Optional[int]:
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def parse_sysbench_output(output: str) -> Dict[str, Any]:
+    """Parse sysbench output into normalized CPU benchmark metrics."""
+    events_per_second = _extract_float(r"events per second:\s*([0-9.]+)", output)
+    total_events = _extract_int(r"total number of events:\s*([0-9]+)", output)
+    total_time_seconds = _extract_float(r"total time:\s*([0-9.]+)s", output)
+
+    if events_per_second is None:
+        raise CpuBenchError("sysbench output missing events per second")
+
+    return {
+        "events_per_second": round(events_per_second, 2),
+        "total_events": total_events,
+        "total_time_seconds": total_time_seconds,
+    }
+
+
+def execute_sysbench(use_sample: bool = False) -> Dict[str, Any]:
+    """Execute sysbench CPU quick test and return parsed metrics."""
+    if use_sample:
+        parsed = parse_sysbench_output(_SAMPLE_SYSBENCH)
+        return {"status": "ok", "data": parsed, "raw_text": _SAMPLE_SYSBENCH}
+
+    cmd = ["sysbench", "cpu", "--threads=2", "--time=10", "run"]
+
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise CpuBenchError(
+            "sysbench not found. Install with: sudo apt install sysbench"
+        ) from exc
+    except subprocess.TimeoutExpired as exc:
+        raise CpuBenchError("sysbench timed out after 20 seconds") from exc
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+        raise CpuBenchError(
+            f"sysbench failed with exit code {result.returncode}: {stderr}"
+        )
+
+    parsed = parse_sysbench_output(result.stdout)
+    return {"status": "ok", "data": parsed, "raw_text": result.stdout}
+
+
+def scan_cpu_benchmark(use_sample: bool = False) -> Dict[str, Any]:
+    """Run quick CPU benchmark and return structured result."""
+    try:
+        result = execute_sysbench(use_sample=use_sample)
+        logger.info(
+            "CPU benchmark collected (events_per_second=%s)",
+            result["data"].get("events_per_second"),
+        )
+        return result
+    except CpuBenchError as exc:
+        message = str(exc)
+        logger.warning("CPU benchmark failed: %s", message)
+        return {"status": "error", "error": message}

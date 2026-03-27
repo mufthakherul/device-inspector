@@ -71,12 +71,55 @@ def score_memory(mem_info: Dict[str, Any]) -> int:
     return 90
 
 
-def score_cpu_thermal(thermal_info: Dict[str, Any]) -> int:
-    """Score CPU thermal behavior from sampled temps.
+def score_disk_performance(perf_info: Dict[str, Any]) -> int:
+    """Score disk performance from read/write throughput metrics.
 
-    Placeholder: return 85 for now.
+    Uses quick benchmark throughput in MB/s and maps to a deterministic band.
     """
-    return 85
+    read_mbps = perf_info.get("read_mbps") if perf_info else None
+    write_mbps = perf_info.get("write_mbps") if perf_info else None
+
+    if read_mbps is None and write_mbps is None:
+        return 70
+
+    try:
+        read_mbps = float(read_mbps or 0)
+        write_mbps = float(write_mbps or 0)
+    except Exception:
+        return 70
+
+    avg_mbps = (read_mbps + write_mbps) / 2
+    if avg_mbps >= 400:
+        return 95
+    if avg_mbps >= 250:
+        return 85
+    if avg_mbps >= 120:
+        return 70
+    return 45
+
+
+def score_cpu_thermal(thermal_info: Dict[str, Any]) -> int:
+    """Score CPU category from benchmark and thermal signals.
+
+    If benchmark data is present, map events_per_second to a score band.
+    If not present, default to a neutral score.
+    """
+    events_per_second = thermal_info.get("events_per_second") if thermal_info else None
+    if events_per_second is None:
+        return 85
+
+    try:
+        eps = float(events_per_second)
+    except Exception:
+        return 85
+
+    if eps >= 2000:
+        return 95
+    if eps >= 1200:
+        return 85
+    if eps >= 700:
+        return 70
+    return 50
 
 
 def score_gpu(gpu_info: Dict[str, Any]) -> int:

@@ -15,7 +15,7 @@ import click
 
 from . import __version__, native_bridge
 from .logging_utils import setup_logging
-from .plugins import inventory, smart
+from .plugins import battery, cpu_bench, disk_perf, inventory, smart
 from .report import compose_report
 from .report_formatter import generate_pdf_report, generate_txt_report, open_file
 
@@ -152,9 +152,10 @@ def run(
     Performs automated hardware health checks including:
     - Device inventory (vendor, model, serial, BIOS)
     - Storage SMART health (all drives: SATA, NVMe, USB)
-    - Battery health (cycle count, capacity) [future]
+    - Battery health (cycle count, capacity)
+    - Disk performance benchmark (fio)
+    - CPU benchmarking (sysbench)
     - Memory testing [future]
-    - CPU benchmarking [future]
 
     Generates report.json with scores, recommendations, and raw artifacts.
     Also generates human-readable report (TXT or PDF) that automatically opens.
@@ -171,6 +172,8 @@ def run(
     Requirements (for real hardware inspection):
       - smartctl (install: apt-get install smartmontools)
       - dmidecode (install: apt-get install dmidecode)
+            - fio (install: apt-get install fio)
+            - sysbench (install: apt-get install sysbench)
       - root/sudo privileges
       - reportlab (optional, for PDF reports: pip install reportlab)
 
@@ -183,6 +186,9 @@ def run(
         artifacts/
           agent.log          # Detailed execution log
           smart_*.json       # Raw SMART data per device
+          battery.json       # Battery health details (when available)
+          disk_perf.json     # fio benchmark summary
+          cpu_bench.json     # sysbench benchmark summary
           memtest.log        # Memory test results [future]
           sensors.csv        # Temperature/fan data [future]
 
@@ -332,7 +338,114 @@ def run(
             smart_status = "sample"
             inspector_logger.info("Using sample SMART data (no real execution)")
 
-    inspector_logger.info("Step 3: Writing placeholder artifacts...")
+    # Scan battery health
+    inspector_logger.info("Step 3: Scanning battery health...")
+    battery_result = battery.scan_battery(use_sample=use_sample)
+    if battery_result["status"] == "ok":
+        battery_artifact = artifacts_dir / "battery.json"
+        battery_artifact.write_text(
+            json.dumps(battery_result["data"], indent=2), encoding="utf-8"
+        )
+        tests_list.append(
+            {
+                "name": "battery_health",
+                "status": "ok",
+                "data": battery_result["data"],
+                "status_detail": "sample" if use_sample else "executed",
+            }
+        )
+        inspector_logger.info(
+            "Battery OK: health=%s%% cycles=%s",
+            battery_result["data"].get("health_pct", "N/A"),
+            battery_result["data"].get("cycle_count", "N/A"),
+        )
+    elif battery_result["status"] == "missing":
+        tests_list.append(
+            {
+                "name": "battery_health",
+                "status": "missing",
+                "error": battery_result.get("error", "Battery not detected"),
+            }
+        )
+        inspector_logger.info("Battery not detected (desktop or unavailable)")
+    else:
+        tests_list.append(
+            {
+                "name": "battery_health",
+                "status": "error",
+                "error": battery_result.get("error", "Battery scan failed"),
+            }
+        )
+        inspector_logger.warning(
+            "Battery scan failed: %s", battery_result.get("error", "unknown")
+        )
+
+    # Run disk performance benchmark
+    inspector_logger.info("Step 4: Running disk performance benchmark...")
+    disk_result = disk_perf.scan_disk_performance(use_sample=use_sample)
+    if disk_result["status"] == "ok":
+        disk_artifact = artifacts_dir / "disk_perf.json"
+        disk_artifact.write_text(
+            json.dumps(disk_result["data"], indent=2), encoding="utf-8"
+        )
+        tests_list.append(
+            {
+                "name": "disk_performance",
+                "status": "ok",
+                "data": disk_result["data"],
+                "status_detail": "sample" if use_sample else "executed",
+            }
+        )
+        inspector_logger.info(
+            "Disk benchmark OK: read=%s MB/s write=%s MB/s",
+            disk_result["data"].get("read_mbps", "N/A"),
+            disk_result["data"].get("write_mbps", "N/A"),
+        )
+    else:
+        tests_list.append(
+            {
+                "name": "disk_performance",
+                "status": "error",
+                "error": disk_result.get("error", "Disk benchmark failed"),
+            }
+        )
+        inspector_logger.warning(
+            "Disk benchmark failed: %s", disk_result.get("error", "unknown")
+        )
+
+    # Run CPU benchmark
+    inspector_logger.info("Step 5: Running CPU benchmark...")
+    cpu_result = cpu_bench.scan_cpu_benchmark(use_sample=use_sample)
+    if cpu_result["status"] == "ok":
+        cpu_artifact = artifacts_dir / "cpu_bench.json"
+        cpu_artifact.write_text(
+            json.dumps(cpu_result["data"], indent=2), encoding="utf-8"
+        )
+        tests_list.append(
+            {
+                "name": "cpu_benchmark",
+                "status": "ok",
+                "data": cpu_result["data"],
+                "status_detail": "sample" if use_sample else "executed",
+            }
+        )
+        inspector_logger.info(
+            "CPU benchmark OK: events/s=%s",
+            cpu_result["data"].get("events_per_second", "N/A"),
+        )
+    else:
+        tests_list.append(
+            {
+                "name": "cpu_benchmark",
+                "status": "error",
+                "error": cpu_result.get("error", "CPU benchmark failed"),
+            }
+        )
+        inspector_logger.warning(
+            "CPU benchmark failed: %s", cpu_result.get("error", "unknown")
+        )
+
+    inspector_logger.info("Step 6: Writing placeholder artifacts...")
 
     # Write placeholder memtester log and sensors CSV
     (artifacts_dir / "memtest.log").write_text(
@@ -342,7 +455,7 @@ def run(
         "timestamp,cpu_temp,fan_rpm\n", encoding="utf-8"
     )
 
-    inspector_logger.info("Step 4: Generating report...")
+    inspector_logger.info("Step 7: Generating report...")
     report = compose_report(
         agent_version=__version__,
         device=device_info,
@@ -368,7 +481,7 @@ def run(
     )
 
     # Generate human-readable report(s)
-    inspector_logger.info("Step 5: Generating human-readable report(s)...")
+    inspector_logger.info("Step 8: Generating human-readable report(s)...")
     report_to_open = None
 
     # Determine if auto-open should be enabled

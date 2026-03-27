@@ -15,7 +15,7 @@ from . import scoring
 
 
 def _now_iso() -> str:
-    return datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    return datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat()
 
 
 def compose_report(
@@ -65,33 +65,46 @@ def compose_report(
 
     # Simple scoring heuristics based on tests
     storage_score = 50  # Default
+    battery_score = scoring.score_battery({})
+    cpu_score = scoring.score_cpu_thermal({})
     if tests:
         # Check for SMART test results
         smart_tests = [t for t in tests if t.get("name", "").startswith("smartctl")]
         if smart_tests:
-            # If we have successful SMART results, score higher
             ok_tests = [t for t in smart_tests if t.get("status") == "ok"]
             if ok_tests:
-                storage_score = 80
-                # Check for warning signs in SMART data
-                for test in ok_tests:
-                    data = test.get("data", {})
-                    attrs = data.get("attributes", {})
-                    # Check for reallocated sectors
-                    if "Reallocated_Sector_Ct" in attrs:
-                        if attrs["Reallocated_Sector_Ct"] > 10:
-                            storage_score = 40  # Failing drive
-                        elif attrs["Reallocated_Sector_Ct"] > 0:
-                            storage_score = 60  # Warning
+                smart_score = min(
+                    scoring.score_storage(test.get("data", {})) for test in ok_tests
+                )
+                storage_score = smart_score
+
+        disk_tests = [t for t in tests if t.get("name") == "disk_performance"]
+        if disk_tests and disk_tests[0].get("status") == "ok":
+            disk_score = scoring.score_disk_performance(disk_tests[0].get("data", {}))
+            # Blend SMART health and measured throughput for storage score.
+            storage_score = int(round(storage_score * 0.7 + disk_score * 0.3))
+
+        battery_tests = [t for t in tests if t.get("name") == "battery_health"]
+        if battery_tests:
+            battery_test = battery_tests[0]
+            if battery_test.get("status") == "ok":
+                battery_score = scoring.score_battery(battery_test.get("data", {}))
+            elif battery_test.get("status") == "missing":
+                # Desktops/no-battery devices should not be penalized.
+                battery_score = 100
+
+        cpu_tests = [t for t in tests if t.get("name") == "cpu_benchmark"]
+        if cpu_tests and cpu_tests[0].get("status") == "ok":
+            cpu_score = scoring.score_cpu_thermal(cpu_tests[0].get("data", {}))
 
     report["scores"] = {
         "storage": storage_score,
-        "battery": 80,
-        "memory": 90,
-        "cpu_thermal": 85,
-        "gpu": 85,
-        "network": 90,
-        "security": 75,
+        "battery": battery_score,
+        "memory": scoring.score_memory({}),
+        "cpu_thermal": cpu_score,
+        "gpu": scoring.score_gpu({}),
+        "network": scoring.score_network({}),
+        "security": scoring.score_security({}),
     }
 
     # Compute overall score using profile weights

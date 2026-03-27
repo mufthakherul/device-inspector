@@ -1,9 +1,9 @@
 # ROADMAP — device-inspector (inspecta)
 
-**Last updated:** 2026-03-26  
-**Status:** Phase 1 in progress — Sprints 0, 1, and 2 infrastructure COMPLETE ✅; Sprint 2 features are the immediate next priority. Native helper scaffolding added to enable a minimal polyglot stack (Python orchestrator + Rust native helper + TypeScript UI/backend) instead of a Python-only approach.
+**Last updated:** 2026-03-27  
+**Status:** Phase 1 in progress — Sprints 0, 1, and 2 infrastructure COMPLETE ✅; Sprint 2 feature work is nearing completion with Linux battery, disk benchmark, and CPU benchmark integrated. Native helper scaffolding keeps the stack minimal polyglot (Python orchestrator + Rust native helper + TypeScript UI/backend).
 
-> **📊 Progress Update (2026-03-26):** Sprint 0 ✅ (scaffold & docs). Sprint 1 ✅ (inventory, SMART execution, error handling — 22 tests passing). Sprint 2 infrastructure ✅ (pytest-cov coverage reporting, Bandit/Safety security scanning, Dependabot, multi-version CI matrix, standalone PyInstaller packaging for Windows/macOS/Linux). Native helper scaffolding ✅ (Rust `inspecta-native` handshake + Python detection) to move off a single-language posture while keeping languages minimal. Project is now at **~65% of Phase 1**. Next up: Sprint 2 feature work — disk performance (fio/Rust helper), battery health (upower), CPU benchmark (sysbench), and complete scoring engine.
+> **📊 Progress Update (2026-03-27):** Sprint 0 ✅ (scaffold & docs). Sprint 1 ✅ (inventory, SMART execution, error handling). Sprint 2 infrastructure ✅ (pytest-cov coverage reporting, Bandit/Safety security scanning, Dependabot, multi-version CI matrix, standalone PyInstaller packaging for Windows/macOS/Linux). Sprint 2 features are now substantially complete: Linux battery health via `upower`, disk benchmarking via `fio`, and CPU benchmarking via `sysbench` are integrated into runtime/reporting/scoring, with test suite at **67 passing tests** and **54.82% coverage**. Project is now at **~80% of Phase 1**. Next up: Windows battery (`powercfg`) support and coverage lift to the 60% target.
 
 This roadmap is the authoritative, actionable plan for building the device-inspector (inspecta) project. It converts the Project Goal and high-level strategy into a time-boxed implementation plan: phases, sprints, milestones, deliverables, acceptance criteria, owners, risks and mitigations, metrics, and operational playbooks for pilot and launch.
 
@@ -129,32 +129,36 @@ Goal: Establish enterprise-grade CI/CD, security scanning, coverage reporting, a
 Sprint 2 — Features: disk perf, battery, CPU bench, scoring 🟡 **IN PROGRESS**
 Goal: Expand agent with disk performance testing (fio), battery health detection, CPU benchmarking, and a complete scoring engine.
 
-**Status:** 🟡 Partially Complete (2026-03-26) — Scoring engine complete; hardware features pending
+**Status:** 🟡 Partially Complete (2026-03-27) — Scoring engine complete; Linux battery, fio disk benchmark, and sysbench CPU benchmark integrated; Windows battery support pending
 
 **What's Done:**
 - ✅ Complete scoring engine with all category weights (storage, battery, memory, cpu_thermal, gpu, network, security)
 - ✅ Profile-based recommendations (Office, Developer, Gamer, Server, default) with weighted scoring
-- ✅ Expand test suite to 46 tests (target: 35+)
-- ✅ Increase test coverage to 43.58% (baseline was 40%, target: 60%)
+- ✅ Expand test suite to 67 tests (target: 35+)
+- ✅ Increase test coverage to 54.82% (baseline was 40%, target: 60%)
 - ✅ Fix CI workflow Black formatting issues
 - ✅ Add Rust native helper handshake + Python detection to enable polyglot extensions
+- ✅ Add Linux battery health parser via `upower` (health %, cycle count, capacity fields)
+- ✅ Integrate battery scan into `inspecta run` and include `battery.json` artifact + `battery_health` test entry
+- ✅ Wire battery-aware score calculation into `report.json` composition (including no-battery handling)
+- ✅ Implement fio wrapper for disk performance and integrate into `inspecta run` + report scoring
+- ✅ Implement sysbench wrapper for CPU benchmarking and integrate into `inspecta run` + report scoring
+- ✅ Add automated tests for battery/disk/CPU plugins and report score composition integration
 
 **In Progress:**
-- 🔲 Implement fio wrapper for disk performance (128MB quick tests) using Rust helper where available, Python fallback otherwise
-- 🔲 Add battery health parser (upower for Linux, powercfg for Windows)
-- 🔲 Implement sysbench wrapper for CPU benchmarking with option to reuse Rust helper for microbenchmarks
+- 🟡 Extend battery health parser with Windows `powercfg` implementation
 
 Acceptance criteria
-- ✅ Code coverage ≥35% reported in CI (currently 43.58%)
+- ✅ Code coverage ≥35% reported in CI (currently 54.82%)
 - ✅ Profile recommendations working (e.g., "Suitable for Office work")
-- ✅ 35+ unit tests passing in CI (currently 46 tests)
+- ✅ 35+ unit tests passing in CI (currently 67 tests)
 - ✅ Complete scoring engine with all category weights
 - ✅ Native helper handshake available and harmless when absent (polyglot-ready stack)
-- 🔲 report.json validates against schemas/report-schema-1.0.0.json (needs testing)
+- ✅ report.json validates against schemas/report-schema-1.0.0.json
 - 🔲 Code coverage ≥60% reported in CI (stretch goal)
-- 🔲 `inspecta run` includes disk read/write speeds in report
-- 🔲 Battery capacity and cycle count detected and scored
-- 🔲 CPU benchmark score included in report
+- ✅ `inspecta run` includes disk read/write speeds in report
+- ✅ Battery capacity and cycle count detected and scored (Linux / `upower`)
+- ✅ CPU benchmark score included in report
 
 Sprint 3 — Memtester quick-mode, sensors snapshot, thermal smoke (2025-12-01 → 2025-12-14)
 Goal: Memory quick smoke test, sensors snapshot, short thermal stress and throttle detection.
