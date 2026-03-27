@@ -2,13 +2,17 @@
 """Battery detection and health parsing helpers.
 
 Linux implementation uses upower to detect batteries and read health metrics.
+Windows implementation uses powercfg to generate and parse battery reports.
 """
 
 from __future__ import annotations
 
 import logging
+import platform
 import re
 import subprocess
+import tempfile
+import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
 logger = logging.getLogger("inspecta.battery")
@@ -41,6 +45,30 @@ _SAMPLE_UPOWER = """\
     charge-cycles:       251
     percentage:          97%
     capacity:            82.63%
+"""
+
+_SAMPLE_POWERCFG = """\
+<?xml version="1.0" encoding="utf-8"?>
+<BatteryReport>
+  <ReportGeneratorVersion>2.3</ReportGeneratorVersion>
+  <BatteryInformation>
+    <BatteryName>Microsoft AC Adapter</BatteryName>
+    <ManufacturerName>Microsoft</ManufacturerName>
+    <SerialNumber>123456789</SerialNumber>
+    <ChemistryFull>LION</ChemistryFull>
+    <Voltage>12000</Voltage>
+    <CycleCount>251</CycleCount>
+    <StatusDescription>Charging</StatusDescription>
+  </BatteryInformation>
+  <RecentUsage>
+    <Usage>
+      <Time>2026-03-27T10:30:00</Time>
+      <ChargePercent>97</ChargePercent>
+    </Usage>
+  </RecentUsage>
+  <DesignCapacity>57000</DesignCapacity>
+  <FullChargeCapacity>47100</FullChargeCapacity>
+</BatteryReport>
 """
 
 
@@ -100,6 +128,64 @@ def parse_upower_output(output: str) -> Dict[str, Any]:
     return result
 
 
+def parse_powercfg_report(xml_text: str) -> Dict[str, Any]:
+    """Parse Windows powercfg /batteryreport XML into normalized fields.
+
+    Args:
+        xml_text: Raw XML output from powercfg /batteryreport
+
+    Returns:
+        Dictionary with battery metrics normalized to match upower format.
+
+    Raises:
+        BatteryError: If XML parsing fails or required elements are missing.
+    """
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError as exc:
+        raise BatteryError(f"Failed to parse powercfg XML: {exc}") from exc
+
+    # Helper to extract text from XML element by path
+    def get_text(path: str) -> Optional[str]:
+        elem = root.find(path)
+        return elem.text if elem is not None else None
+
+    def get_int(path: str) -> Optional[int]:
+        text = get_text(path)
+        if text is None:
+            return None
+        try:
+            return int(text)
+        except ValueError:
+            return None
+
+    battery_info = root.find(".//BatteryInformation")
+    if battery_info is None:
+        raise BatteryError("No BatteryInformation element in powercfg report")
+
+    design_capacity = get_int(".//DesignCapacity")
+    full_capacity = get_int(".//FullChargeCapacity")
+
+    # Calculate health percentage from capacities (mWh in powercfg)
+    health_pct = None
+    if full_capacity is not None and design_capacity and design_capacity > 0:
+        health_pct = int(round((full_capacity / design_capacity) * 100))
+        # Clamp to 0-100 range
+        health_pct = max(0, min(100, health_pct))
+
+    return {
+        "present": True,
+        "state": get_text(".//StatusDescription") or "unknown",
+        "percentage": None,  # Not readily available in simplified powercfg
+        "health_pct": health_pct,
+        "cycle_count": get_int(".//CycleCount"),
+        "design_capacity_mwh": design_capacity,
+        "full_capacity_mwh": full_capacity,
+        "vendor": get_text(".//ManufacturerName"),
+        "model": get_text(".//BatteryName"),
+    }
+
+
 def _detect_battery_path() -> str:
     """Detect the first battery device path using `upower -e`."""
     try:
@@ -157,21 +243,100 @@ def execute_upower(use_sample: bool = False) -> Dict[str, Any]:
     return {"status": "ok", "data": parsed, "raw_text": result.stdout}
 
 
+def execute_powercfg(use_sample: bool = False) -> Dict[str, Any]:
+    """Execute powercfg on Windows and return parsed battery data.
+
+    Args:
+        use_sample: If True, return sample battery data without calling powercfg.
+
+    Returns:
+        Dictionary with status, data, and raw XML text.
+
+    Raises:
+        BatteryError: If powercfg fails or XML parsing fails.
+    """
+    if use_sample:
+        parsed = parse_powercfg_report(_SAMPLE_POWERCFG)
+        parsed["device"] = "battery_ACPI"
+        return {"status": "ok", "data": parsed, "raw_text": _SAMPLE_POWERCFG}
+
+    with tempfile.NamedTemporaryFile(suffix=".xml", delete=False) as tmp:
+        report_path = tmp.name
+
+    try:
+        result = subprocess.run(
+            ["powercfg", "/batteryreport", f"/output:{report_path}"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+
+        if result.returncode != 0:
+            stderr = result.stderr.strip()
+            if "no battery" in stderr.lower():
+                raise BatteryError(f"No battery detected: {stderr}")
+            raise BatteryError(f"powercfg failed: {stderr}")
+
+        with open(report_path, "r", encoding="utf-8") as f:
+            xml_text = f.read()
+
+        parsed = parse_powercfg_report(xml_text)
+        parsed["device"] = "battery_ACPI"
+        return {"status": "ok", "data": parsed, "raw_text": xml_text}
+
+    except subprocess.TimeoutExpired as exc:
+        raise BatteryError("powercfg timed out after 15 seconds") from exc
+    except FileNotFoundError as exc:
+        raise BatteryError("powercfg not available (Windows only)") from exc
+    except OSError as exc:
+        raise BatteryError(f"Failed to read powercfg report: {exc}") from exc
+
+
 def scan_battery(use_sample: bool = False) -> Dict[str, Any]:
     """Scan battery health and return a structured result.
 
-    Returns:
-        Dictionary with status ('ok', 'missing', 'error') and optional data.
-    """
-    try:
-        result = execute_upower(use_sample=use_sample)
-        logger.info("Battery data collected (device=%s)", result["data"].get("device"))
-        return result
-    except BatteryError as exc:
-        message = str(exc)
-        if "No battery device detected" in message:
-            logger.info("Battery scan not applicable: %s", message)
-            return {"status": "missing", "error": message}
+    Detects OS and uses upower (Linux/Unix) or powercfg (Windows).
 
-        logger.warning("Battery scan failed: %s", message)
-        return {"status": "error", "error": message}
+    Args:
+        use_sample: If True, use sample data instead of executing tools.
+
+    Returns:
+        Dictionary with keys:
+        - status: 'ok', 'missing', or 'error'
+        - data: Battery metrics dict (when status == 'ok')
+        - error: Error message string (when status != 'ok')
+    """
+    system = platform.system()
+
+    if system == "Windows":
+        try:
+            result = execute_powercfg(use_sample=use_sample)
+            logger.info(
+                "Battery data collected from powercfg (device=%s)",
+                result["data"].get("device"),
+            )
+            return result
+        except BatteryError as exc:
+            message = str(exc)
+            if "no battery" in message.lower():
+                logger.info("Battery scan not applicable: %s", message)
+                return {"status": "missing", "error": message}
+            logger.warning("Battery scan failed: %s", message)
+            return {"status": "error", "error": message}
+    else:
+        # Linux and other Unix-like systems (macOS, etc.) use upower
+        try:
+            result = execute_upower(use_sample=use_sample)
+            logger.info(
+                "Battery data collected from upower (device=%s)",
+                result["data"].get("device"),
+            )
+            return result
+        except BatteryError as exc:
+            message = str(exc)
+            if "No battery device detected" in message:
+                logger.info("Battery scan not applicable: %s", message)
+                return {"status": "missing", "error": message}
+            logger.warning("Battery scan failed: %s", message)
+            return {"status": "error", "error": message}
