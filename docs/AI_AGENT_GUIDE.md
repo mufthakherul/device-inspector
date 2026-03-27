@@ -5,11 +5,11 @@ Use this guide when coding directly or through AI assistants (Copilot, GPT, Clau
 ## Core Principles
 - Ship auditable diagnostics: every result should be backed by artifacts (logs/JSON) and transparent scoring.
 - Respect the stack: Python 3.11+; Black/ruff/isort styling; pytest for tests; click CLI.
-- Prefer small, reviewable changes; explain intent and risk in PR descriptions.
+- Prefer reviewable changes; explain intent and risk in PR descriptions.
 - Keep the repo clean: archive replaced/outdated files under `archives/` with a short README noting why they moved.
 
 ## Working Style
-- Plan first: outline the change, risks, and test plan before coding. Keep scope minimal but complete.
+- Plan first: outline the change, risks, and test plan before coding. Keep scope as needed but complete.
 - Read existing code before adding new patterns; reuse helpers in `agent/` and `agent/plugins/`.
 - Make behavior obvious: fail fast with clear errors; log to `artifacts/agent.log` for CLI flows.
 - Avoid speculative features; align with Roadmap and existing interfaces.
