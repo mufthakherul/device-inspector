@@ -15,7 +15,7 @@ import click
 
 from . import __version__, native_bridge
 from .logging_utils import setup_logging
-from .plugins import battery, cpu_bench, disk_perf, inventory, smart
+from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .report import compose_report
 from .report_formatter import generate_pdf_report, generate_txt_report, open_file
 
@@ -445,17 +445,156 @@ def run(
             "CPU benchmark failed: %s", cpu_result.get("error", "unknown")
         )
 
-    inspector_logger.info("Step 6: Writing placeholder artifacts...")
+    inspector_logger.info("Step 6: Running memory test...")
+    memtest_result = memtest.scan_memory(use_sample=use_sample)
+    if memtest_result["status"] == "ok":
+        # Write memtest log artifact
+        memtest_artifact = artifacts_dir / "memtest.log"
+        memtest_artifact.write_text(
+            memtest_result.get("raw_text", "OK\n"), encoding="utf-8"
+        )
+        tests_list.append(
+            {
+                "name": "memory_test",
+                "status": "ok",
+                "data": memtest_result["data"],
+                "status_detail": "sample" if use_sample else "executed",
+            }
+        )
+        inspector_logger.info(
+            "Memory test OK: result=%s", memtest_result["data"].get("result", "PASS")
+        )
+    elif memtest_result["status"] == "skip":
+        # Write placeholder when memtester not available
+        (artifacts_dir / "memtest.log").write_text(
+            "Memtester not available\n", encoding="utf-8"
+        )
+        tests_list.append(
+            {
+                "name": "memory_test",
+                "status": "skip",
+                "reason": memtest_result.get("reason", "memtester not available"),
+            }
+        )
+        inspector_logger.info("Memory test skipped: %s", memtest_result.get("reason"))
+    else:
+        (artifacts_dir / "memtest.log").write_text(
+            f"Error: {memtest_result.get('error', 'unknown')}\n", encoding="utf-8"
+        )
+        tests_list.append(
+            {
+                "name": "memory_test",
+                "status": "error",
+                "error": memtest_result.get("error", "Memory test failed"),
+            }
+        )
+        inspector_logger.warning(
+            "Memory test failed: %s", memtest_result.get("error", "unknown")
+        )
 
-    # Write placeholder memtester log and sensors CSV
-    (artifacts_dir / "memtest.log").write_text(
-        "Memtester placeholder\nOK\n", encoding="utf-8"
-    )
-    (artifacts_dir / "sensors.csv").write_text(
-        "timestamp,cpu_temp,fan_rpm\n", encoding="utf-8"
-    )
+    inspector_logger.info("Step 7: Collecting thermal sensors snapshot...")
+    try:
+        sensors_result = (
+            sensors.get_sensors_snapshot()
+            if not use_sample
+            else {
+                "status": "ok",
+                "platform": "linux",
+                "tool": "lm-sensors",
+                "sensors": [
+                    {
+                        "adapter": "coretemp-isa-0000",
+                        "type": "CPU",
+                        "readings": [
+                            {
+                                "label": "Package id 0",
+                                "temp": 45.0,
+                                "high": 100.0,
+                                "crit": 100.0,
+                            },
+                            {
+                                "label": "Core 0",
+                                "temp": 42.0,
+                                "high": 100.0,
+                                "crit": 100.0,
+                            },
+                            {
+                                "label": "Core 1",
+                                "temp": 44.0,
+                                "high": 100.0,
+                                "crit": 100.0,
+                            },
+                        ],
+                    }
+                ],
+                "max_temp": 45.0,
+                "avg_temp": 43.7,
+                "critical_temps": [],
+            }
+        )
+    except sensors.SensorError as e:
+        # Sensors not available - create empty result
+        sensors_result = {"sensors": []}
+        inspector_logger.info("Thermal sensors not available: %s", str(e))
 
-    inspector_logger.info("Step 7: Generating report...")
+    try:
+        # Write sensors CSV artifact
+        sensors_csv = artifacts_dir / "sensors.csv"
+        csv_lines = ["timestamp,sensor,temp_c"]
+
+        if use_sample or sensors_result.get("sensors"):
+            import time
+
+            timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            for sensor in sensors_result.get("sensors", []):
+                for reading in sensor.get("readings", []):
+                    csv_lines.append(
+                        f"{timestamp},{reading['label']},{reading['temp']}"
+                    )
+
+        sensors_csv.write_text("\n".join(csv_lines) + "\n", encoding="utf-8")
+
+        if sensors_result.get("max_temp"):
+            tests_list.append(
+                {
+                    "name": "thermal_snapshot",
+                    "status": "ok",
+                    "data": {
+                        "max_temp": sensors_result["max_temp"],
+                        "avg_temp": sensors_result.get("avg_temp"),
+                        "critical": len(sensors_result.get("critical_temps", [])) > 0,
+                    },
+                    "status_detail": "sample" if use_sample else "executed",
+                }
+            )
+            inspector_logger.info(
+                "Thermal snapshot OK: max=%.1f°C, avg=%.1f°C",
+                sensors_result["max_temp"],
+                sensors_result.get("avg_temp", 0),
+            )
+        else:
+            tests_list.append(
+                {
+                    "name": "thermal_snapshot",
+                    "status": "skip",
+                    "reason": "No thermal sensors available",
+                }
+            )
+            inspector_logger.info("Thermal snapshot: No sensors available")
+    except Exception as e:
+        (artifacts_dir / "sensors.csv").write_text(
+            "timestamp,sensor,temp_c\n", encoding="utf-8"
+        )
+        tests_list.append(
+            {
+                "name": "thermal_snapshot",
+                "status": "error",
+                "error": str(e),
+            }
+        )
+        inspector_logger.warning("Thermal snapshot failed: %s", str(e))
+
+    inspector_logger.info("Step 8: Generating report...")
     report = compose_report(
         agent_version=__version__,
         device=device_info,
@@ -481,7 +620,7 @@ def run(
     )
 
     # Generate human-readable report(s)
-    inspector_logger.info("Step 8: Generating human-readable report(s)...")
+    inspector_logger.info("Step 9: Generating human-readable report(s)...")
     report_to_open = None
 
     # Determine if auto-open should be enabled

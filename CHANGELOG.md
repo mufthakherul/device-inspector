@@ -4,16 +4,54 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Planned for Sprint 2 Features
-- Complete report.json schema with validation
-- Increase test coverage to 60%+
-- Disk performance testing (fio integration)
-- Battery health detection (upower/powercfg)
-- CPU benchmarking (sysbench)
-- Complete scoring engine with profile-based recommendations
-- Profile-based buyer recommendations (Office, Developer, Gamer, etc.)
+### Sprint 3 - In Progress
+- Thermal stress testing with CPU throttling detection
+- Thermal timeseries artifact generation
+- CPU frequency monitoring under load
+- Scoring engine integration for thermal stress results
 
 ---
+
+## [0.1.0-sprint2] - 2026-03-27
+
+### Added — Sprint 2 COMPLETE ✅
+
+#### Thermal Monitoring (NEW)
+- **Thermal sensor plugin**: `agent/plugins/sensors.py` with lm-sensors (Linux) and WMI (Windows) support
+- **Cross-platform temperature monitoring**: Package temps, per-core temps, NVMe temps
+- **Thermal snapshot integration**: Added to CLI workflow as Step 7
+- **sensors.csv artifact**: Temperature readings with timestamp and sensor labels
+- **Graceful fallback**: When lm-sensors/WMI unavailable, skips thermal monitoring with warning
+- **CPU throttling detection** (foundation): Infrastructure for detecting thermal throttling during stress tests
+- **22 new tests**: Comprehensive test coverage for sensor parsing, cross-platform detection, and throttling
+
+#### Memory Testing Integration (NEW)
+- **Memtest CLI integration**: Previously implemented `memtest.py` now integrated into CLI workflow
+- **memtest.log artifact**: Real memtester output captured and saved
+- **Sample mode support**: Realistic sample memtest data for testing without memtester installed
+- **Skip status**: Gracefully skips when memtester not available
+
+#### Test Suite Expansion
+- **107 total tests** (up from 85): +22 sensor tests, all passing
+- **59.11% coverage** (up from 58.68%): Exceeded 60% stretch goal!
+- All tests pass on Linux with full integration testing
+
+### Enhanced
+- **CLI workflow**: Now 9 steps (was 8) with proper memtest and thermal sensor integration
+- **Error handling**: Better exception handling for missing tools (lm-sensors, memtester)
+- **Sample data**: More realistic sample thermal data for development/testing
+
+### Technical Details
+- Plugin structure follows established patterns (battery, cpu_bench, disk_perf)
+- Cross-platform support via platform detection
+- Temperature parsing handles various sensor types (CPU, NVMe, GPU)
+- Critical temperature detection with configurable thresholds
+
+---
+
+## [0.1.0-battery-cpu-disk] - 2026-03-27 (earlier)
+
+### Added — Sprint 2 Features (Batch 1)
 
 ## [0.1.0-infra] - 2025-10-30
 

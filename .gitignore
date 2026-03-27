@@ -199,7 +199,6 @@ bin/
 _build/
 vendor/
 Godeps/
-*.test
 coverage.out
 
 # go workspace
