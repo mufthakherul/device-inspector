@@ -140,7 +140,7 @@ def execute_macos_battery(use_sample: bool = False) -> Dict[str, Any]:
         "status": "ok",
         "data": parsed,
         "raw_text": (
-            f"{pmset_result.stdout}\n" f"{(profiler_data and 'system_profiler') or ''}"
+            f"{pmset_result.stdout}\n{(profiler_data and 'system_profiler') or ''}"
         ),
     }
 

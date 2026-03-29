@@ -33,6 +33,14 @@ def test_run_full_mode_executes_pipeline(tmp_path):
 
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["mode"] == "full"
+    assert "run_metadata" in report
+    assert report["evidence"]["manifest_path"] == "artifacts/manifest.json"
+    assert "report.json" in {
+        e.get("path")
+        for e in json.loads(
+            (out_dir / "artifacts" / "manifest.json").read_text(encoding="utf-8")
+        ).get("entries", [])
+    }
 
     test_names = {t.get("name") for t in report.get("tests", [])}
     assert "thermal_stress" in test_names

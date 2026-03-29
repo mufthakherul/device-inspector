@@ -408,7 +408,7 @@ def get_sensors_snapshot_linux() -> Dict[str, Any]:
     """Get thermal snapshot using lm-sensors on Linux."""
     if not has_lm_sensors():
         raise SensorError(
-            "lm-sensors not available " f"({linux_env.tool_install_hint('sensors')})"
+            f"lm-sensors not available ({linux_env.tool_install_hint('sensors')})"
         )
 
     try:

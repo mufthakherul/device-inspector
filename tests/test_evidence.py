@@ -33,6 +33,8 @@ def test_write_and_verify_evidence_manifest(tmp_path: Path):
     result = verify_evidence_manifest(out, rel)
     assert result["ok"] is True
     assert result["checked"] == 2
+    assert result["exit_code"] == 0
+    assert result["exit_reason"] == "verified"
 
 
 def test_verify_manifest_detects_tampering(tmp_path: Path):
@@ -55,3 +57,14 @@ def test_verify_manifest_detects_tampering(tmp_path: Path):
     assert result["ok"] is False
     assert result["checked"] == 1
     assert result["mismatches"][0]["reason"] == "hash mismatch"
+    assert result["exit_code"] == 1
+    assert result["exit_reason"] == "integrity_mismatch"
+
+
+def test_verify_manifest_missing_file_taxonomy(tmp_path: Path):
+    out = tmp_path
+    result = verify_evidence_manifest(out, "artifacts/manifest.json")
+
+    assert result["ok"] is False
+    assert result["exit_code"] == 2
+    assert result["exit_reason"] == "manifest_not_found"

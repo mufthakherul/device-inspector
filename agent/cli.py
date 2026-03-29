@@ -7,14 +7,18 @@ report.json and placeholder artifacts. Designed for tests and developer runs.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
+import platform as os_platform
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 import click
 
 from . import __version__, native_bridge
-from .evidence import verify_evidence_manifest, write_evidence_manifest
+from .evidence import EvidenceError, verify_evidence_manifest, write_evidence_manifest
 from .logging_utils import setup_logging
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .profiles import get_profile, is_valid_profile
@@ -187,6 +191,11 @@ def inventory_cmd(use_sample: bool) -> None:
         "without actually running diagnostics"
     ),
 )
+@click.option(
+    "--sign-key",
+    default=None,
+    help=("Optional path to Ed25519 private key (PEM) for detached manifest signing."),
+)
 def run(
     mode: str,
     output: Path,
@@ -203,6 +212,7 @@ def run(
     modes_profile: str,
     timeout: int | None,
     dry_run: bool,
+    sign_key: str | None,
 ) -> None:
     """Run a complete device inspection and generate report.
 
@@ -259,6 +269,8 @@ def run(
     Note: 'full' mode currently runs an enhanced comprehensive pipeline
     that builds on quick mode with thermal stress enabled by default.
     """
+    run_started_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts_dir = out_dir / "artifacts"
@@ -1046,22 +1058,91 @@ def run(
         if extra.exists() and extra.is_file():
             evidence_candidates.append(str(extra.relative_to(out_dir)))
 
-    manifest_rel_path, manifest_sha256 = write_evidence_manifest(
-        output_dir=out_dir,
-        relative_paths=evidence_candidates,
-        agent_version=__version__,
+    # Sprint 6 policy: always include report.json in manifest coverage.
+    evidence_candidates.append("report.json")
+
+    # Immutable run metadata for forensic reproducibility.
+    def _tool_version(tool: str, args: list[str] | None = None) -> str | None:
+        command = [tool] + (args or ["--version"])
+        try:
+            res = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+            return None
+
+        text = (res.stdout or "").strip() or (res.stderr or "").strip()
+        if not text:
+            return None
+        return text.splitlines()[0][:200]
+
+    os_fingerprint_source = "|".join(
+        [
+            os_platform.system(),
+            os_platform.release(),
+            os_platform.version(),
+            os_platform.machine(),
+            os_platform.processor() or "",
+        ]
     )
+
+    run_finished_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+    run_metadata = {
+        "started_at": run_started_at,
+        "completed_at": run_finished_at,
+        "python_version": os_platform.python_version(),
+        "platform": os_platform.platform(),
+        "os_fingerprint_sha256": hashlib.sha256(
+            os_fingerprint_source.encode("utf-8")
+        ).hexdigest(),
+        "tool_versions": {
+            "smartctl": _tool_version("smartctl"),
+            "fio": _tool_version("fio"),
+            "sysbench": _tool_version("sysbench"),
+            "memtester": _tool_version("memtester"),
+            "sensors": _tool_version("sensors"),
+            "powercfg": _tool_version("powercfg", ["/?"]),
+            "winsat": _tool_version("winsat", ["/?"]),
+        },
+    }
+
+    sign_key_path = Path(sign_key) if sign_key else None
+
+    # Finalize report metadata before manifest creation so report.json hash is stable.
+    if "artifacts/manifest.json" not in report.get("artifacts", []):
+        report.setdefault("artifacts", []).append("artifacts/manifest.json")
+
+    report.setdefault("evidence", {})
+    report["evidence"]["manifest_sha256"] = None
+    report["evidence"]["manifest_path"] = "artifacts/manifest.json"
+    report["evidence"]["signed"] = bool(sign_key_path)
+    report["run_metadata"] = run_metadata
+
+    with open(report_path, "w", encoding="utf-8") as fh:
+        json.dump(report, fh, indent=2)
+
+    try:
+        manifest_rel_path, manifest_sha256 = write_evidence_manifest(
+            output_dir=out_dir,
+            relative_paths=evidence_candidates,
+            agent_version=__version__,
+            run_metadata=run_metadata,
+            sign_key_path=sign_key_path,
+        )
+    except EvidenceError as exc:
+        inspector_logger.error("Evidence manifest signing failed: %s", exc)
+        raise SystemExit(20)
 
     if manifest_rel_path not in report["artifacts"]:
         report["artifacts"].append(manifest_rel_path)
 
-    report.setdefault("evidence", {})
-    report["evidence"]["manifest_sha256"] = manifest_sha256
-    report["evidence"]["manifest_path"] = manifest_rel_path
-    report["evidence"]["signed"] = False
-
-    with open(report_path, "w", encoding="utf-8") as fh:
-        json.dump(report, fh, indent=2)
+    # Do not rewrite report after manifest generation to preserve report.json hash
+    # when report.json is included in manifest coverage policy.
 
     inspector_logger.info(
         "Evidence manifest written: %s (sha256=%s)",
@@ -1142,7 +1223,17 @@ def report_cmd(report_file: Path, open_report: bool, report_format: str) -> None
     is_flag=True,
     help="Output results as JSON instead of human-readable format.",
 )
-def verify_cmd(bundle_dir: Path, manifest: str, as_json: bool) -> None:
+@click.option(
+    "--public-key",
+    default=None,
+    help="Optional Ed25519 public key (PEM) for signed manifest verification.",
+)
+def verify_cmd(
+    bundle_dir: Path,
+    manifest: str,
+    as_json: bool,
+    public_key: str | None,
+) -> None:
     """Verify evidence integrity of a report bundle.
 
     Validates SHA256 hashes stored in the manifest against actual files.
@@ -1162,7 +1253,11 @@ def verify_cmd(bundle_dir: Path, manifest: str, as_json: bool) -> None:
     if not bundle_dir.is_dir():
         raise click.BadParameter(f"Bundle directory not found: {bundle_dir}")
 
-    result = verify_evidence_manifest(bundle_dir, manifest)
+    result = verify_evidence_manifest(
+        bundle_dir,
+        manifest,
+        public_key_path=Path(public_key) if public_key else None,
+    )
 
     if as_json:
         click.echo(json.dumps(result, indent=2, default=str))
@@ -1171,6 +1266,10 @@ def verify_cmd(bundle_dir: Path, manifest: str, as_json: bool) -> None:
         click.echo(f"Manifest:          {manifest}")
         click.echo(f"Files checked:     {result.get('checked', 0)}")
         click.echo(f"Integrity status:  {'✓ OK' if result.get('ok') else '✗ FAILED'}")
+        click.echo(
+            "Result code:       "
+            f"{result.get('exit_code')} ({result.get('exit_reason')})"
+        )
 
         if result.get("mismatches"):
             click.echo("\n⚠ Integrity Issues:")
@@ -1188,8 +1287,7 @@ def verify_cmd(bundle_dir: Path, manifest: str, as_json: bool) -> None:
                 click.echo(f"  - {missing}")
 
     # Exit code based on integrity status
-    integrity_ok = result.get("ok", False)
-    raise SystemExit(0 if integrity_ok else 1)
+    raise SystemExit(int(result.get("exit_code", 1)))
 
 
 # ============================================================================
