@@ -46,7 +46,9 @@ def fetch_latest_release(owner: str, repo: str, token: str | None = None) -> dic
         headers["Authorization"] = f"Bearer {token}"
 
     request = Request(url, headers=headers)
-    with urlopen(request, timeout=30) as response:  # nosec B310 (trusted GitHub API endpoint)
+    with urlopen(
+        request, timeout=30
+    ) as response:  # nosec B310 (trusted GitHub API endpoint)
         return json.loads(response.read().decode("utf-8"))
 
 

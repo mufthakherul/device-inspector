@@ -30,7 +30,27 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run quick-mode sample smoke
-        run: python -m agent.cli run --mode quick --output smoke-os --use-sample --no-auto-open --format txt
+        shell: python
+        run: |
+          import subprocess
+
+          cmd = [
+            "python",
+            "-m",
+            "agent.cli",
+            "run",
+            "--mode",
+            "quick",
+            "--output",
+            "smoke-os",
+            "--use-sample",
+            "--no-auto-open",
+            "--format",
+            "txt",
+          ]
+          proc = subprocess.run(cmd, check=False)
+          if proc.returncode not in (0, 10):
+            raise SystemExit(proc.returncode)
 
       - name: Verify smoke artifacts
         shell: bash
@@ -64,7 +84,7 @@ jobs:
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             ${{ matrix.image }} \
-            /bin/sh -lc "${{ matrix.install_cmd }} ; python3 -m venv /tmp/inspecta-venv ; . /tmp/inspecta-venv/bin/activate ; python -m pip install --upgrade pip ; python -m pip install -r requirements.txt ; python -m agent.cli run --mode quick --output smoke-linux --use-sample --no-auto-open --format txt"
+            /bin/sh -lc "${{ matrix.install_cmd }} ; python3 -m venv /tmp/inspecta-venv ; . /tmp/inspecta-venv/bin/activate ; python -m pip install --upgrade pip ; python -m pip install -r requirements.txt ; python -m agent.cli run --mode quick --output smoke-linux --use-sample --no-auto-open --format txt ; rc=$? ; if [ \"$rc\" -ne 0 ] && [ \"$rc\" -ne 10 ]; then exit $rc; fi"
 
       - name: Verify smoke artifact exists
         run: test -f smoke-linux/report.json

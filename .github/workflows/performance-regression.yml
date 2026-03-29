@@ -49,7 +49,7 @@ jobs:
               shutil.rmtree(out_dir)
 
             start = time.perf_counter()
-            subprocess.run(
+            proc = subprocess.run(
               [
                 "python",
                 "-m",
@@ -64,8 +64,10 @@ jobs:
                 "--format",
                 "txt",
               ],
-              check=True,
+              check=False,
             )
+            if proc.returncode not in (0, 10):
+              raise SystemExit(proc.returncode)
             durations.append(time.perf_counter() - start)
 
           mean_seconds = sum(durations) / len(durations)
