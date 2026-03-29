@@ -14,6 +14,8 @@ import subprocess
 import time
 from typing import Any, Dict, Optional
 
+from . import linux_env
+
 logger = logging.getLogger("inspecta.sensors")
 
 
@@ -405,7 +407,9 @@ def parse_sensors_output(output: str) -> Dict[str, Any]:
 def get_sensors_snapshot_linux() -> Dict[str, Any]:
     """Get thermal snapshot using lm-sensors on Linux."""
     if not has_lm_sensors():
-        raise SensorError("lm-sensors not available (install lm-sensors package)")
+        raise SensorError(
+            "lm-sensors not available " f"({linux_env.tool_install_hint('sensors')})"
+        )
 
     try:
         result = subprocess.run(

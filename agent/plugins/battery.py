@@ -17,6 +17,8 @@ import tempfile
 import xml.etree.ElementTree as ET
 from typing import Any, Dict, Optional
 
+from . import linux_env
+
 logger = logging.getLogger("inspecta.battery")
 
 
@@ -319,7 +321,7 @@ def _detect_battery_path() -> str:
         )
     except FileNotFoundError as exc:
         raise BatteryError(
-            "upower not found. Install with: sudo apt install upower"
+            f"upower not found. {linux_env.tool_install_hint('upower')}"
         ) from exc
     except subprocess.TimeoutExpired as exc:
         raise BatteryError("upower -e timed out after 10 seconds") from exc

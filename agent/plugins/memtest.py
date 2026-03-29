@@ -12,6 +12,8 @@ import re
 import subprocess
 from typing import Any, Dict
 
+from . import linux_env
+
 logger = logging.getLogger("inspecta.memtest")
 
 
@@ -179,10 +181,13 @@ def execute_memtest(
         }
 
     except FileNotFoundError as exc:
+        linux_hint = linux_env.tool_install_hint("memtester").replace(
+            "Install with: ", ""
+        )
         raise MemtestError(
             (
                 "memtester not found. Install with: "
-                "sudo apt install memtester (Linux) or "
+                f"{linux_hint} (Linux) or "
                 "download from memtest.org (other systems)"
             )
         ) from exc

@@ -12,6 +12,8 @@ import re
 import subprocess
 from typing import Any, Dict, Optional
 
+from . import linux_env
+
 logger = logging.getLogger("inspecta.cpu_bench")
 
 
@@ -82,7 +84,7 @@ def execute_sysbench(use_sample: bool = False) -> Dict[str, Any]:
         )
     except FileNotFoundError as exc:
         raise CpuBenchError(
-            "sysbench not found. Install with: sudo apt install sysbench"
+            f"sysbench not found. {linux_env.tool_install_hint('sysbench')}"
         ) from exc
     except subprocess.TimeoutExpired as exc:
         raise CpuBenchError("sysbench timed out after 20 seconds") from exc

@@ -13,6 +13,8 @@ import re
 import subprocess
 from typing import Any, Dict
 
+from . import linux_env
+
 logger = logging.getLogger("inspecta.disk_perf")
 
 
@@ -86,7 +88,7 @@ def execute_fio(use_sample: bool = False) -> Dict[str, Any]:
         )
     except FileNotFoundError as exc:
         raise DiskPerfError(
-            "fio not found. Install with: sudo apt install fio"
+            f"fio not found. {linux_env.tool_install_hint('fio')}"
         ) from exc
     except subprocess.TimeoutExpired as exc:
         raise DiskPerfError("fio timed out after 30 seconds") from exc

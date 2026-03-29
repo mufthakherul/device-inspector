@@ -14,6 +14,8 @@ import re
 import subprocess
 from typing import Any
 
+from . import linux_env
+
 logger = logging.getLogger("inspecta.inventory")
 
 
@@ -217,7 +219,7 @@ def execute_dmidecode() -> str:
         if result.returncode != 0:
             if "Permission denied" in result.stderr or result.returncode == 1:
                 raise InventoryError(
-                    "dmidecode requires root/sudo privileges. "
+                    f"{linux_env.root_permission_hint('dmidecode')} "
                     "Run with: sudo inspecta inventory"
                 )
             raise InventoryError(f"dmidecode failed: {result.stderr}")
@@ -226,7 +228,7 @@ def execute_dmidecode() -> str:
 
     except FileNotFoundError as exc:
         raise InventoryError(
-            "dmidecode not found. Install with: sudo apt install dmidecode"
+            f"dmidecode not found. {linux_env.tool_install_hint('dmidecode')}"
         ) from exc
     except subprocess.TimeoutExpired as exc:
         raise InventoryError("dmidecode timed out after 10 seconds") from exc

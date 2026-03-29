@@ -17,6 +17,8 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+from . import linux_env
+
 logger = logging.getLogger("inspecta.smart")
 
 
@@ -341,7 +343,8 @@ def execute_smartctl(device: str, use_sample: bool = False) -> Dict[str, Any]:
         elif result.returncode == 2:
             raise SmartError(
                 f"Could not open device {device}. "
-                f"Run with sudo or check device exists. Error: {result.stderr}"
+                f"{linux_env.root_permission_hint('smartctl')} "
+                f"Check device exists. Error: {result.stderr}"
             )
         elif result.returncode >= 128:
             raise SmartError(f"smartctl crashed for {device}: {result.stderr}")
@@ -363,7 +366,7 @@ def execute_smartctl(device: str, use_sample: bool = False) -> Dict[str, Any]:
 
     except FileNotFoundError as exc:
         raise SmartError(
-            "smartctl not found. Install with: sudo apt install smartmontools"
+            f"smartctl not found. {linux_env.tool_install_hint('smartctl')}"
         ) from exc
     except subprocess.TimeoutExpired as exc:
         raise SmartError(f"smartctl timed out after 30 seconds for {device}") from exc
