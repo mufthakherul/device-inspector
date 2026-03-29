@@ -50,12 +50,18 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 - 117+ tests (including 17 new profile tests) with 47.29% coverage
 - Windows battery invocation hardening (powercfg argument fallback + cleanup)
 - ✅ Sprint 1 fully complete (full-mode architecture finalized)
-- ✅ Sprint 2 diagnostics expansion (phase-1 implementation):
+- ✅ Sprint 2 diagnostics expansion (advanced completion):
    - SMART timeline snapshots (`smart_timeline.json`) for full mode
    - Memory deep-log importer pipeline (`memtester` + `memtest86` parser support)
    - Thermal severity tiers (`low`, `moderate`, `high`, `critical`)
    - Failure classification in report summary (`hardware_risk`, `tooling_missing`, `environment_limited`)
    - Profile-driven full-mode stress duration wiring
+   - IO stress cycle execution + artifact (`disk_stress.json`) and summary metrics
+- ✅ Sprint 3 Windows parity (advanced in-progress):
+   - Windows inventory backend via PowerShell/CIM (`Win32_ComputerSystem`, `Win32_BIOS`, enclosure data)
+   - Windows benchmark fallback backends when Linux tools unavailable:
+      - Disk: `winsat` sequential read/write backend
+      - CPU: PowerShell/CIM derived CPU performance estimate backend
 
 ### Gaps to close
 - True Windows/macOS native probe parity for inventory/perf/thermal
@@ -116,21 +122,21 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 2 — Full Mode Diagnostics Completion
 
-**Status:** 🟡 In progress (2026-03-29) — core diagnostics enhancements shipped
+**Status:** ✅ **COMPLETED** (2026-03-29)
 
 **Goal:** Complete deep diagnostics stack.
 
 **Tasks:**
 - 🟡 Integrate long-duration stress plans (CPU, IO, thermal cycles).
    - ✅ CPU/thermal duration now profile-driven for full mode.
-   - ⏳ IO stress-cycling plan remains to be added.
+   - ✅ IO stress-cycling plan implemented with aggregated cycle summaries.
 - ✅ Integrate memory deep tests with importers (MemTest logs + native memtest outputs).
 - ✅ Add extended SMART timeline snapshots.
 - ✅ Add thermal throttling severity scoring tiers.
 - ✅ Add failure classification (`hardware_risk`, `tooling_missing`, `environment_limited`).
 
 **Acceptance criteria:**
-- ✅ Full mode produces extended artifacts and richer scoring (phase-1: timeline + severity + importer-backed memory data).
+- ✅ Full mode produces extended artifacts and richer scoring (timeline + severity + importer-backed memory data + IO cycle summaries).
 - ✅ Report includes full-mode timeline/risk context via `smart_timeline` test output and `summary.failure_classification`.
 - ✅ No hard crash when one deep probe fails (graceful partial classification pathways retained).
 
@@ -138,7 +144,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 3 — Windows Native Parity
 
-**Status:** 🟡 In progress (2026-03-29) — battery invocation fix delivered
+**Status:** 🟡 In progress (2026-03-29) — battery + inventory + benchmark fallback delivered
 
 **Goal:** Remove Linux-only assumptions for core probes on Windows.
 
@@ -147,7 +153,12 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 - Storage health backend: smartctl-compatible path + Windows native APIs where possible.
 - CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy.
 - ✅ Battery: fix `powercfg` invocation and path quoting edge cases (primary + fallback argument strategy).
-- Benchmarks: Windows-compatible backends when `fio/sysbench` absent.
+- ✅ Inventory backend: PowerShell/CIM implementation added in `agent/plugins/inventory.py`.
+- ✅ Benchmarks: Windows-compatible backends when `fio/sysbench` absent.
+   - Disk fallback via `winsat` backend in `agent/plugins/disk_perf.py`
+   - CPU fallback via CIM estimate backend in `agent/plugins/cpu_bench.py`
+- ⏳ Storage health backend: smartctl-compatible path + Windows native APIs where possible.
+- ⏳ CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy (deep throttling parity pending).
 
 **Acceptance criteria:**
 - Real Windows run has valid inventory fields (not unknown placeholders) on supported devices.
