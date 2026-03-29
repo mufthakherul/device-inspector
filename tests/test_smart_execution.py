@@ -266,3 +266,54 @@ def test_execute_windows_storage_health_prefers_smartctl(mock_list, mock_exec):
     assert len(result) == 1
     assert result[0]["device"] == "//./PhysicalDrive0"
     assert result[0]["status"] == "ok"
+
+
+@patch("agent.plugins.smart.platform.system", return_value="Darwin")
+@patch("agent.plugins.smart.execute_macos_storage_health")
+def test_scan_all_devices_macos_backend(mock_exec, _mock_platform):
+    mock_exec.return_value = [
+        {
+            "device": "/dev/disk0",
+            "type": "ssd",
+            "status": "ok",
+            "data": {"model": "APPLE SSD"},
+            "raw_json": {},
+        }
+    ]
+
+    result = smart.scan_all_devices(use_sample=False)
+
+    assert len(result) == 1
+    assert result[0]["device"] == "/dev/disk0"
+    assert result[0]["status"] == "ok"
+
+
+@patch("agent.plugins.smart.subprocess.run")
+def test_execute_macos_storage_health_success(mock_run):
+    list_payload = (
+        b'<?xml version="1.0" encoding="UTF-8"?>'
+        b'<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" '
+        b'"http://www.apple.com/DTDs/PropertyList-1.0.dtd">'
+        b'<plist version="1.0"><dict><key>AllDisksAndPartitions</key>'
+        b"<array><dict><key>DeviceIdentifier</key><string>disk0</string></dict>"
+        b"</array></dict></plist>"
+    )
+    info_payload = (
+        b'<?xml version="1.0" encoding="UTF-8"?>'
+        b'<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" '
+        b'"http://www.apple.com/DTDs/PropertyList-1.0.dtd">'
+        b'<plist version="1.0"><dict><key>MediaName</key><string>APPLE SSD</string>'
+        b"<key>SMARTStatus</key><string>Verified</string><key>SolidState</key><true/>"
+        b"<key>DiskSize</key><integer>1000</integer></dict></plist>"
+    )
+
+    mock_run.side_effect = [
+        MagicMock(returncode=0, stdout=list_payload, stderr=b""),
+        MagicMock(returncode=0, stdout=info_payload, stderr=b""),
+    ]
+
+    result = smart.execute_macos_storage_health()
+
+    assert len(result) == 1
+    assert result[0]["device"] == "/dev/disk0"
+    assert result[0]["status"] == "ok"

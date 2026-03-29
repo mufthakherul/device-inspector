@@ -7,6 +7,7 @@ Parses vendor, model, serial number, BIOS version, and chassis type.
 
 from __future__ import annotations
 
+import json
 import logging
 import platform
 import re
@@ -18,6 +19,64 @@ logger = logging.getLogger("inspecta.inventory")
 
 class InventoryError(Exception):
     """Raised when inventory detection fails."""
+
+
+def execute_macos_inventory() -> str:
+    """Execute macOS system_profiler query and return JSON payload."""
+    try:
+        result = subprocess.run(
+            ["system_profiler", "SPHardwareDataType", "-json"],
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise InventoryError("system_profiler not found on macOS") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise InventoryError("macOS inventory query timed out") from exc
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip() or result.stdout.strip()
+        raise InventoryError(f"macOS inventory query failed: {stderr}")
+
+    return result.stdout.strip()
+
+
+def parse_macos_inventory(output: str) -> dict[str, Any]:
+    """Parse JSON output from `system_profiler SPHardwareDataType -json`."""
+    try:
+        payload = json.loads(output)
+    except Exception as exc:
+        raise InventoryError(f"Could not parse macOS inventory output: {exc}") from exc
+
+    rows = payload.get("SPHardwareDataType") or []
+    row = rows[0] if isinstance(rows, list) and rows else {}
+
+    def clean(value: Any) -> Any:
+        if value is None:
+            return None
+        text = str(value).strip()
+        return text or None
+
+    model = clean(row.get("machine_model") or row.get("model_name"))
+    model_identifier = clean(row.get("machine_model_identifier"))
+    if model and model_identifier and model_identifier not in model:
+        normalized_model = f"{model} ({model_identifier})"
+    else:
+        normalized_model = model or model_identifier
+
+    return {
+        "vendor": clean(row.get("machine_name")) or "Apple",
+        "model": normalized_model,
+        "serial": clean(row.get("serial_number")),
+        "bios_version": clean(row.get("boot_rom_version")),
+        "bios_date": None,
+        "chassis_type": clean(row.get("chassis_type")) or "Notebook",
+        "sku": clean(row.get("provisioning_UDID")),
+        "uuid": clean(row.get("platform_UUID")),
+        "family": clean(row.get("chip_type")) or clean(row.get("cpu_type")),
+    }
 
 
 def execute_windows_inventory_registry() -> str:
@@ -104,8 +163,6 @@ def execute_windows_inventory() -> str:
 
 def parse_windows_inventory(output: str) -> dict[str, Any]:
     """Parse JSON output from execute_windows_inventory."""
-    import json
-
     try:
         data = json.loads(output)
     except Exception as exc:
@@ -309,6 +366,11 @@ def get_inventory(use_sample: bool = False) -> dict[str, Any]:
             reg_output = execute_windows_inventory_registry()
             logger.info("Executed Windows registry fallback inventory successfully")
             return parse_windows_inventory(reg_output)
+
+        if platform.system().lower() == "darwin":
+            output = execute_macos_inventory()
+            logger.info("Executed macOS inventory query successfully")
+            return parse_macos_inventory(output)
 
         output = execute_dmidecode()
         logger.info("Executed dmidecode successfully")

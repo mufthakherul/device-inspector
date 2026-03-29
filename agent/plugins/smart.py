@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import platform
+import plistlib
 import re
 import subprocess
 import time
@@ -21,6 +22,85 @@ logger = logging.getLogger("inspecta.smart")
 
 class SmartError(Exception):
     """Raised when SMART operations fail."""
+
+
+def execute_macos_storage_health() -> List[Dict[str, Any]]:
+    """Collect macOS storage health using diskutil plist outputs."""
+    try:
+        list_result = subprocess.run(
+            ["diskutil", "list", "-plist"],
+            capture_output=True,
+            timeout=15,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise SmartError("diskutil not found on macOS") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise SmartError("macOS storage list probe timed out") from exc
+
+    if list_result.returncode != 0:
+        stderr = (list_result.stderr or b"").decode("utf-8", errors="ignore").strip()
+        raise SmartError(f"macOS storage list probe failed: {stderr}")
+
+    try:
+        payload = plistlib.loads(list_result.stdout)
+    except Exception as exc:
+        raise SmartError(f"Could not parse macOS disk list output: {exc}") from exc
+
+    entries = payload.get("AllDisksAndPartitions") or []
+    device_ids = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        device_id = entry.get("DeviceIdentifier")
+        if device_id and str(device_id).startswith("disk"):
+            device_ids.append(str(device_id))
+
+    normalized: List[Dict[str, Any]] = []
+    for device_id in device_ids:
+        try:
+            info_result = subprocess.run(
+                ["diskutil", "info", "-plist", f"/dev/{device_id}"],
+                capture_output=True,
+                timeout=12,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            continue
+
+        if info_result.returncode != 0:
+            continue
+
+        try:
+            info = plistlib.loads(info_result.stdout)
+        except Exception:
+            continue
+
+        smart_status = str(info.get("SMARTStatus") or "Unknown")
+        failed = smart_status.lower() not in {"verified", "passed", "ok", "unknown"}
+        media_type = "ssd" if bool(info.get("SolidState")) else "hdd"
+
+        normalized.append(
+            {
+                "device": f"/dev/{device_id}",
+                "type": media_type,
+                "status": "error" if failed else "ok",
+                "data": {
+                    "name": info.get("MediaName") or device_id,
+                    "model": info.get("MediaName") or device_id,
+                    "serial": info.get("SerialNumber"),
+                    "attributes": {
+                        "SMARTStatus": smart_status,
+                        "SolidState": info.get("SolidState"),
+                        "DiskSize": info.get("DiskSize"),
+                    },
+                    "macos_smart_status": smart_status,
+                },
+                "raw_json": info,
+            }
+        )
+
+    return normalized
 
 
 def list_windows_smartctl_devices() -> List[str]:
@@ -378,6 +458,20 @@ def scan_all_devices(use_sample: bool = False) -> List[Dict[str, Any]]:
             return [
                 {
                     "device": "windows-storage",
+                    "type": "unknown",
+                    "status": "error",
+                    "error": str(e),
+                }
+            ]
+
+    if platform.system().lower() == "darwin":
+        try:
+            return execute_macos_storage_health()
+        except SmartError as e:
+            logger.warning("macOS storage health probe failed: %s", e)
+            return [
+                {
+                    "device": "macos-storage",
                     "type": "unknown",
                     "status": "error",
                     "error": str(e),

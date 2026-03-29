@@ -7,6 +7,7 @@ Windows implementation uses powercfg to generate and parse battery reports.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import platform
@@ -21,6 +22,125 @@ logger = logging.getLogger("inspecta.battery")
 
 class BatteryError(Exception):
     """Raised when battery operations fail."""
+
+
+def parse_pmset_batt_output(output: str) -> Dict[str, Any]:
+    """Parse `pmset -g batt` output for state and percentage."""
+    if "No batteries" in output:
+        raise BatteryError("No battery detected")
+
+    pct_match = re.search(r"(\d+)%", output)
+    state_match = re.search(r";\s*([a-zA-Z\s]+?);", output)
+
+    state = state_match.group(1).strip() if state_match else "unknown"
+    percentage = float(pct_match.group(1)) if pct_match else None
+
+    return {
+        "present": percentage is not None,
+        "state": state,
+        "percentage": percentage,
+    }
+
+
+def parse_macos_power_json(output: str) -> Dict[str, Any]:
+    """Parse `system_profiler SPPowerDataType -json` output."""
+    try:
+        payload = json.loads(output)
+    except Exception as exc:
+        raise BatteryError(f"Could not parse macOS power JSON: {exc}") from exc
+
+    sections = payload.get("SPPowerDataType") or []
+    section = sections[0] if isinstance(sections, list) and sections else {}
+    batteries = section.get("sppower_battery_health_info") or []
+    batt = batteries[0] if isinstance(batteries, list) and batteries else {}
+
+    cycle_count = batt.get("sppower_cycle_count")
+    full_capacity = batt.get("sppower_battery_max_capacity")
+    design_capacity = batt.get("sppower_battery_design_capacity")
+
+    health_pct = None
+    if full_capacity is not None and design_capacity:
+        try:
+            full_val = float(full_capacity)
+            design_val = float(design_capacity)
+            if design_val > 0:
+                health_pct = int(round((full_val / design_val) * 100))
+                health_pct = max(0, min(100, health_pct))
+        except (TypeError, ValueError):
+            health_pct = None
+
+    return {
+        "cycle_count": (
+            int(cycle_count) if isinstance(cycle_count, (int, float)) else None
+        ),
+        "health_pct": health_pct,
+        "design_capacity_mwh": design_capacity,
+        "full_capacity_mwh": full_capacity,
+        "vendor": section.get("sppower_manufacturer") or "Apple",
+        "model": section.get("sppower_battery_model") or "Internal Battery",
+    }
+
+
+def execute_macos_battery(use_sample: bool = False) -> Dict[str, Any]:
+    """Execute macOS battery probes (`pmset` + `system_profiler`)."""
+    if use_sample:
+        pmset_data = parse_pmset_batt_output(
+            "Now drawing from 'Battery Power'\n"
+            " -InternalBattery-0\t95%; discharging; "
+            "3:12 remaining present: true"
+        )
+        profiler_data = {
+            "cycle_count": 251,
+            "health_pct": 83,
+            "design_capacity_mwh": 57000,
+            "full_capacity_mwh": 47100,
+            "vendor": "Apple",
+            "model": "Internal Battery",
+        }
+        parsed = {**pmset_data, **profiler_data, "device": "battery_apple_internal"}
+        return {"status": "ok", "data": parsed, "raw_text": "sample-macos"}
+
+    try:
+        pmset_result = subprocess.run(
+            ["pmset", "-g", "batt"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise BatteryError("pmset not found on macOS") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise BatteryError("pmset timed out after 10 seconds") from exc
+
+    if pmset_result.returncode != 0:
+        stderr = pmset_result.stderr.strip() or pmset_result.stdout.strip()
+        raise BatteryError(f"pmset failed: {stderr}")
+
+    pmset_data = parse_pmset_batt_output(pmset_result.stdout)
+
+    profiler_data: Dict[str, Any] = {}
+    try:
+        profiler_result = subprocess.run(
+            ["system_profiler", "SPPowerDataType", "-json"],
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+        if profiler_result.returncode == 0 and profiler_result.stdout.strip():
+            profiler_data = parse_macos_power_json(profiler_result.stdout)
+    except (FileNotFoundError, subprocess.TimeoutExpired, BatteryError):
+        profiler_data = {}
+
+    parsed = {**pmset_data, **profiler_data, "device": "battery_apple_internal"}
+    return {
+        "status": "ok",
+        "data": parsed,
+        "raw_text": (
+            f"{pmset_result.stdout}\n" f"{(profiler_data and 'system_profiler') or ''}"
+        ),
+    }
 
 
 _SAMPLE_UPOWER = """\
@@ -331,6 +451,21 @@ def scan_battery(use_sample: bool = False) -> Dict[str, Any]:
             result = execute_powercfg(use_sample=use_sample)
             logger.info(
                 "Battery data collected from powercfg (device=%s)",
+                result["data"].get("device"),
+            )
+            return result
+        except BatteryError as exc:
+            message = str(exc)
+            if "no battery" in message.lower():
+                logger.info("Battery scan not applicable: %s", message)
+                return {"status": "missing", "error": message}
+            logger.warning("Battery scan failed: %s", message)
+            return {"status": "error", "error": message}
+    elif system == "Darwin":
+        try:
+            result = execute_macos_battery(use_sample=use_sample)
+            logger.info(
+                "Battery data collected from macOS probes (device=%s)",
                 result["data"].get("device"),
             )
             return result

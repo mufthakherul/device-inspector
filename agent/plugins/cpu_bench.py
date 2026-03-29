@@ -141,11 +141,61 @@ def execute_windows_cpu_probe() -> Dict[str, Any]:
     return {"status": "ok", "data": data, "raw_text": result.stdout}
 
 
+def execute_macos_cpu_probe() -> Dict[str, Any]:
+    """Execute macOS CPU probe via sysctl and derive a benchmark proxy metric."""
+    cmd = ["sysctl", "-n", "hw.ncpu", "hw.cpufrequency"]
+
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise CpuBenchError("sysctl not found on macOS") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise CpuBenchError("macOS CPU probe timed out") from exc
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip() or result.stdout.strip()
+        raise CpuBenchError(f"macOS CPU probe failed: {stderr}")
+
+    values = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if len(values) < 2:
+        raise CpuBenchError("macOS CPU probe output incomplete")
+
+    try:
+        logical_processors = int(values[0])
+        freq_hz = float(values[1])
+    except ValueError as exc:
+        raise CpuBenchError(f"Could not parse macOS CPU probe output: {exc}") from exc
+
+    freq_mhz = round(freq_hz / 1_000_000.0, 2)
+    eps = round((freq_mhz * logical_processors) / 5.0, 2)
+
+    return {
+        "status": "ok",
+        "data": {
+            "events_per_second": eps,
+            "total_events": None,
+            "total_time_seconds": None,
+            "backend": "macos_sysctl_estimate",
+            "max_clock_mhz": freq_mhz,
+            "logical_processors": logical_processors,
+        },
+        "raw_text": result.stdout,
+    }
+
+
 def scan_cpu_benchmark(use_sample: bool = False) -> Dict[str, Any]:
     """Run quick CPU benchmark and return structured result."""
     try:
         if not use_sample and platform.system().lower() == "windows":
             result = execute_windows_cpu_probe()
+        elif not use_sample and platform.system().lower() == "darwin":
+            result = execute_macos_cpu_probe()
         else:
             result = execute_sysbench(use_sample=use_sample)
         logger.info(

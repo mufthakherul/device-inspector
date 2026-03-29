@@ -75,3 +75,20 @@ def test_scan_cpu_benchmark_windows_probe(mock_run, _mock_platform):
     assert result["status"] == "ok"
     assert result["data"]["backend"] == "windows_cim_estimate"
     assert result["data"]["events_per_second"] == 2200.0
+
+
+@patch("agent.plugins.cpu_bench.platform.system", return_value="Darwin")
+@patch("agent.plugins.cpu_bench.subprocess.run")
+def test_scan_cpu_benchmark_macos_probe(mock_run, _mock_platform):
+    mock_run.return_value = subprocess.CompletedProcess(
+        args=["sysctl"],
+        returncode=0,
+        stdout="8\n3200000000\n",
+        stderr="",
+    )
+
+    result = cpu_bench.scan_cpu_benchmark(use_sample=False)
+
+    assert result["status"] == "ok"
+    assert result["data"]["backend"] == "macos_sysctl_estimate"
+    assert result["data"]["logical_processors"] == 8

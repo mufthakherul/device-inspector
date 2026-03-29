@@ -247,3 +247,50 @@ def test_scan_battery_windows_missing_battery(mock_execute_powercfg, mock_platfo
 
     assert result["status"] == "missing"
     assert "no battery" in result["error"].lower()
+
+
+def test_parse_pmset_batt_output_basic_fields():
+    sample = (
+        "Now drawing from 'Battery Power'\n"
+        " -InternalBattery-0\t83%; discharging; 2:45 remaining present: true"
+    )
+
+    parsed = battery.parse_pmset_batt_output(sample)
+
+    assert parsed["present"] is True
+    assert parsed["percentage"] == 83.0
+    assert parsed["state"] == "discharging"
+
+
+def test_parse_macos_power_json_basic_fields():
+    output = (
+        '{"SPPowerDataType":[{"sppower_manufacturer":"Apple",'
+        '"sppower_battery_model":"A2389",'
+        '"sppower_battery_health_info":[{"sppower_cycle_count":120,'
+        '"sppower_battery_max_capacity":48000,'
+        '"sppower_battery_design_capacity":60000}]}]}'
+    )
+
+    parsed = battery.parse_macos_power_json(output)
+
+    assert parsed["cycle_count"] == 120
+    assert parsed["health_pct"] == 80
+    assert parsed["vendor"] == "Apple"
+
+
+@patch("platform.system", return_value="Darwin")
+@patch("agent.plugins.battery.execute_macos_battery")
+def test_scan_battery_macos_backend(mock_exec, _mock_platform):
+    mock_exec.return_value = {
+        "status": "ok",
+        "data": {
+            "present": True,
+            "percentage": 90,
+            "device": "battery_apple_internal",
+        },
+    }
+
+    result = battery.scan_battery(use_sample=False)
+
+    assert result["status"] == "ok"
+    mock_exec.assert_called_once_with(use_sample=False)

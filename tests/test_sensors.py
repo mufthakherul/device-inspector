@@ -253,6 +253,16 @@ class TestGetSensorsSnapshot:
         mock_windows.assert_called_once()
 
     @patch("agent.plugins.sensors.detect_platform")
+    @patch("agent.plugins.sensors.get_sensors_snapshot_macos")
+    def test_macos_platform(self, mock_macos, mock_platform):
+        mock_platform.return_value = "darwin"
+        mock_macos.return_value = {"platform": "darwin"}
+
+        result = sensors.get_sensors_snapshot()
+        assert result["platform"] == "darwin"
+        mock_macos.assert_called_once()
+
+    @patch("agent.plugins.sensors.detect_platform")
     def test_unsupported_platform(self, mock_platform):
         """Test error on unsupported platform."""
         mock_platform.return_value = "unknown"
@@ -383,6 +393,41 @@ class TestDetectCpuThrottling:
         result = sensors.detect_cpu_throttling(duration_seconds=6)
         assert result["platform"] == "windows"
 
+    @patch("agent.plugins.sensors._get_macos_cpu_freq_mhz")
+    @patch("agent.plugins.sensors._get_macos_thermal_level")
+    @patch("agent.plugins.sensors.get_sensors_snapshot_macos")
+    @patch("time.sleep")
+    def test_detect_cpu_throttling_macos(
+        self,
+        _mock_sleep,
+        mock_snapshot,
+        mock_thermal_level,
+        mock_freq,
+    ):
+        mock_freq.side_effect = [3200.0, 2800.0, 2750.0]
+        mock_thermal_level.side_effect = [0, 1]
+        mock_snapshot.side_effect = [
+            {"max_temp": 50.0},
+            {"max_temp": 82.0},
+            {"max_temp": 85.0},
+        ]
+
+        result = sensors.detect_cpu_throttling_macos(duration_seconds=4)
+
+        assert result["platform"] == "darwin"
+        assert result["throttling_detected"] is True
+        assert result["min_freq_mhz"] == 2750.0
+
+    @patch("agent.plugins.sensors.detect_platform", return_value="darwin")
+    @patch("agent.plugins.sensors.detect_cpu_throttling_macos")
+    def test_detect_cpu_throttling_dispatch_macos(self, mock_macos, _mock_platform):
+        mock_macos.return_value = {
+            "platform": "darwin",
+            "throttling_detected": False,
+        }
+        result = sensors.detect_cpu_throttling(duration_seconds=6)
+        assert result["platform"] == "darwin"
+
 
 class TestDetectPlatform:
     """Test detect_platform function."""
@@ -402,8 +447,29 @@ class TestDetectPlatform:
     @patch("platform.system")
     def test_unknown(self, mock_system):
         """Test unknown platform detection."""
-        mock_system.return_value = "Darwin"
+        mock_system.return_value = "FreeBSD"
         assert sensors.detect_platform() == "unknown"
+
+    @patch("platform.system")
+    def test_darwin(self, mock_system):
+        mock_system.return_value = "Darwin"
+        assert sensors.detect_platform() == "darwin"
+
+
+class TestMacosSensorsSnapshot:
+    @patch("agent.plugins.sensors.subprocess.run")
+    def test_get_sensors_snapshot_macos_with_osx_cpu_temp(self, mock_run):
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout="56.8°C",
+            stderr="",
+        )
+
+        result = sensors.get_sensors_snapshot_macos()
+
+        assert result["platform"] == "darwin"
+        assert result["tool"] == "osx-cpu-temp"
+        assert result["max_temp"] == 56.8
 
 
 class TestThermalSeverityClassification:

@@ -112,14 +112,139 @@ Sensor 2:     +41.9°C  (low  = -273.1°C, high = +65261.8°C)
 
 
 def detect_platform() -> str:
-    """Return 'linux', 'windows', or 'unknown'."""
+    """Return 'linux', 'windows', 'darwin', or 'unknown'."""
     system = platform.system().lower()
     if system == "linux":
         return "linux"
     elif system == "windows":
         return "windows"
+    elif system == "darwin":
+        return "darwin"
     else:
         return "unknown"
+
+
+def _parse_macos_temp_text(output: str) -> Optional[float]:
+    """Parse common macOS temperature command output text."""
+    patterns = [
+        r"([0-9]+(?:\.[0-9]+)?)\s*°?C",
+        r"CPU[^\n:]*:\s*([0-9]+(?:\.[0-9]+)?)",
+        r"die temperature:\s*([0-9]+(?:\.[0-9]+)?)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, output, flags=re.IGNORECASE)
+        if match:
+            try:
+                return float(match.group(1))
+            except ValueError:
+                continue
+    return None
+
+
+def get_sensors_snapshot_macos() -> Dict[str, Any]:
+    """Get thermal snapshot on macOS with safe fallback policy."""
+    probes = [
+        ["osx-cpu-temp"],
+        ["powermetrics", "--samplers", "smc", "-n", "1"],
+    ]
+
+    for cmd in probes:
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=12,
+                check=False,
+            )
+        except FileNotFoundError:
+            continue
+        except subprocess.TimeoutExpired:
+            continue
+
+        if result.returncode != 0:
+            continue
+
+        temp = _parse_macos_temp_text(result.stdout)
+        if temp is None:
+            continue
+
+        return {
+            "platform": "darwin",
+            "tool": cmd[0],
+            "timestamp": time.time(),
+            "sensors": [
+                {
+                    "adapter": "macos-thermal",
+                    "type": "CPU",
+                    "readings": [
+                        {
+                            "label": "CPU Die",
+                            "temp": round(temp, 1),
+                            "high": None,
+                            "crit": None,
+                        }
+                    ],
+                }
+            ],
+            "max_temp": round(temp, 1),
+            "avg_temp": round(temp, 1),
+            "critical_temps": [],
+        }
+
+    raise SensorError(
+        "macOS thermal probe unavailable (install osx-cpu-temp or run powermetrics)"
+    )
+
+
+def _get_macos_cpu_freq_mhz() -> Optional[float]:
+    """Get current/nominal CPU frequency on macOS via sysctl."""
+    keys = ["hw.cpufrequency", "hw.cpufrequency_max"]
+    for key in keys:
+        try:
+            result = subprocess.run(
+                ["sysctl", "-n", key],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=False,
+            )
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            continue
+
+        if result.returncode != 0:
+            continue
+
+        try:
+            hz = float(result.stdout.strip())
+            if hz > 0:
+                return round(hz / 1_000_000.0, 1)
+        except ValueError:
+            continue
+
+    return None
+
+
+def _get_macos_thermal_level() -> Optional[int]:
+    """Read macOS thermal level if available (0 is best)."""
+    try:
+        result = subprocess.run(
+            ["sysctl", "-n", "machdep.xcpm.cpu_thermal_level"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+
+    if result.returncode != 0:
+        return None
+
+    try:
+        return int(result.stdout.strip())
+    except ValueError:
+        return None
 
 
 def has_lm_sensors() -> bool:
@@ -403,6 +528,8 @@ def get_sensors_snapshot() -> Dict[str, Any]:
         return get_sensors_snapshot_linux()
     elif plat == "windows":
         return get_sensors_snapshot_windows()
+    elif plat == "darwin":
+        return get_sensors_snapshot_macos()
     else:
         raise SensorError(f"Unsupported platform: {platform.system()}")
 
@@ -791,6 +918,99 @@ def detect_cpu_throttling_windows(duration_seconds: int = 30) -> Dict[str, Any]:
     }
 
 
+def detect_cpu_throttling_macos(duration_seconds: int = 30) -> Dict[str, Any]:
+    """Detect probable CPU throttling on macOS using sysctl indicators."""
+    sample_interval = 2
+    sample_count = max(1, duration_seconds // sample_interval)
+
+    baseline_freq = _get_macos_cpu_freq_mhz()
+    baseline_temp = None
+    try:
+        baseline_snapshot = get_sensors_snapshot_macos()
+        baseline_temp = baseline_snapshot.get("max_temp")
+    except SensorError:
+        baseline_snapshot = None
+
+    samples = []
+    temps = []
+    freqs = []
+    thermal_levels = []
+
+    for _ in range(sample_count):
+        time.sleep(sample_interval)
+
+        freq = _get_macos_cpu_freq_mhz()
+        thermal_level = _get_macos_thermal_level()
+        temp = None
+        try:
+            snap = get_sensors_snapshot_macos()
+            temp = snap.get("max_temp")
+        except SensorError:
+            temp = None
+
+        throttled = False
+        if baseline_freq and freq and float(freq) < (float(baseline_freq) * 0.85):
+            throttled = True
+        if thermal_level is not None and thermal_level > 0:
+            throttled = True
+
+        samples.append(
+            {
+                "timestamp": time.time(),
+                "temp_c": temp,
+                "freq_mhz": freq,
+                "thermal_level": thermal_level,
+                "throttled": throttled,
+            }
+        )
+
+        if temp is not None:
+            temps.append(float(temp))
+        if freq is not None:
+            freqs.append(float(freq))
+        if thermal_level is not None:
+            thermal_levels.append(int(thermal_level))
+
+    min_freq = min(freqs) if freqs else None
+    avg_freq = round(sum(freqs) / len(freqs), 1) if freqs else None
+    peak_temp = max(temps) if temps else None
+    avg_temp = round(sum(temps) / len(temps), 1) if temps else None
+    throttling_detected = any(s.get("throttled") for s in samples)
+
+    reason = None
+    if throttling_detected:
+        reasons = []
+        if baseline_freq and min_freq:
+            drop_pct = (
+                (float(baseline_freq) - float(min_freq)) / float(baseline_freq)
+            ) * 100
+            if drop_pct > 15:
+                reasons.append(
+                    "CPU frequency dropped "
+                    f"{drop_pct:.1f}% ({baseline_freq} -> {min_freq} MHz)"
+                )
+        if thermal_levels and max(thermal_levels) > 0:
+            reasons.append(f"macOS thermal level elevated to {max(thermal_levels)}")
+        reason = (
+            "; ".join(reasons) if reasons else "Thermal pressure indicators observed"
+        )
+
+    return {
+        "platform": "darwin",
+        "baseline_max_temp": baseline_temp,
+        "baseline_freq_mhz": baseline_freq,
+        "peak_temp": peak_temp,
+        "avg_stress_temp": avg_temp,
+        "min_freq_mhz": min_freq,
+        "avg_freq_mhz": avg_freq,
+        "samples": samples,
+        "throttling_detected": throttling_detected,
+        "throttle_reason": reason,
+        "duration_seconds": duration_seconds,
+        "num_samples": len(samples),
+    }
+
+
 def detect_cpu_throttling(duration_seconds: int = 30) -> Dict[str, Any]:
     """Detect CPU thermal throttling on the current platform."""
     plat = detect_platform()
@@ -799,6 +1019,8 @@ def detect_cpu_throttling(duration_seconds: int = 30) -> Dict[str, Any]:
         return detect_cpu_throttling_linux(duration_seconds)
     elif plat == "windows":
         return detect_cpu_throttling_windows(duration_seconds)
+    elif plat == "darwin":
+        return detect_cpu_throttling_macos(duration_seconds)
     else:
         raise SensorError(f"Unsupported platform: {platform.system()}")
 

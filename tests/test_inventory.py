@@ -130,3 +130,38 @@ def test_get_inventory_windows_registry_fallback(mock_cim, mock_reg, _mock_platf
 
     assert result["vendor"] == "Lenovo"
     assert result["model"] == "ThinkPad"
+
+
+def test_parse_macos_inventory_json():
+    output = (
+        '{"SPHardwareDataType":[{"machine_name":"MacBook Pro",'
+        '"machine_model":"MacBookPro18,3",'
+        '"machine_model_identifier":"MacBookPro18,3",'
+        '"serial_number":"C02ABC12345",'
+        '"boot_rom_version":"10151.101.3",'
+        '"platform_UUID":"1234-5678",'
+        '"chip_type":"Apple M1 Pro"}]}'
+    )
+
+    parsed = inventory.parse_macos_inventory(output)
+
+    assert parsed["vendor"] == "MacBook Pro"
+    assert parsed["model"] == "MacBookPro18,3"
+    assert parsed["serial"] == "C02ABC12345"
+    assert parsed["bios_version"] == "10151.101.3"
+
+
+@patch("agent.plugins.inventory.platform.system", return_value="Darwin")
+@patch("agent.plugins.inventory.execute_macos_inventory")
+def test_get_inventory_macos_backend(mock_exec, _mock_platform):
+    mock_exec.return_value = (
+        '{"SPHardwareDataType":[{"machine_name":"Apple",'
+        '"machine_model":"MacBook Air",'
+        '"machine_model_identifier":"Mac14,2",'
+        '"serial_number":"M123"}]}'
+    )
+
+    result = inventory.get_inventory(use_sample=False)
+
+    assert result["model"] == "MacBook Air (Mac14,2)"
+    assert result["serial"] == "M123"
