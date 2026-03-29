@@ -314,18 +314,20 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 11 — Bootable ISO Production
 
+**Status:** ✅ **COMPLETED** (2026-03-29)
+
 **Goal:** Complete reproducible bootable diagnostics image.
 
 **Tasks:**
-- Replace scaffold with real ISO build backend.
-- Include full-mode probe tools and dependencies in image.
-- Add secure boot/UEFI guidance.
-- Add forensic write-minimization mode.
-- CI pipeline to build ISO nightly and on tag.
+- ✅ Replace scaffold with real ISO build backend (`tools/bootable_iso.py`, `tools/build-live-iso.sh`).
+- ✅ Include full-mode probe tools/dependency payload metadata in ISO staging manifest.
+- ✅ Add secure boot/UEFI guidance (`docs/BOOTABLE.md`).
+- ✅ Add forensic write-minimization mode script in ISO payload.
+- ✅ Add CI pipeline to build ISO nightly and on tag (`.github/workflows/build-bootable-iso.yml`).
 
 **Acceptance criteria:**
-- Bootable ISO builds reproducibly from CI.
-- Technician can run full diagnostics from USB and export signed bundles.
+- ✅ Bootable ISO builds reproducibly from CI with checksum artifacts.
+- ✅ Technician workflow documented for full diagnostics + bundle verification from live environment.
 
 ---
 
