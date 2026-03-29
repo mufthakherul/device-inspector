@@ -207,10 +207,12 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 - ✅ Tool resolver integrated into Linux probes (`dmidecode`, `upower`, `sysbench`, `fio`, `memtester`, `smartctl`, `lm-sensors`) with distro-aware install hints.
 - ✅ Permission model diagnostics standardized via root/sudo hint helpers for root-required Linux probes.
 - ✅ Containerized integration smoke matrix added (`.github/workflows/ci-integration-matrix.yml`) for Ubuntu/Debian/Fedora sample smoke runs.
+- ✅ Added true OS integration smoke matrix in `.github/workflows/ci-integration-matrix.yml` for `windows-latest`, `ubuntu-latest`, and `macos-latest`.
 
 **Acceptance criteria:**
 - ✅ Reduced false failures due to distro differences by replacing apt-only guidance with distro-aware install hints.
 - ✅ Probe behavior documented per distro class in capability resolver + roadmap delivery notes.
+- ✅ Mandatory OS smoke matrix coverage aligned with workflow matrix requirements.
 
 ---
 
@@ -345,6 +347,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 **Acceptance criteria:**
 - ✅ GitHub Pages site auto-deploys on `main` docs-site changes.
 - ✅ Download page is driven by synced release metadata (`docs-site/data/releases.json`).
+- ✅ Release orchestration now gates completion on successful cross-platform build workflow outcomes before release finalization (`.github/workflows/release.yml`).
 
 ---
 

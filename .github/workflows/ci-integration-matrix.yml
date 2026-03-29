@@ -7,6 +7,38 @@ on:
     branches: [main]
 
 jobs:
+  os-smoke:
+    name: OS smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Run quick-mode sample smoke
+        run: python -m agent.cli run --mode quick --output smoke-os --use-sample --no-auto-open --format txt
+
+      - name: Verify smoke artifacts
+        shell: bash
+        run: |
+          test -f smoke-os/report.json
+          test -f smoke-os/report.txt
+
   linux-container-smoke:
     name: Linux smoke (${{ matrix.distro }})
     runs-on: ubuntu-latest

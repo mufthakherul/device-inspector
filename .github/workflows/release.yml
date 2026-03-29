@@ -7,11 +7,16 @@ on:
       - "v*"
 
 permissions:
+  actions: write
   contents: write
 
+concurrency:
+  group: release-orchestration-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  orchestration-precheck:
-    name: Validate release workflow matrix
+  orchestrate-build-matrix:
+    name: Orchestrate and gate build matrix
     runs-on: ubuntu-latest
 
     steps:
@@ -28,10 +33,8 @@ jobs:
             ".github/workflows/build-mobile-ios.yml"
             ".github/workflows/build-harmonyos.yml"
             ".github/workflows/build-bootable-iso.yml"
-            ".github/workflows/deploy-pages.yml"
-            ".github/workflows/nightly-health.yml"
+            ".github/workflows/build-release.yml"
             ".github/workflows/publish-pypi.yml"
-            ".github/workflows/release-metadata-sync.yml"
           )
 
           for wf in "${required[@]}"; do
@@ -39,11 +42,122 @@ jobs:
             echo "OK: $wf"
           done
 
+      - name: Trigger required workflows (manual orchestration)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const ref = context.ref.replace("refs/heads/", "").replace("refs/tags/", "");
+            const workflows = [
+              "build-cli-packages.yml",
+              "build-desktop-apps.yml",
+              "build-mobile-android.yml",
+              "build-mobile-ios.yml",
+              "build-harmonyos.yml",
+              "build-bootable-iso.yml",
+              "build-release.yml",
+              "publish-pypi.yml"
+            ];
+
+            for (const workflow_id of workflows) {
+              await github.rest.actions.createWorkflowDispatch({
+                owner,
+                repo,
+                workflow_id,
+                ref
+              });
+              core.info(`Dispatched ${workflow_id} on ref ${ref}`);
+            }
+
+      - name: Wait for required workflows to complete
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const targetSha = context.sha;
+            const startedAt = Date.now();
+            const timeoutMs = 3 * 60 * 60 * 1000; // 3 hours
+            const pollMs = 20 * 1000;
+
+            const workflows = [
+              "build-cli-packages.yml",
+              "build-desktop-apps.yml",
+              "build-mobile-android.yml",
+              "build-mobile-ios.yml",
+              "build-harmonyos.yml",
+              "build-bootable-iso.yml",
+              "build-release.yml",
+              "publish-pypi.yml"
+            ];
+
+            const pending = new Set(workflows);
+            const failures = [];
+            const success = [];
+
+            function sleep(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            while (pending.size > 0) {
+              if (Date.now() - startedAt > timeoutMs) {
+                core.setFailed(`Timed out while waiting for workflows: ${Array.from(pending).join(", ")}`);
+                return;
+              }
+
+              for (const wf of Array.from(pending)) {
+                const runs = await github.paginate(
+                  github.rest.actions.listWorkflowRuns,
+                  {
+                    owner,
+                    repo,
+                    workflow_id: wf,
+                    per_page: 100
+                  }
+                );
+
+                const run = runs.find(r => r.head_sha === targetSha);
+
+                if (!run) {
+                  core.info(`No run yet for ${wf} on sha ${targetSha}`);
+                  continue;
+                }
+
+                core.info(`Observed ${wf}: status=${run.status}, conclusion=${run.conclusion ?? "n/a"}`);
+
+                if (run.status !== "completed") {
+                  continue;
+                }
+
+                pending.delete(wf);
+
+                if (run.conclusion === "success") {
+                  success.push(wf);
+                } else {
+                  failures.push(`${wf} (${run.conclusion})`);
+                }
+              }
+
+              if (pending.size > 0) {
+                await sleep(pollMs);
+              }
+            }
+
+            core.info(`Succeeded workflows: ${success.join(", ")}`);
+
+            if (failures.length > 0) {
+              core.setFailed(`Release matrix failed: ${failures.join(", ")}`);
+            }
+
   finalize-release:
     name: Finalize release metadata sync
     runs-on: ubuntu-latest
     needs:
-      - orchestration-precheck
+      - orchestrate-build-matrix
 
     steps:
       - name: Checkout code
