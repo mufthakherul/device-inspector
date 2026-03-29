@@ -311,7 +311,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 ## 15) Immediate next actions (first 16 issues to open)
 
 1. Reconcile roadmap claims vs current implementation artifacts.
-2. Implement interrupted-run recovery checkpoints for full mode.
+2. ✅ Implement interrupted-run recovery checkpoints for full mode (CLI checkpoint + resume path).
 3. Add deterministic bundle mode test suite.
 4. Add `sbom-security.yml` workflow.
 5. Add performance regression benchmark workflow.
@@ -373,7 +373,7 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 | 5 Sprints | DoD satisfied for each sprint | In progress | sprint reports | Team | Rolling |
 | 6 Workflows | Required CI/CD/security workflows green | In progress | GitHub Actions | DevOps | Sprint 2 |
 | 7 Packaging | Target channels produce usable artifacts | In progress | release artifacts | Release Eng | Sprint 8 |
-| 8 Full mode | Strict completion criteria passed | In progress | cli/tests/docs | Core Eng | Sprint 2 |
+| 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test | Core Eng | Sprint 2 |
 | 9 Docs IA | Route-based portal complete | Planned | docs-site routes | DX | Sprint 12 |
 | 10 KPIs | Dashboard and metrics pipeline active | Planned | status dashboards | PM+Data | Sprint 3 |
 | 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates | Sec/QA | Rolling |
