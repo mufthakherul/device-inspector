@@ -1,0 +1,39 @@
+name: CI Integration Matrix
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  linux-container-smoke:
+    name: Linux smoke (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu-24.04
+            image: ubuntu:24.04
+            install_cmd: apt-get update ; DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip
+          - distro: debian-12
+            image: debian:12
+            install_cmd: apt-get update ; DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip
+          - distro: fedora-40
+            image: fedora:40
+            install_cmd: dnf install -y python3 python3-pip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run sample quick-mode smoke in container
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            ${{ matrix.image }} \
+            /bin/sh -lc "${{ matrix.install_cmd }} ; python3 -m pip install --upgrade pip ; python3 -m pip install -r requirements.txt ; python3 -m pip install -e . ; python3 -m agent.cli run --mode quick --output smoke-linux --use-sample --no-auto-open --format txt"
+
+      - name: Verify smoke artifact exists
+        run: test -f smoke-linux/report.json

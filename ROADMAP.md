@@ -198,17 +198,19 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 5 — Linux Robustness and Distro Matrix
 
+**Status:** 🟡 **IN PROGRESS** (2026-03-29)
+
 **Goal:** Improve Linux consistency across distros.
 
 **Tasks:**
-- Distro capability detector (Debian/Ubuntu/Fedora/Arch families).
-- Tool resolver with install hints per distro.
-- Permission model checks (sudo/capabilities).
-- Containerized integration smoke matrix.
+- ✅ Distro capability detector added (`agent/plugins/linux_env.py`) with `/etc/os-release` parsing and package-manager mapping (Debian/Ubuntu/Fedora/Arch/SUSE/Alpine families).
+- ✅ Tool resolver integrated into Linux probes (`dmidecode`, `upower`, `sysbench`, `fio`, `memtester`, `smartctl`, `lm-sensors`) with distro-aware install hints.
+- ✅ Permission model diagnostics standardized via root/sudo hint helpers for root-required Linux probes.
+- ✅ Containerized integration smoke matrix added (`.github/workflows/ci-integration-matrix.yml`) for Ubuntu/Debian/Fedora sample smoke runs.
 
 **Acceptance criteria:**
-- Reduced false failures due to distro differences.
-- Probe behavior documented per distro class.
+- ✅ Reduced false failures due to distro differences by replacing apt-only guidance with distro-aware install hints.
+- ✅ Probe behavior documented per distro class in capability resolver + roadmap delivery notes.
 
 ---
 
