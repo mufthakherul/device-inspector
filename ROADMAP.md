@@ -179,7 +179,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 4 — macOS Native Parity
 
-**Status:** 🟡 **IN PROGRESS** (2026-03-29)
+**Status:** ✅ **COMPLETED** (2026-03-29)
 
 **Goal:** First-class macOS support.
 
@@ -198,7 +198,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 5 — Linux Robustness and Distro Matrix
 
-**Status:** 🟡 **IN PROGRESS** (2026-03-29)
+**Status:** ✅ **COMPLETED** (2026-03-29)
 
 **Goal:** Improve Linux consistency across distros.
 
@@ -216,18 +216,20 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 6 — Offline Professional Bundle
 
+**Status:** ✅ **COMPLETED** (2026-03-29)
+
 **Goal:** Turn output into enterprise-grade offline bundle.
 
 **Tasks:**
-- Include report JSON in manifest coverage policy.
-- Detached signature mode (`ed25519`) for report bundles.
-- Bundle validator command improvements with machine-readable exit taxonomy.
-- Tamper simulation test suite.
-- Add immutable run metadata (tool versions, OS fingerprint hash, timestamps).
+- ✅ Include `report.json` in manifest coverage policy.
+- ✅ Detached signature mode (`ed25519`) for report bundles (optional key-driven detached signature flow).
+- ✅ Bundle validator command improvements with machine-readable exit taxonomy (`exit_code`, `exit_reason`).
+- ✅ Tamper simulation test suite added (`tests/test_evidence_tamper.py`).
+- ✅ Immutable run metadata added (tool versions, OS fingerprint hash, start/end timestamps).
 
 **Acceptance criteria:**
-- `inspecta verify` detects intentional tampering across tracked files.
-- Signed and unsigned verification pathways documented.
+- ✅ `inspecta verify` detects intentional tampering across tracked files.
+- ✅ Signed and unsigned verification pathways implemented (`--sign-key` on run, `--public-key` on verify for signed bundles).
 
 ---
 
