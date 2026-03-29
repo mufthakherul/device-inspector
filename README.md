@@ -1,11 +1,15 @@
-# device-inspector (inspecta)
+# Inspecta Nexus
 
 [![CI](https://github.com/mufthakherul/inspecta-nexus/workflows/CI/badge.svg)](https://github.com/mufthakherul/inspecta-nexus/actions)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![Offline-First](https://img.shields.io/badge/Mode-Offline--First-0A7B83)](#)
+[![Cross-Platform](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-4C8EDA)](#)
+[![Evidence-Verified](https://img.shields.io/badge/Evidence-Manifest%20%2B%20Verify-2E8B57)](#)
 [![License: Custom](https://img.shields.io/badge/License-Custom%20Non--Commercial-orange.svg)](LICENSE.txt)
 
-Local-first automated diagnostics for laptops and PCs with offline-first execution, verifiable evidence bundles, and cross-platform delivery targets. Public non-commercial licensing applies (see `LICENSE.txt`).
+**Tagline:** *Professional offline diagnostics, trusted evidence, anywhere.*
+
+Local-first automated diagnostics for laptops and PCs with verifiable evidence bundles, portable workflows, and cross-platform delivery targets. Public non-commercial licensing applies (see `LICENSE.txt`).
 
 **Status:** 🟢 **Active Modernization** — next-generation roadmap in execution  
 **Current Version:** 0.1.0  
@@ -110,7 +114,7 @@ Key features (MVP focus)
 - Anti-tamper evidence (planned): SHA256 bundles, timestamps, optional signed reports
 
 Quick facts
-- Repo name: device-inspector
+- Repo name: inspecta-nexus
 - Product alias: inspecta
 - Priority platform: Linux-first (live-USB option for full tests)
 - License: Custom non-commercial (see LICENSE.txt). Author retains right to relicense.
