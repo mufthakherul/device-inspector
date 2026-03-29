@@ -1,6 +1,6 @@
 # Security Policy — device-inspector (inspecta)
 
-Last updated: 2025-10-18
+Last updated: 2026-03-30
 
 This document describes how to report security vulnerabilities, how reports will be handled, timelines and expectations, and best practices for responsible security research related to Device Inspector (inspecta). The project maintainers take security seriously and will treat reports confidentially and professionally.
 
@@ -10,7 +10,7 @@ If you discover a security issue, please follow the Responsible Disclosure proce
 
 ## Quick summary / TL;DR
 
-- Prefer encrypted email for reports: security@device-inspector.org (PGP key fingerprint below). If you can't use PGP, open a direct contact through the maintainer's GitHub profile: @mufthakherul.
+- Prefer encrypted email for reports: mufthakherul@outlook.com (PGP-supported reporting channel; fingerprint guidance below). If you can't use PGP, open a direct contact through the maintainer's GitHub profile: @mufthakherul.
 - Include a clear proof-of-concept (PoC), steps to reproduce, affected version(s), and any logs or artifacts (redacted of PII) when reporting.
 - We will acknowledge receipt within 72 hours and give status updates until resolved.
 - We aim to release a coordinated fix within 30 days for critical issues, sooner where feasible. Timelines may vary for complex or third-party issues.
@@ -34,7 +34,7 @@ Out of scope:
 ## How to report a vulnerability
 
 Preferred (secure) method:
-1. Encrypt your report with the project's PGP public key and email it to security@device-inspector.org.
+1. Encrypt your report with the project's PGP public key and email it to mufthakherul@outlook.com.
 2. If encryption is not possible, send a message to the project owner via GitHub (see "Contact" below) asking for a secure channel.
 
 Alternative:
@@ -90,9 +90,9 @@ How to encrypt (example)
    ```
 2. Encrypt a report file:
    ```bash
-   gpg --encrypt --recipient "device-inspector (inspecta) <security@device-inspector.org>" -o report.gpg report.txt
+  gpg --encrypt --recipient "device-inspector (inspecta) <mufthakherul@outlook.com>" -o report.gpg report.txt
    ```
-3. Send the encrypted file via email to security@device-inspector.org.
+3. Send the encrypted file via email to mufthakherul@outlook.com.
 
 If you cannot use PGP:
 - Use the GitHub contact for the owner (@mufthakherul) to request an alternative secure channel (e.g., Signal, Keybase, or secure paste). Do not post sensitive details publicly.
@@ -232,7 +232,7 @@ If you notice a dangerous dependency or secret in the repo, report it privately 
 ## Contact / reporting channels
 
 Primary contact (preferred):
-- Encrypted email: security@device-inspector.org (PGP encryption encouraged)
+- Encrypted email: mufthakherul@outlook.com (PGP encryption encouraged)
 
 Secondary contact:
 - GitHub owner: @mufthakherul — use the GitHub profile contact to request a secure channel if PGP/email not possible.

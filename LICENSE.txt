@@ -1,12 +1,12 @@
 Device Inspector (inspecta) — Custom Non-Commercial License (Version 1.0)
-Copyright (c) 2025 mufthakherul
+Copyright (c) 2025 MD MUFTHAKHERUL ISLAM MIRAZ
 All rights reserved.
 
 Preamble
 This License grants specific limited rights to use, copy, and modify the materials in this repository for personal, educational, research, or other non-commercial purposes only. The Author (copyright holder) expressly reserves all other rights, including the right to relicense, commercialize, or otherwise exploit the Project in whole or in part at any time. If you wish to use the Project for commercial purposes, you must obtain a separate commercial license from the Author.
 
 1. Definitions
-1.1 "Author" means the copyright holder: mufthakherul.
+1.1 "Author" means the copyright holder: MD MUFTHAKHERUL ISLAM MIRAZ.
 1.2 "Project" means the repository and all files, source code, documentation, images, scripts, examples and other content provided in the repository named "device-inspector" (inspecta).
 1.3 "You" (or "Licensee") means any individual or legal entity that exercises rights under this License.
 1.4 "Commercial Use" means:
@@ -86,7 +86,7 @@ The Author reserves the right to seek injunctive or other equitable relief in th
 If you use the Project to collect personal data from end users (e.g., test artifacts that might contain personal information), you are solely responsible for complying with applicable privacy laws (such as GDPR, CCPA) and for obtaining any required consents. The Author is not responsible for data collected by your modified Derivative Works or deployments.
 
 16. Contact for Commercial Licensing or Permissions
-To request a commercial license, redistribution permission, or trademark/use permission, contact the Author via the Project's GitHub profile (https://github.com/mufthakherul) or email where provided in the repository.
+To request a commercial license, redistribution permission, or trademark/use permission, contact the Author via the Project's GitHub profile (https://github.com/mufthakherul) or email (mufthakherul@outlook.com).
 
 17. Severability
 If any provision of this License is found to be unenforceable, invalid, or illegal under applicable law, that provision will be limited or eliminated to the minimum extent necessary so that the remaining provisions will otherwise remain in full force and effect and enforceable.

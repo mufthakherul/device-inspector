@@ -5,13 +5,13 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: Custom](https://img.shields.io/badge/License-Custom%20Non--Commercial-orange.svg)](LICENSE.txt)
 
-Local-first automated diagnostics for used laptops & PCs — quick-mode audits, auditable JSON+PDF reports, and optional bootable full diagnostics. Public, non-commercial use; © 2025 mufthakherul
+Local-first automated diagnostics for laptops and PCs with offline-first execution, verifiable evidence bundles, and cross-platform delivery targets. Public non-commercial licensing applies (see `LICENSE.txt`).
 
-**Status:** 🟢 **Active Development** — Phase 1 MVP Sprint 1 Complete (~60% complete)  
+**Status:** 🟢 **Active Modernization** — next-generation roadmap in execution  
 **Current Version:** 0.1.0  
-**Last Updated:** 2025-10-30
+**Last Updated:** 2026-03-30
 
-> **📊 Project Status:** Sprint 1 COMPLETE! Inventory detection, real SMART execution, and structured logging fully implemented. 22 tests passing with CI/CD. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for detailed progress and [NEXT_STEPS.md](NEXT_STEPS.md) for Sprint 2 priorities.
+> **📊 Project Direction:** The project has moved beyond early MVP scope into a broader cross-platform and polyglot modernization path. See [ROADMAP.md](ROADMAP.md) for current strategic sections, compliance matrix, and execution priorities.
 
 ---
 
@@ -57,8 +57,8 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 
 ## 🎯 Current Implementation Status
 
-**Phase:** Phase 1 — MVP Quick-mode Agent (Sprint 1 COMPLETE ✅)  
-**Completion:** ~60% of MVP functionality implemented  
+**Phase:** Platform expansion + reliability hardening  
+**Execution model:** Offline-first diagnostics with progressive cross-platform parity and evidence integrity improvements
 
 ### ✅ What's Working Now (Sprint 1 Complete)
 
@@ -75,7 +75,7 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 - **Documentation** — ✅ Comprehensive specs, roadmap, and contributing guides
 - **Sample Data** — ✅ dmidecode, smartctl (healthy/failing SATA, NVMe)
 
-### 🚧 In Development (Sprint 2 - Next)
+### 🚧 In Active Development
 
 - **Complete Schema** — Full REPORT_SCHEMA.md implementation with validation
 - **Coverage Reporting** — pytest-cov integration for 60%+ coverage
@@ -83,7 +83,7 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 - **Battery Health** — upower/powercfg integration
 - **CPU Benchmarking** — sysbench integration
 
-### 📋 Coming Later (Sprint 2-3)
+### 📋 Planned Roadmap Focus Areas
 
 - Memory testing (memtester)
 - Thermal monitoring (lm-sensors)
@@ -346,8 +346,11 @@ Acknowledgements & references
 - The open-source community and pilot testers (future)
 
 Contact
-- Owner / maintainer: @mufthakherul on GitHub
-- For commercial licensing inquiries: contact via GitHub
+- Owner / maintainer: **MD MUFTHAKHERUL ISLAM MIRAZ**
+- GitHub: [@mufthakherul](https://github.com/mufthakherul)
+- Email: [mufthakherul@outlook.com](mailto:mufthakherul@outlook.com)
+- Website: [mufthakherul.me](https://www.mufthakherul.me/)
+- For commercial licensing inquiries: open a private contact request via GitHub or email.
 
 ---
 
