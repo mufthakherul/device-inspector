@@ -50,6 +50,12 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 - 117+ tests (including 17 new profile tests) with 47.29% coverage
 - Windows battery invocation hardening (powercfg argument fallback + cleanup)
 - ✅ Sprint 1 fully complete (full-mode architecture finalized)
+- ✅ Sprint 2 diagnostics expansion (phase-1 implementation):
+   - SMART timeline snapshots (`smart_timeline.json`) for full mode
+   - Memory deep-log importer pipeline (`memtester` + `memtest86` parser support)
+   - Thermal severity tiers (`low`, `moderate`, `high`, `critical`)
+   - Failure classification in report summary (`hardware_risk`, `tooling_missing`, `environment_limited`)
+   - Profile-driven full-mode stress duration wiring
 
 ### Gaps to close
 - True Windows/macOS native probe parity for inventory/perf/thermal
@@ -110,19 +116,23 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 2 — Full Mode Diagnostics Completion
 
+**Status:** 🟡 In progress (2026-03-29) — core diagnostics enhancements shipped
+
 **Goal:** Complete deep diagnostics stack.
 
 **Tasks:**
-- Integrate long-duration stress plans (CPU, IO, thermal cycles).
-- Integrate memory deep tests with importers (MemTest logs + native memtest outputs).
-- Add extended SMART timeline snapshots.
-- Add thermal throttling severity scoring tiers.
-- Add failure classification (`hardware_risk`, `tooling_missing`, `environment_limited`).
+- 🟡 Integrate long-duration stress plans (CPU, IO, thermal cycles).
+   - ✅ CPU/thermal duration now profile-driven for full mode.
+   - ⏳ IO stress-cycling plan remains to be added.
+- ✅ Integrate memory deep tests with importers (MemTest logs + native memtest outputs).
+- ✅ Add extended SMART timeline snapshots.
+- ✅ Add thermal throttling severity scoring tiers.
+- ✅ Add failure classification (`hardware_risk`, `tooling_missing`, `environment_limited`).
 
 **Acceptance criteria:**
-- Full mode produces extended artifacts and richer scoring.
-- Report includes full-mode timeline and risk summary.
-- No hard crash when one deep probe fails.
+- ✅ Full mode produces extended artifacts and richer scoring (phase-1: timeline + severity + importer-backed memory data).
+- ✅ Report includes full-mode timeline/risk context via `smart_timeline` test output and `summary.failure_classification`.
+- ✅ No hard crash when one deep probe fails (graceful partial classification pathways retained).
 
 ---
 
