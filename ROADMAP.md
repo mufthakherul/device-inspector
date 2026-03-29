@@ -57,13 +57,16 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
    - Failure classification in report summary (`hardware_risk`, `tooling_missing`, `environment_limited`)
    - Profile-driven full-mode stress duration wiring
    - IO stress cycle execution + artifact (`disk_stress.json`) and summary metrics
-- ✅ Sprint 3 Windows parity (advanced in-progress):
+- ✅ Sprint 3 Windows parity (advanced completion):
    - Windows inventory backend via PowerShell/CIM (`Win32_ComputerSystem`, `Win32_BIOS`, enclosure data)
+   - Windows inventory registry fallback (`HKLM:\HARDWARE\DESCRIPTION\System\BIOS`)
    - Windows benchmark fallback backends when Linux tools unavailable:
       - Disk: `winsat` sequential read/write backend
       - CPU: PowerShell/CIM derived CPU performance estimate backend
    - Windows storage health backend via PowerShell `Get-PhysicalDisk` (health/operational status mapping)
+   - smartctl-first Windows storage probing (`smartctl --scan-open`) with native fallback
    - Windows CPU throttling detection backend via CIM sampling (frequency-drop based)
+   - OpenHardwareMonitor-first thermal adapter strategy with WMI fallback
 
 ### Gaps to close
 - True Windows/macOS native probe parity for inventory/perf/thermal
@@ -146,29 +149,30 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 3 — Windows Native Parity
 
-**Status:** 🟡 In progress (2026-03-29) — battery + inventory + benchmark fallback + storage/thermal backends delivered
+**Status:** ✅ **COMPLETED** (2026-03-29)
 
 **Goal:** Remove Linux-only assumptions for core probes on Windows.
 
 **Tasks:**
-- Inventory backend: WMI/CIM + registry fallback.
-- Storage health backend: smartctl-compatible path + Windows native APIs where possible.
-- CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy.
+- ✅ Inventory backend: WMI/CIM + registry fallback.
+- ✅ Storage health backend: smartctl-compatible path + Windows native APIs where possible.
+- ✅ CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy.
 - ✅ Battery: fix `powercfg` invocation and path quoting edge cases (primary + fallback argument strategy).
 - ✅ Inventory backend: PowerShell/CIM implementation added in `agent/plugins/inventory.py`.
 - ✅ Benchmarks: Windows-compatible backends when `fio/sysbench` absent.
    - Disk fallback via `winsat` backend in `agent/plugins/disk_perf.py`
    - CPU fallback via CIM estimate backend in `agent/plugins/cpu_bench.py`
 - ✅ Storage health backend: smartctl-compatible path + Windows native APIs where possible.
-   - Added native Windows storage-health probe via `Get-PhysicalDisk` in `agent/plugins/smart.py`
+   - Added smartctl-first Windows probing via `smartctl --scan-open`
+   - Added native Windows storage-health probe via `Get-PhysicalDisk` fallback in `agent/plugins/smart.py`
 - ✅ CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy.
    - Added Windows throttling detection pipeline using CIM sampling in `agent/plugins/sensors.py`
-   - OpenHardwareMonitor optional adapter remains future enhancement (non-blocking)
+   - Added OpenHardwareMonitor-first snapshot path with WMI fallback
 
 **Acceptance criteria:**
-- Real Windows run has valid inventory fields (not unknown placeholders) on supported devices.
-- Battery report succeeds when OS command succeeds directly.
-- Degradation warnings are clear and actionable.
+- ✅ Real Windows run has valid inventory fields (not unknown placeholders) on supported devices.
+- ✅ Battery report succeeds when OS command succeeds directly.
+- ✅ Degradation warnings are clear and actionable.
 
 ---
 
