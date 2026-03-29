@@ -39,7 +39,9 @@ def test_execute_upower_with_sample():
 
 
 @patch("subprocess.run")
-def test_scan_battery_missing_device(mock_run):
+@patch("platform.system")
+def test_scan_battery_missing_device(mock_platform, mock_run):
+    mock_platform.return_value = "Linux"
     mock_run.return_value = MagicMock(
         returncode=0,
         stdout="/org/freedesktop/UPower/devices/DisplayDevice\n",
@@ -53,7 +55,9 @@ def test_scan_battery_missing_device(mock_run):
 
 
 @patch("subprocess.run")
-def test_scan_battery_upower_not_found(mock_run):
+@patch("platform.system")
+def test_scan_battery_upower_not_found(mock_platform, mock_run):
+    mock_platform.return_value = "Linux"
     mock_run.side_effect = FileNotFoundError()
 
     result = battery.scan_battery(use_sample=False)
@@ -63,7 +67,9 @@ def test_scan_battery_upower_not_found(mock_run):
 
 
 @patch("subprocess.run")
-def test_scan_battery_timeout(mock_run):
+@patch("platform.system")
+def test_scan_battery_timeout(mock_platform, mock_run):
+    mock_platform.return_value = "Linux"
     mock_run.side_effect = subprocess.TimeoutExpired("upower", 10)
 
     result = battery.scan_battery(use_sample=False)

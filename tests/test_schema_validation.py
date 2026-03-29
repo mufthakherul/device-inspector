@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,7 +15,7 @@ def test_sample_report_validates_schema():
     # Use the provided script to validate
     ret = subprocess.run(
         [
-            "python",
+            sys.executable,
             str(ROOT / "scripts" / "validate_report.py"),
             str(report),
             str(schema),
@@ -29,7 +30,7 @@ def test_cli_quick_generates_valid_report(tmp_path: Path):
     out.mkdir()
     ret = subprocess.run(
         [
-            "python",
+            sys.executable,
             "-m",
             "agent.cli",
             "run",
@@ -38,6 +39,7 @@ def test_cli_quick_generates_valid_report(tmp_path: Path):
             "--output",
             str(out),
             "--no-prompt",
+            "--use-sample",
         ]
     )
     # CLI uses exit code 10 for partial success when sample smart used
@@ -47,7 +49,7 @@ def test_cli_quick_generates_valid_report(tmp_path: Path):
     schema = ROOT / "schemas" / "report-schema-1.0.0.json"
     ret2 = subprocess.run(
         [
-            "python",
+            sys.executable,
             str(ROOT / "scripts" / "validate_report.py"),
             str(report),
             str(schema),

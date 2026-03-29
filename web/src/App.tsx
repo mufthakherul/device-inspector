@@ -7,13 +7,13 @@ function formatScore(score?: number): string {
 }
 
 export default function App() {
-    const [report, setReport] = useState(null as InspectaReport | null);
+    const [report, setReport] = useState<InspectaReport | null>(null);
     const [error, setError] = useState("");
 
     const scoreEntries = useMemo(
         () => Object.entries(report?.scores ?? {}).sort(([a], [b]) => a.localeCompare(b)),
         [report]
-    ) as Array<[string, number]>;
+    ) as [string, number][];
 
     const onFileSelected = async (event: ChangeEvent<HTMLInputElement>) => {
         setError("");
@@ -84,19 +84,14 @@ export default function App() {
                                 <tr><th>Name</th><th>Status</th><th>Detail</th><th>Error</th></tr>
                             </thead>
                             <tbody>
-                                {(report.tests ?? []).map(
-                                    (
-                                        test: { name?: string; status?: string; status_detail?: string; error?: string },
-                                        idx: number
-                                    ) => (
-                                        <tr key={`${test.name ?? "test"}-${idx}`}>
-                                            <td>{test.name ?? "unknown"}</td>
-                                            <td>{(test.status ?? "unknown").toUpperCase()}</td>
-                                            <td>{test.status_detail ?? ""}</td>
-                                            <td>{test.error ?? ""}</td>
-                                        </tr>
-                                    )
-                                )}
+                                {(report.tests ?? []).map((test, idx) => (
+                                    <tr key={`${test.name ?? "test"}-${idx}`}>
+                                        <td>{test.name ?? "unknown"}</td>
+                                        <td>{(test.status ?? "unknown").toUpperCase()}</td>
+                                        <td>{test.status_detail ?? ""}</td>
+                                        <td>{test.error ?? ""}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </section>

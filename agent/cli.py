@@ -14,6 +14,7 @@ from pathlib import Path
 import click
 
 from . import __version__, native_bridge
+from .evidence import write_evidence_manifest
 from .logging_utils import setup_logging
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .report import compose_report
@@ -833,6 +834,42 @@ def run(
         except UploadError as e:
             inspector_logger.warning("Upload failed: %s", str(e))
             logger.warning("Upload failed: %s", str(e))
+
+    inspector_logger.info("Step 12: Generating evidence manifest...")
+    evidence_candidates: list[str] = []
+    evidence_candidates.extend(
+        [str(p.relative_to(out_dir)) for p in artifacts_dir.iterdir()]
+    )
+
+    txt_report = out_dir / "report.txt"
+    pdf_report = out_dir / "report.pdf"
+    html_report = out_dir / "report.html"
+    for extra in (txt_report, pdf_report, html_report):
+        if extra.exists() and extra.is_file():
+            evidence_candidates.append(str(extra.relative_to(out_dir)))
+
+    manifest_rel_path, manifest_sha256 = write_evidence_manifest(
+        output_dir=out_dir,
+        relative_paths=evidence_candidates,
+        agent_version=__version__,
+    )
+
+    if manifest_rel_path not in report["artifacts"]:
+        report["artifacts"].append(manifest_rel_path)
+
+    report.setdefault("evidence", {})
+    report["evidence"]["manifest_sha256"] = manifest_sha256
+    report["evidence"]["manifest_path"] = manifest_rel_path
+    report["evidence"]["signed"] = False
+
+    with open(report_path, "w", encoding="utf-8") as fh:
+        json.dump(report, fh, indent=2)
+
+    inspector_logger.info(
+        "Evidence manifest written: %s (sha256=%s)",
+        manifest_rel_path,
+        manifest_sha256,
+    )
 
     inspector_logger.info("=" * 60)
     inspector_logger.info("Inspection complete. Log file: %s", log_file)

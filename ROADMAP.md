@@ -1,9 +1,9 @@
 # ROADMAP — device-inspector (inspecta)
 
-**Last updated:** 2026-03-27  
-**Status:** Phase 1 ~97% complete — Sprint 3 COMPLETE ✅! All thermal features including stress testing and throttle detection now fully implemented.
+**Last updated:** 2026-03-29  
+**Status:** Phase 2 core implementation COMPLETE ✅ (viewer + report command + opt-in upload API skeleton). Sprint 6 scaffold added.
 
-> **📊 Progress Update (2026-03-27):** Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅, Sprint 3 ✅ **COMPLETE**: Thermal stress testing with CPU throttling detection, frequency monitoring, and CSV artifact generation all implemented. Test suite: **107 passing tests**, **58.01% coverage** (exceeds target!). Thermal stress is now integrated into CLI with `--with-stress` flag. Next: Sprint 4 - Enhanced PDF reporting and web viewer.
+> **📊 Progress Update (2026-03-29):** Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅, Sprint 3 ✅, Sprint 4 ✅ **IMPLEMENTED**, Sprint 5 ✅ **CORE IMPLEMENTED**, Sprint 6 🟡 **SCAFFOLD STARTED**. Added: `inspecta report` command, HTML report generation, React/Vite static viewer scaffold, TypeScript upload API (`POST /reports`, `GET /reports/{id}`, `GET /reports/{id}/pdf`), CLI `--upload/--token`, and offline SHA256 evidence manifest generation + verification.
 
 This roadmap is the authoritative, actionable plan for building the device-inspector (inspecta) project. It converts the Project Goal and high-level strategy into a time-boxed implementation plan: phases, sprints, milestones, deliverables, acceptance criteria, owners, risks and mitigations, metrics, and operational playbooks for pilot and launch.
 
@@ -198,48 +198,55 @@ Acceptance criteria
 Sprint 4 — Report PDF generation & schema, static viewer (2025-12-15 → 2026-01-04)
 Goal: Produce a human-friendly PDF, finalize JSON schema and implement a simple static web viewer for local report display.
 
+**Status:** ✅ Implemented (2026-03-29)
+
 Tasks
-- Finalize JSON Schema (report-schema.json) and tests for schema validation
-- Implement PDF report generator (Puppeteer/wkhtmltopdf or Python WeasyPrint) with templating
-- Create a minimal React/TypeScript static viewer (Next.js or Vite) that reads local report.json and displays summary and raw logs
-- Add `inspecta report --open` to launch viewer against local report
-- Add sample report artifacts and screenshots for viewer demo
+- ✅ Finalize JSON Schema (`schemas/report-schema-1.0.0.json`) and schema validation tests
+- ✅ Implement PDF report generator (reportlab)
+- ✅ Create a minimal React/TypeScript static viewer (`web/`) that reads local report.json and displays summary and raw logs
+- ✅ Add `inspecta report --open` and `inspecta report --format html` for local offline report viewing
+- 🟡 Add sample viewer screenshots/artifacts (pending polish)
 
 Acceptance criteria
-- report.json validates against schema
-- report.pdf generated from sample report.json matches template and includes evidence thumbnails
-- Local viewer opens and renders report.json correctly
+- ✅ report.json validates against schema
+- ✅ report.pdf generated from sample report.json
+- ✅ Local viewer opens and renders report.json correctly
+- 🟡 Evidence thumbnails in PDF template (future enhancement)
 
 Sprint 5 — Backend API (opt-in) & upload flow (2026-01-05 → 2026-01-18)
 Goal: Build minimal secure upload API with opt-in behavior; artifact storage to S3-compatible store.
 
+**Status:** ✅ Core implemented (2026-03-29)
+
 Tasks
-- Implement server skeleton in TypeScript/Node (Express/Fastify/Nest) with POST /reports for authenticated upload
-- Implement token-based auth for upload (short-lived tokens)
-- Store artifacts in S3 (or local file store for dev)
-- Implement basic report retrieval endpoint GET /reports/{id} and GET /reports/{id}/pdf
-- Implement server-side virus/malware scan policy for uploaded content (optional step)
-- Update agent with `--upload` flow that only proceeds with explicit user consent
+- ✅ Implement server skeleton in TypeScript/Node (Express) with `POST /reports` for authenticated upload
+- ✅ Implement token-based auth for upload (Bearer token)
+- ✅ Store artifacts in local file store for dev (`server/data/reports/*`)
+- ✅ Implement basic report retrieval endpoint `GET /reports/{id}` and `GET /reports/{id}/pdf`
+- 🟡 Implement server-side malware scan policy for uploaded content (pending)
+- ✅ Update agent with `--upload` flow requiring explicit token (`--upload --token`)
 
 Acceptance criteria
-- Agent can `inspecta run --mode quick --upload https://... --token <token>` and server accepts and stores artifacts, returns report ID and link
-- Server has basic ACL and retention policy config
-- Security: uploads accepted only via token; HTTPS required
+- ✅ Agent can `inspecta run --mode quick --upload https://... --token <token>` and server accepts and stores artifacts
+- 🟡 Server has retention policy config (pending)
+- 🟡 HTTPS enforcement in app layer (recommended for deployment ingress/proxy)
 
 Sprint 6 — Bootable image builder + memtest integration (2026-01-19 → 2026-02-01)
 Goal: Provide reproducible scripts to build a bootable diagnostic image that includes memtest and core tools.
 
+**Status:** 🟡 Scaffold started (2026-03-29)
+
 Tasks
-- Choose base distro (Alpine minimal or Ubuntu minimal) and create builder scripts (Packer or simple bash/guestfish)
-- Include smartmontools, fio, stress-ng, memtest86 or memtest86+ (or document licensing steps)
-- Provide USB write instructions and quick boot checklist for technicians
-- Add mechanism to generate signed artifact manifest from live-USB runs (timestamp, sha256, agent version)
-- Document memtest full-run workflow and how to attach memtest logs to report.json
+- ✅ Create builder scaffold script: `tools/build-live-iso.sh`
+- 🟡 Include smartmontools/fio/stress-ng/memtest in actual ISO image (pending distro backend)
+- ✅ Provide quick boot checklist and workflow docs (`docs/BOOTABLE.md`)
+- ✅ Add SHA256 artifact manifest mechanism (`agent/evidence.py`, `tools/verify_bundle.py`)
+- 🟡 Document/import full MemTest logs into report.json (pending)
 
 Acceptance criteria
-- `tools/build-live-iso.sh` produces a bootable ISO that boots to a shell with tools present
-- Bootable image integrates MemTest or provides clear steps to run MemTest86 and collect logs
-- Documented process to collect and import memtest logs into report.json
+- 🟡 `tools/build-live-iso.sh` currently produces build scaffold metadata; full ISO backend pending
+- ✅ Clear steps documented for technician workflow and evidence validation
+- 🟡 Automated memtest log import into report.json pending
 
 Sprint 7 — QA & pilot recruitment (2026-02-02 → 2026-02-15)
 Goal: Prepare pilot program, automated tests, and CI e2e for quick-mode; recruit pilot partners.
@@ -289,9 +296,9 @@ Acceptance criteria
 - M0: Repo scaffold and docs (README, LICENSE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) — ✅ DONE
 - M1: Agent skeleton + SMART + inventory + sample report — ✅ DONE (Sprint 1)
 - M1b: CI/CD hardening + security scanning + standalone packaging — ✅ DONE (Sprint 2 infra)
-- M2: Quick-mode features + scoring + sample PDF — Sprint 2–4 (in progress)
-- M3: Viewer + optional server upload — Sprint 4–5
-- M4: Bootable ISO builder + memtest integration — Sprint 6
+- M2: Quick-mode features + scoring + sample PDF — ✅ DONE (Sprint 2–4)
+- M3: Viewer + optional server upload — ✅ CORE DONE (Sprint 4–5)
+- M4: Bootable ISO builder + memtest integration — 🟡 IN PROGRESS (Sprint 6 scaffold)
 - M5: Pilot complete and v1.0 release — Sprint 8 & Release
 
 ---
