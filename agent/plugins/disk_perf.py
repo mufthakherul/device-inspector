@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import logging
+import platform
+import re
 import subprocess
 from typing import Any, Dict
 
@@ -102,10 +104,108 @@ def execute_fio(use_sample: bool = False) -> Dict[str, Any]:
     return {"status": "ok", "data": parsed, "raw_json": raw}
 
 
+def execute_windows_winsat() -> Dict[str, Any]:
+    """Execute Windows disk benchmark via winsat and return normalized metrics."""
+    read_cmd = ["winsat", "disk", "-seq", "-read", "-drive", "c"]
+    write_cmd = ["winsat", "disk", "-seq", "-write", "-drive", "c"]
+
+    try:
+        read_result = subprocess.run(
+            read_cmd,
+            capture_output=True,
+            text=True,
+            timeout=45,
+            check=False,
+        )
+        write_result = subprocess.run(
+            write_cmd,
+            capture_output=True,
+            text=True,
+            timeout=45,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise DiskPerfError("winsat not found on Windows") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise DiskPerfError("winsat timed out") from exc
+
+    if read_result.returncode != 0 or write_result.returncode != 0:
+        message = (
+            (read_result.stderr or "").strip()
+            or (write_result.stderr or "").strip()
+            or "winsat returned non-zero exit code"
+        )
+        raise DiskPerfError(f"winsat failed: {message}")
+
+    read_match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s+MB/s", read_result.stdout)
+    write_match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s+MB/s", write_result.stdout)
+
+    if not read_match or not write_match:
+        raise DiskPerfError("winsat output missing MB/s metrics")
+
+    read_mbps = float(read_match.group(1))
+    write_mbps = float(write_match.group(1))
+
+    return {
+        "status": "ok",
+        "data": {
+            "job": "winsat_seq",
+            "read_mbps": round(read_mbps, 2),
+            "write_mbps": round(write_mbps, 2),
+            "read_iops": None,
+            "write_iops": None,
+            "backend": "winsat",
+        },
+        "raw_text": {
+            "read": read_result.stdout,
+            "write": write_result.stdout,
+        },
+    }
+
+
+def run_io_stress_cycles(cycles: int, use_sample: bool = False) -> Dict[str, Any]:
+    """Run repeated IO benchmark cycles and aggregate summary metrics."""
+    effective_cycles = max(1, int(cycles))
+    cycle_results: list[dict[str, Any]] = []
+
+    for idx in range(effective_cycles):
+        cycle = scan_disk_performance(use_sample=use_sample)
+        cycle_results.append({"cycle": idx + 1, **cycle})
+
+    ok_cycles = [c for c in cycle_results if c.get("status") == "ok"]
+    if not ok_cycles:
+        return {
+            "status": "error",
+            "error": "All IO stress cycles failed",
+            "cycles": cycle_results,
+        }
+
+    reads = [float(c["data"].get("read_mbps", 0) or 0) for c in ok_cycles]
+    writes = [float(c["data"].get("write_mbps", 0) or 0) for c in ok_cycles]
+
+    return {
+        "status": "ok" if len(ok_cycles) == effective_cycles else "partial",
+        "cycles": cycle_results,
+        "summary": {
+            "requested_cycles": effective_cycles,
+            "successful_cycles": len(ok_cycles),
+            "avg_read_mbps": round(sum(reads) / len(reads), 2),
+            "avg_write_mbps": round(sum(writes) / len(writes), 2),
+            "min_read_mbps": round(min(reads), 2),
+            "max_read_mbps": round(max(reads), 2),
+            "min_write_mbps": round(min(writes), 2),
+            "max_write_mbps": round(max(writes), 2),
+        },
+    }
+
+
 def scan_disk_performance(use_sample: bool = False) -> Dict[str, Any]:
     """Run quick disk benchmark and return structured result."""
     try:
-        result = execute_fio(use_sample=use_sample)
+        if not use_sample and platform.system().lower() == "windows":
+            result = execute_windows_winsat()
+        else:
+            result = execute_fio(use_sample=use_sample)
         logger.info(
             "Disk benchmark collected (read=%s MB/s, write=%s MB/s)",
             result["data"].get("read_mbps"),

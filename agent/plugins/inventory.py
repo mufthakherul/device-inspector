@@ -8,6 +8,7 @@ Parses vendor, model, serial number, BIOS version, and chassis type.
 from __future__ import annotations
 
 import logging
+import platform
 import re
 import subprocess
 from typing import Any
@@ -17,6 +18,82 @@ logger = logging.getLogger("inspecta.inventory")
 
 class InventoryError(Exception):
     """Raised when inventory detection fails."""
+
+
+def execute_windows_inventory() -> str:
+    """Execute Windows CIM queries and return JSON payload.
+
+    Returns:
+        JSON string produced by PowerShell ConvertTo-Json.
+    """
+    ps_script = (
+        "$cs=Get-CimInstance Win32_ComputerSystem; "
+        "$bios=Get-CimInstance Win32_BIOS; "
+        "$enc=Get-CimInstance Win32_SystemEnclosure | Select-Object -First 1; "
+        "$obj=[ordered]@{"
+        "vendor=$cs.Manufacturer;"
+        "model=$cs.Model;"
+        "serial=$bios.SerialNumber;"
+        "bios_version=($bios.SMBIOSBIOSVersion -join ', ');"
+        "bios_date=$bios.ReleaseDate;"
+        "chassis_type=($enc.ChassisTypes -join ', ');"
+        "sku=$cs.SystemSKUNumber;"
+        "uuid=$cs.SystemFamily;"
+        "family=$cs.SystemFamily"
+        "}; "
+        "$obj | ConvertTo-Json -Compress"
+    )
+
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True,
+            text=True,
+            timeout=12,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise InventoryError("PowerShell not found on Windows") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise InventoryError("Windows inventory query timed out") from exc
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip() or result.stdout.strip()
+        raise InventoryError(f"Windows inventory query failed: {stderr}")
+
+    return result.stdout.strip()
+
+
+def parse_windows_inventory(output: str) -> dict[str, Any]:
+    """Parse JSON output from execute_windows_inventory."""
+    import json
+
+    try:
+        data = json.loads(output)
+    except Exception as exc:
+        raise InventoryError(
+            f"Could not parse Windows inventory output: {exc}"
+        ) from exc
+
+    def clean(value: Any) -> Any:
+        if value is None:
+            return None
+        text = str(value).strip()
+        if text in ("", "To Be Filled By O.E.M.", "Not Specified"):
+            return None
+        return text
+
+    return {
+        "vendor": clean(data.get("vendor")),
+        "model": clean(data.get("model")),
+        "serial": clean(data.get("serial")),
+        "bios_version": clean(data.get("bios_version")),
+        "bios_date": clean(data.get("bios_date")),
+        "chassis_type": clean(data.get("chassis_type")),
+        "sku": clean(data.get("sku")),
+        "uuid": clean(data.get("uuid")),
+        "family": clean(data.get("family")),
+    }
 
 
 def execute_dmidecode() -> str:
@@ -173,6 +250,11 @@ def get_inventory(use_sample: bool = False) -> dict[str, Any]:
             output = f.read()
         logger.info("Using sample dmidecode output")
     else:
+        if platform.system().lower() == "windows":
+            output = execute_windows_inventory()
+            logger.info("Executed Windows inventory query successfully")
+            return parse_windows_inventory(output)
+
         output = execute_dmidecode()
         logger.info("Executed dmidecode successfully")
 

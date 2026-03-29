@@ -565,6 +565,36 @@ def run(
             "Disk benchmark failed: %s", disk_result.get("error", "unknown")
         )
 
+    # Sprint 2 advanced: IO stress cycles for full mode profiles.
+    if mode == "full" and runtime_profile:
+        io_cycles = max(1, int(runtime_profile.enable_thermal_cycles))
+        inspector_logger.info(
+            "Step 4b: Running IO stress cycles (%d cycle(s))...",
+            io_cycles,
+        )
+        io_stress = disk_perf.run_io_stress_cycles(
+            cycles=io_cycles,
+            use_sample=use_sample,
+        )
+
+        io_artifact = artifacts_dir / "disk_stress.json"
+        io_artifact.write_text(json.dumps(io_stress, indent=2), encoding="utf-8")
+
+        tests_list.append(
+            {
+                "name": "disk_stress_cycles",
+                "status": (
+                    "ok" if io_stress.get("status") in {"ok", "partial"} else "error"
+                ),
+                "data": io_stress.get("summary", {}),
+                "status_detail": "sample" if use_sample else "executed",
+            }
+        )
+        inspector_logger.info(
+            "IO stress cycles complete: status=%s",
+            io_stress.get("status"),
+        )
+
     # Run CPU benchmark
     inspector_logger.info("Step 5: Running CPU benchmark...")
     cpu_result = cpu_bench.scan_cpu_benchmark(use_sample=use_sample)

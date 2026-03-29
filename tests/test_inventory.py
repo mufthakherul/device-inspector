@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -85,3 +86,34 @@ def test_parse_dmidecode_empty_output():
     assert result["model"] is None
     assert result["serial"] is None
     assert result["bios_version"] is None
+
+
+def test_parse_windows_inventory_json():
+    output = (
+        '{"vendor":"Dell Inc.","model":"Latitude 7430",'
+        '"serial":"ABC123","bios_version":"1.20.0",'
+        '"bios_date":"20260201000000.000000+000",'
+        '"chassis_type":"10","sku":"0ABC",'
+        '"uuid":"family-guid","family":"Latitude"}'
+    )
+    parsed = inventory.parse_windows_inventory(output)
+
+    assert parsed["vendor"] == "Dell Inc."
+    assert parsed["model"] == "Latitude 7430"
+    assert parsed["serial"] == "ABC123"
+    assert parsed["bios_version"] == "1.20.0"
+
+
+@patch("agent.plugins.inventory.platform.system", return_value="Windows")
+@patch("agent.plugins.inventory.subprocess.run")
+def test_get_inventory_windows_backend(mock_run, _mock_system):
+    mock_run.return_value = MagicMock(
+        returncode=0,
+        stdout='{"vendor":"HP","model":"EliteBook","serial":"XYZ"}',
+        stderr="",
+    )
+
+    result = inventory.get_inventory(use_sample=False)
+
+    assert result["vendor"] == "HP"
+    assert result["model"] == "EliteBook"

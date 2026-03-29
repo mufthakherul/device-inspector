@@ -37,7 +37,8 @@ def test_execute_fio_with_sample():
 
 
 @patch("subprocess.run")
-def test_scan_disk_performance_fio_not_found(mock_run):
+@patch("agent.plugins.disk_perf.platform.system", return_value="Linux")
+def test_scan_disk_performance_fio_not_found(_mock_platform, mock_run):
     mock_run.side_effect = FileNotFoundError()
 
     result = disk_perf.scan_disk_performance(use_sample=False)
@@ -47,10 +48,36 @@ def test_scan_disk_performance_fio_not_found(mock_run):
 
 
 @patch("subprocess.run")
-def test_scan_disk_performance_fio_failure(mock_run):
+@patch("agent.plugins.disk_perf.platform.system", return_value="Linux")
+def test_scan_disk_performance_fio_failure(mock_platform, mock_run):
     mock_run.return_value = MagicMock(returncode=1, stdout="", stderr="bad args")
 
     result = disk_perf.scan_disk_performance(use_sample=False)
 
     assert result["status"] == "error"
     assert "fio failed" in result["error"]
+
+
+@patch("agent.plugins.disk_perf.platform.system", return_value="Windows")
+@patch("agent.plugins.disk_perf.subprocess.run")
+def test_scan_disk_performance_windows_winsat(mock_run, _mock_platform):
+    mock_run.side_effect = [
+        MagicMock(returncode=0, stdout="Disk  300.25 MB/s", stderr=""),
+        MagicMock(returncode=0, stdout="Disk  250.75 MB/s", stderr=""),
+    ]
+
+    result = disk_perf.scan_disk_performance(use_sample=False)
+
+    assert result["status"] == "ok"
+    assert result["data"]["backend"] == "winsat"
+    assert result["data"]["read_mbps"] == 300.25
+    assert result["data"]["write_mbps"] == 250.75
+
+
+def test_run_io_stress_cycles_with_sample():
+    result = disk_perf.run_io_stress_cycles(cycles=2, use_sample=True)
+
+    assert result["status"] == "ok"
+    assert result["summary"]["requested_cycles"] == 2
+    assert result["summary"]["successful_cycles"] == 2
+    assert result["summary"]["avg_read_mbps"] > 0
