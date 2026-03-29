@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: mufthakherul.inspecta-agent
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: mufthakherul
+PublisherUrl: https://github.com/mufthakherul
+PackageName: inspecta-agent
+PackageUrl: https://github.com/mufthakherul/device-inspector
+ShortDescription: Local-first device diagnostics CLI with evidence bundle support.
+Moniker: inspecta
+License: Custom Non-Commercial
+LicenseUrl: https://github.com/mufthakherul/device-inspector/blob/main/LICENSE.txt
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

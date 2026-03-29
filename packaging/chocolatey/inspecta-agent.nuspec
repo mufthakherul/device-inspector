@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>inspecta-agent</id>
+    <version>0.1.0</version>
+    <title>inspecta-agent</title>
+    <authors>mufthakherul</authors>
+    <projectUrl>https://github.com/mufthakherul/device-inspector</projectUrl>
+    <licenseUrl>https://github.com/mufthakherul/device-inspector/blob/main/LICENSE.txt</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Local-first device diagnostics CLI with evidence integrity verification.</description>
+    <tags>diagnostics hardware inspecta</tags>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
