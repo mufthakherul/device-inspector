@@ -88,7 +88,7 @@ def write_payload(payload: dict, output_path: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sync docs-site release metadata")
     parser.add_argument("--owner", default="mufthakherul")
-    parser.add_argument("--repo", default="device-inspector")
+    parser.add_argument("--repo", default="inspecta-nexus")
     parser.add_argument("--output", default="docs-site/data/releases.json")
     args = parser.parse_args()
 

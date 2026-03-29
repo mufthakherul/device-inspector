@@ -1,0 +1,50 @@
+name: SBOM and Security
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  sbom-and-audit:
+    name: Generate SBOM and audit dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependency tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install cyclonedx-bom pip-audit
+
+      - name: Generate CycloneDX SBOM (JSON)
+        run: |
+          cyclonedx-py requirements requirements.txt -o sbom.cyclonedx.json --output-format JSON
+
+      - name: Run dependency vulnerability audit
+        continue-on-error: true
+        run: |
+          pip-audit -r requirements.txt --format json --output pip-audit.json
+
+      - name: Upload security artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-and-security-artifacts
+          path: |
+            sbom.cyclonedx.json
+            pip-audit.json
+          retention-days: 30

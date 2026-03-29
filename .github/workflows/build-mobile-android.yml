@@ -13,6 +13,8 @@ jobs:
   android-build:
     name: Android APK/AAB
     runs-on: ubuntu-latest
+    env:
+      HAS_ANDROID_SIGNING: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEY_ALIAS != '' && secrets.ANDROID_KEY_PASSWORD != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
     defaults:
       run:
         working-directory: apps/mobile
@@ -45,7 +47,7 @@ jobs:
         run: flutter build appbundle --release --dart-define=LOCAL_ONLY=true
 
       - name: Prepare signed Android build (optional)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEY_ALIAS != '' && secrets.ANDROID_KEY_PASSWORD != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
+        if: ${{ env.HAS_ANDROID_SIGNING == 'true' }}
         shell: bash
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release-keystore.jks
@@ -62,7 +64,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
 
       - name: Build signed APK (optional)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEY_ALIAS != '' && secrets.ANDROID_KEY_PASSWORD != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
+        if: ${{ env.HAS_ANDROID_SIGNING == 'true' }}
         run: flutter build apk --release --dart-define=LOCAL_ONLY=true
 
       - name: Upload Android artifacts

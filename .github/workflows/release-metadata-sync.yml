@@ -29,7 +29,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -m tools.sync_release_metadata --owner mufthakherul --repo device-inspector --output docs-site/data/releases.json
+          python -m tools.sync_release_metadata --owner mufthakherul --repo inspecta-nexus --output docs-site/data/releases.json
 
       - name: Commit metadata updates
         shell: bash
