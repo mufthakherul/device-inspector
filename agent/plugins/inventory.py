@@ -20,6 +20,44 @@ class InventoryError(Exception):
     """Raised when inventory detection fails."""
 
 
+def execute_windows_inventory_registry() -> str:
+    """Execute Windows registry fallback query and return JSON payload."""
+    ps_script = (
+        "$r=Get-ItemProperty 'HKLM:\\HARDWARE\\DESCRIPTION\\System\\BIOS';"
+        "$obj=[ordered]@{"
+        "vendor=$r.SystemManufacturer;"
+        "model=$r.SystemProductName;"
+        "serial=$r.BaseBoardSerialNumber;"
+        "bios_version=$r.BIOSVersion;"
+        "bios_date=$r.BIOSReleaseDate;"
+        "chassis_type=$null;"
+        "sku=$r.SystemSKU;"
+        "uuid=$null;"
+        "family=$r.SystemFamily"
+        "};"
+        "$obj | ConvertTo-Json -Compress"
+    )
+
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True,
+            text=True,
+            timeout=12,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise InventoryError("PowerShell not found on Windows") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise InventoryError("Windows registry inventory query timed out") from exc
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip() or result.stdout.strip()
+        raise InventoryError(f"Windows registry inventory query failed: {stderr}")
+
+    return result.stdout.strip()
+
+
 def execute_windows_inventory() -> str:
     """Execute Windows CIM queries and return JSON payload.
 
@@ -94,6 +132,11 @@ def parse_windows_inventory(output: str) -> dict[str, Any]:
         "uuid": clean(data.get("uuid")),
         "family": clean(data.get("family")),
     }
+
+
+def _has_minimum_inventory(data: dict[str, Any]) -> bool:
+    """Check if parsed inventory has minimum useful identity fields."""
+    return bool(data.get("vendor") and data.get("model"))
 
 
 def execute_dmidecode() -> str:
@@ -251,9 +294,21 @@ def get_inventory(use_sample: bool = False) -> dict[str, Any]:
         logger.info("Using sample dmidecode output")
     else:
         if platform.system().lower() == "windows":
-            output = execute_windows_inventory()
-            logger.info("Executed Windows inventory query successfully")
-            return parse_windows_inventory(output)
+            try:
+                output = execute_windows_inventory()
+                parsed = parse_windows_inventory(output)
+                if _has_minimum_inventory(parsed):
+                    logger.info("Executed Windows inventory query successfully")
+                    return parsed
+                logger.warning(
+                    "Windows inventory missing core fields; using registry fallback"
+                )
+            except InventoryError as exc:
+                logger.warning("Windows CIM inventory failed: %s", exc)
+
+            reg_output = execute_windows_inventory_registry()
+            logger.info("Executed Windows registry fallback inventory successfully")
+            return parse_windows_inventory(reg_output)
 
         output = execute_dmidecode()
         logger.info("Executed dmidecode successfully")

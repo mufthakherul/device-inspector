@@ -171,6 +171,20 @@ class TestGetSensorsSnapshotLinux:
 class TestGetSensorsSnapshotWindows:
     """Test get_sensors_snapshot_windows function."""
 
+    @patch("agent.plugins.sensors._get_windows_openhardwaremonitor_snapshot")
+    def test_openhardwaremonitor_preferred(self, mock_ohm):
+        mock_ohm.return_value = {
+            "platform": "windows",
+            "tool": "openhardwaremonitor",
+            "sensors": [{"adapter": "openhardwaremonitor-wmi", "readings": []}],
+            "max_temp": 65.0,
+            "avg_temp": 60.0,
+            "critical_temps": [],
+        }
+
+        result = sensors.get_sensors_snapshot_windows()
+        assert result["tool"] == "openhardwaremonitor"
+
     @patch("subprocess.run")
     def test_wmi_no_data(self, mock_run):
         """Test Windows when no thermal data available."""
@@ -195,6 +209,22 @@ class TestGetSensorsSnapshotWindows:
 
         with pytest.raises(sensors.SensorError, match="timed out"):
             sensors.get_sensors_snapshot_windows()
+
+
+class TestOpenHardwareMonitorSnapshot:
+    @patch("agent.plugins.sensors.subprocess.run")
+    def test_openhardwaremonitor_snapshot_parse(self, mock_run):
+        mock_run.return_value = MagicMock(
+            returncode=0,
+            stdout='[{"Name":"CPU Core","Value":55.5,"SensorType":"Temperature"}]',
+            stderr="",
+        )
+
+        result = sensors._get_windows_openhardwaremonitor_snapshot()
+
+        assert result is not None
+        assert result["tool"] == "openhardwaremonitor"
+        assert result["max_temp"] == 55.5
 
 
 class TestGetSensorsSnapshot:

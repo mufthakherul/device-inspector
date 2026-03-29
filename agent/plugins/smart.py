@@ -23,12 +23,77 @@ class SmartError(Exception):
     """Raised when SMART operations fail."""
 
 
+def list_windows_smartctl_devices() -> List[str]:
+    """List Windows storage devices available to smartctl."""
+    try:
+        result = subprocess.run(
+            ["smartctl", "--scan-open"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except FileNotFoundError:
+        return []
+    except subprocess.TimeoutExpired:
+        return []
+
+    if result.returncode != 0:
+        return []
+
+    devices: List[str] = []
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        # Typical: "//./PhysicalDrive0 -d sat # ..."
+        parts = line.split()
+        if not parts:
+            continue
+
+        candidate = parts[0]
+        if candidate.startswith("//./") or candidate.startswith("/dev/"):
+            devices.append(candidate)
+
+    return devices
+
+
 def execute_windows_storage_health() -> List[Dict[str, Any]]:
     """Collect Windows storage health using PowerShell/CIM.
 
     Returns:
         List of disk records normalized to SMART-like structure.
     """
+    # Preferred path: use smartctl if available on Windows.
+    smartctl_devices = list_windows_smartctl_devices()
+    if smartctl_devices:
+        smartctl_results: List[Dict[str, Any]] = []
+        for device in smartctl_devices:
+            try:
+                raw = execute_smartctl(device, use_sample=False)
+                parsed = parse_smart_json(raw)
+                smartctl_results.append(
+                    {
+                        "device": device,
+                        "type": "unknown",
+                        "status": "ok",
+                        "data": parsed,
+                        "raw_json": raw,
+                    }
+                )
+            except SmartError as exc:
+                smartctl_results.append(
+                    {
+                        "device": device,
+                        "type": "unknown",
+                        "status": "error",
+                        "error": str(exc),
+                    }
+                )
+
+        if any(r.get("status") == "ok" for r in smartctl_results):
+            return smartctl_results
+
     ps_script = (
         "Get-PhysicalDisk | "
         "Select-Object FriendlyName,SerialNumber,MediaType,"

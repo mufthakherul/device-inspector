@@ -117,3 +117,16 @@ def test_get_inventory_windows_backend(mock_run, _mock_system):
 
     assert result["vendor"] == "HP"
     assert result["model"] == "EliteBook"
+
+
+@patch("agent.plugins.inventory.platform.system", return_value="Windows")
+@patch("agent.plugins.inventory.execute_windows_inventory_registry")
+@patch("agent.plugins.inventory.execute_windows_inventory")
+def test_get_inventory_windows_registry_fallback(mock_cim, mock_reg, _mock_platform):
+    mock_cim.side_effect = inventory.InventoryError("cim failed")
+    mock_reg.return_value = '{"vendor":"Lenovo","model":"ThinkPad","serial":"R1"}'
+
+    result = inventory.get_inventory(use_sample=False)
+
+    assert result["vendor"] == "Lenovo"
+    assert result["model"] == "ThinkPad"

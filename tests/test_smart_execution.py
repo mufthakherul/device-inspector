@@ -248,3 +248,21 @@ def test_scan_all_devices_windows_backend(mock_run, _mock_platform):
     assert len(result) == 1
     assert result[0]["device"] == "physicaldisk0"
     assert result[0]["status"] == "ok"
+
+
+@patch("agent.plugins.smart.execute_smartctl")
+@patch("agent.plugins.smart.list_windows_smartctl_devices")
+def test_execute_windows_storage_health_prefers_smartctl(mock_list, mock_exec):
+    mock_list.return_value = ["//./PhysicalDrive0"]
+    mock_exec.return_value = {
+        "device": {"name": "//./PhysicalDrive0"},
+        "model_name": "NVMe Drive",
+        "serial_number": "SN001",
+        "ata_smart_attributes": {"table": []},
+    }
+
+    result = smart.execute_windows_storage_health()
+
+    assert len(result) == 1
+    assert result[0]["device"] == "//./PhysicalDrive0"
+    assert result[0]["status"] == "ok"

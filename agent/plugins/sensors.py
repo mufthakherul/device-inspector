@@ -21,6 +21,78 @@ class SensorError(Exception):
     """Raised when sensor operations fail."""
 
 
+def _get_windows_openhardwaremonitor_snapshot() -> Optional[Dict[str, Any]]:
+    """Try reading temperatures from OpenHardwareMonitor WMI namespace."""
+    ps_script = (
+        "$sensors=Get-WmiObject -Namespace root\\OpenHardwareMonitor "
+        "-Class Sensor -ErrorAction SilentlyContinue | "
+        "Where-Object {$_.SensorType -eq 'Temperature'} | "
+        "Select-Object Name,Value,Identifier,SensorType;"
+        "$sensors | ConvertTo-Json -Compress"
+    )
+
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+
+    if result.returncode != 0 or not result.stdout.strip():
+        return None
+
+    import json
+
+    try:
+        payload = json.loads(result.stdout.strip())
+    except Exception:
+        return None
+
+    rows = payload if isinstance(payload, list) else [payload]
+    readings = []
+    temps = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        try:
+            temp = float(row.get("Value"))
+        except (TypeError, ValueError):
+            continue
+
+        readings.append(
+            {
+                "label": str(row.get("Name") or "Temperature"),
+                "temp": round(temp, 1),
+                "high": None,
+                "crit": None,
+            }
+        )
+        temps.append(temp)
+
+    if not readings:
+        return None
+
+    return {
+        "platform": "windows",
+        "tool": "openhardwaremonitor",
+        "timestamp": time.time(),
+        "sensors": [
+            {
+                "adapter": "openhardwaremonitor-wmi",
+                "type": "CPU",
+                "readings": readings,
+            }
+        ],
+        "max_temp": max(temps),
+        "avg_temp": round(sum(temps) / len(temps), 1),
+        "critical_temps": [],
+    }
+
+
 _SAMPLE_SENSORS = """\
 coretemp-isa-0000
 Adapter: ISA adapter
@@ -242,6 +314,10 @@ def get_sensors_snapshot_windows() -> Dict[str, Any]:
     Note: This is a placeholder. Full implementation would use WMI queries
     or OpenHardwareMonitor if available.
     """
+    ohm_snapshot = _get_windows_openhardwaremonitor_snapshot()
+    if ohm_snapshot is not None:
+        return ohm_snapshot
+
     try:
         # Try using WMIC to get thermal zone temperatures
         result = subprocess.run(
@@ -605,6 +681,11 @@ def _collect_windows_perf_sample() -> Dict[str, Any]:
         "if($tz -and $tz.CurrentTemperature){"
         "$temp=[math]::Round(($tz.CurrentTemperature/10)-273.15,1)"
         "};"
+        "$ohm=Get-WmiObject -Namespace root\\OpenHardwareMonitor "
+        "-Class Sensor -ErrorAction SilentlyContinue | "
+        "Where-Object {$_.SensorType -eq 'Temperature'} | "
+        "Select-Object -First 1;"
+        "if($ohm -and $ohm.Value){$temp=[double]$ohm.Value};"
         "$obj=[ordered]@{"
         "freq_mhz=$cpu.CurrentClockSpeed;"
         "max_mhz=$cpu.MaxClockSpeed;"
