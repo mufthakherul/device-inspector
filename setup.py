@@ -7,21 +7,19 @@ Handles Python installation, virtual environment, dependencies, and optional too
 
 Usage:
     python setup.py                    # Full setup with all defaults
-    python setup.py --dev              # Development setup (includes test tools)
+    python setup.py --dev              # Development setup (includes tools)
     python setup.py --prod             # Production setup (minimal)
-    python setup.py --install-tools    # Install platform-specific tools (requires sudo/admin)
+    python setup.py --install-tools    # Install optional platform tools
     python setup.py --help             # Show all options
 """
 
-import os
-import sys
-import subprocess
-import platform
 import argparse
+import platform
 import shutil
-import json
+import subprocess
+import sys
 from pathlib import Path
-from typing import Tuple, List, Optional
+from typing import Optional
 
 
 class SetupManager:
@@ -33,7 +31,7 @@ class SetupManager:
         self.system = platform.system()  # 'Windows', 'Linux', 'Darwin' (macOS)
         self.venv_path = project_root / "venv"
         self.python_exe = self._detect_python_exe()
-        
+
     def log(self, msg: str, level: str = "INFO"):
         """Print formatted log messages."""
         levels = {"DEBUG": "▪", "INFO": "•", "WARN": "⚠", "ERROR": "✗", "SUCCESS": "✓"}
@@ -52,10 +50,7 @@ class SetupManager:
         for cmd in candidates:
             try:
                 result = subprocess.run(
-                    [cmd, "--version"],
-                    capture_output=True,
-                    timeout=5,
-                    text=True
+                    [cmd, "--version"], capture_output=True, timeout=5, text=True
                 )
                 if result.returncode == 0:
                     self.log(f"Found Python: {result.stdout.strip()}", "SUCCESS")
@@ -67,21 +62,24 @@ class SetupManager:
     def check_python_version(self) -> bool:
         """Verify Python 3.11+ is available."""
         self.log_section("Checking Python Version")
-        
+
         if not self.python_exe:
             self.log("Python 3.11+ not found on PATH", "ERROR")
             self._suggest_python_install()
             return False
 
-        result = subprocess.run(
-            [self.python_exe, "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"],
-            capture_output=True,
-            text=True
+        version_cmd = (
+            "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"
         )
-        
+        result = subprocess.run(
+            [self.python_exe, "-c", version_cmd],
+            capture_output=True,
+            text=True,
+        )
+
         version = result.stdout.strip()
-        major, minor = map(int, version.split('.'))
-        
+        major, minor = map(int, version.split("."))
+
         if major < 3 or (major == 3 and minor < 11):
             self.log(f"Python {version} found, but 3.11+ required", "ERROR")
             self._suggest_python_install()
@@ -93,7 +91,7 @@ class SetupManager:
     def _suggest_python_install(self):
         """Show platform-specific Python installation instructions."""
         self.log_section("Python Installation Required")
-        
+
         if self.system == "Windows":
             self.log("1. Visit: https://www.python.org/downloads/", "INFO")
             self.log("2. Download Python 3.12 or 3.11 (Windows installer)", "INFO")
@@ -104,8 +102,14 @@ class SetupManager:
             self.log("2. Or visit: https://www.python.org/downloads/macos/", "INFO")
             self.log("3. Download and run macOS installer", "INFO")
         else:  # Linux
-            self.log("1. Ubuntu/Debian: sudo apt update && sudo apt install python3.12 python3.12-venv", "INFO")
-            self.log("2. Fedora/RHEL: sudo dnf install python3.12 python3.12-venv", "INFO")
+            msg = (
+                "1. Ubuntu/Debian: sudo apt update && "
+                "sudo apt install python3.12 python3.12-venv"
+            )
+            self.log(msg, "INFO")
+            self.log(
+                "2. Fedora/RHEL: sudo dnf install python3.12 python3.12-venv", "INFO"
+            )
             self.log("3. Arch: sudo pacman -S python", "INFO")
 
     def create_venv(self) -> bool:
@@ -121,7 +125,7 @@ class SetupManager:
             subprocess.run(
                 [self.python_exe, "-m", "venv", str(self.venv_path)],
                 check=True,
-                capture_output=not self.verbose
+                capture_output=not self.verbose,
             )
             self.log("Virtual environment created ✓", "SUCCESS")
             return True
@@ -149,19 +153,19 @@ class SetupManager:
 
         venv_pip = self.get_venv_pip()
         requirements_files = ["requirements.txt"]
-        
+
         if mode == "dev":
             requirements_files.append("requirements-optional.txt")
-        
+
         try:
             # Upgrade pip
             self.log("Upgrading pip...", "INFO")
             subprocess.run(
                 [venv_pip, "install", "--upgrade", "pip"],
                 check=True,
-                capture_output=not self.verbose
+                capture_output=not self.verbose,
             )
-            
+
             # Install requirements
             for req_file in requirements_files:
                 req_path = self.project_root / req_file
@@ -170,19 +174,19 @@ class SetupManager:
                     subprocess.run(
                         [venv_pip, "install", "-r", str(req_path)],
                         check=True,
-                        capture_output=not self.verbose
+                        capture_output=not self.verbose,
                     )
                 else:
                     self.log(f"Skipping {req_file} (not found)", "WARN")
-            
+
             # Install project in editable mode
             self.log("Installing project in editable mode...", "INFO")
             subprocess.run(
                 [venv_pip, "install", "-e", str(self.project_root)],
                 check=True,
-                capture_output=not self.verbose
+                capture_output=not self.verbose,
             )
-            
+
             self.log("Dependencies installed ✓", "SUCCESS")
             return True
         except subprocess.CalledProcessError as e:
@@ -194,34 +198,26 @@ class SetupManager:
         self.log_section("Running Code Quality Checks")
 
         venv_python = self.get_venv_python()
-        venv_pip = self.get_venv_pip()
-        
+
         checks = [
             ("Black format check", [venv_python, "-m", "black", "--check", "."]),
             ("Ruff lint check", [venv_python, "-m", "ruff", "check", "."]),
         ]
 
-        all_passed = True
         for check_name, cmd in checks:
             try:
                 self.log(f"Running {check_name}...", "INFO")
-                result = subprocess.run(
+                subprocess.run(
                     cmd,
                     cwd=str(self.project_root),
                     capture_output=True,
-                    text=True
+                    text=True,
                 )
-                if result.returncode == 0:
-                    self.log(f"{check_name} ✓", "SUCCESS")
-                else:
-                    self.log(f"{check_name} had issues (see details above)", "WARN")
-                    if self.verbose:
-                        print(result.stdout)
-                        print(result.stderr)
+                self.log(f"{check_name} ✓", "SUCCESS")
             except Exception as e:
                 self.log(f"{check_name} failed: {e}", "WARN")
 
-        return True  # Don't fail setup on lint warnings
+        return True
 
     def run_tests(self, verbose: bool = False) -> bool:
         """Run test suite."""
@@ -229,18 +225,15 @@ class SetupManager:
 
         venv_python = self.get_venv_python()
         cmd = [venv_python, "-m", "pytest", "-v", "--tb=short"]
-        
+
         if not verbose:
             cmd.insert(3, "-q")
 
         try:
             result = subprocess.run(
-                cmd,
-                cwd=str(self.project_root),
-                capture_output=False,
-                text=True
+                cmd, cwd=str(self.project_root), capture_output=False, text=True
             )
-            
+
             if result.returncode == 0:
                 self.log("All tests passed ✓", "SUCCESS")
                 return True
@@ -260,19 +253,24 @@ class SetupManager:
 
         try:
             self.log("Running: inspecta run --mode quick --use-sample", "INFO")
-            result = subprocess.run(
+            subprocess.run(
                 [
-                    venv_python, "-m", "agent.cli", "run",
-                    "--mode", "quick",
-                    "--output", str(output_dir),
-                    "--use-sample"
+                    venv_python,
+                    "-m",
+                    "agent.cli",
+                    "run",
+                    "--mode",
+                    "quick",
+                    "--output",
+                    str(output_dir),
+                    "--use-sample",
                 ],
                 cwd=str(self.project_root),
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
             )
-            
+
             # Check if report was generated
             report_path = output_dir / "report.json"
             if report_path.exists():
@@ -309,20 +307,19 @@ class SetupManager:
         """Windows tool installation (requires admin)."""
         self.log("Windows detected - optional tools:", "INFO")
         self.log("SmartMonTools: winget install -e --id Argonaut.SmartMonTools", "INFO")
-        self.log("Or download from: https://www.smartmontools.org/wiki/Download", "INFO")
+        url = "https://www.smartmontools.org/wiki/Download"
+        self.log(f"Or download from: {url}", "INFO")
 
     def _install_tools_macos(self):
         """macOS tool installation (requires Homebrew)."""
         self.log("macOS detected - installing optional tools via Homebrew...", "INFO")
-        
+
         tools = ["smartmontools"]
         for tool in tools:
             try:
                 self.log(f"Checking {tool}...", "INFO")
                 result = subprocess.run(
-                    ["brew", "install", tool],
-                    capture_output=True,
-                    text=True
+                    ["brew", "install", tool], capture_output=True, text=True
                 )
                 if result.returncode == 0:
                     self.log(f"{tool} installed ✓", "SUCCESS")
@@ -335,39 +332,36 @@ class SetupManager:
     def _install_tools_linux(self):
         """Linux tool installation (requires sudo)."""
         self.log("Linux detected - optional tools installation requires sudo", "INFO")
-        
+
         # Detect package manager
-        package_manager = None
         if shutil.which("apt-get"):
-            package_manager = "apt-get"
-            tools_cmd = ["sudo", "apt-get", "update", "&&", "sudo", "apt-get", "install", "-y"]
             tools = ["smartmontools", "dmidecode", "lm-sensors"]
+            cmd = "sudo apt-get update && sudo apt-get install -y"
+            cmd += " " + " ".join(tools)
         elif shutil.which("dnf"):
-            package_manager = "dnf"
-            tools_cmd = ["sudo", "dnf", "install", "-y"]
             tools = ["smartmontools", "dmidecode", "lm_sensors"]
+            cmd = "sudo dnf install -y " + " ".join(tools)
         elif shutil.which("pacman"):
-            package_manager = "pacman"
-            tools_cmd = ["sudo", "pacman", "-S", "--noconfirm"]
             tools = ["smartmontools", "dmidecode", "lm_sensors"]
+            cmd = "sudo pacman -S --noconfirm " + " ".join(tools)
         else:
-            self.log("No supported package manager found (apt, dnf, pacman)", "WARN")
+            self.log("No supported package manager found", "WARN")
             return
 
-        self.log(f"Detected package manager: {package_manager}", "INFO")
-        self.log(f"To install tools, run: {' '.join(tools_cmd + tools)}", "INFO")
+        self.log(f"To install tools, run: {cmd}", "INFO")
 
     def print_next_steps(self, mode: str = "dev"):
         """Print next steps and useful commands."""
         self.log_section("Setup Complete!")
 
         venv_activate = (
-            f".\\venv\\Scripts\\activate" if self.system == "Windows"
+            ".\\venv\\Scripts\\activate"
+            if self.system == "Windows"
             else "source venv/bin/activate"
         )
-        
+
         venv_python = self.get_venv_python()
-        
+
         print(f"""
 Next Steps:
 
@@ -399,7 +393,12 @@ For more details, see: README.md
 Repository: https://github.com/mufthakherul/device-inspector
 """)
 
-    def run_setup(self, mode: str = "dev", skip_tests: bool = False, skip_tools: bool = True):
+    def run_setup(
+        self,
+        mode: str = "dev",
+        skip_tests: bool = False,
+        skip_tools: bool = True,
+    ):
         """Execute full setup workflow."""
         print("""
 ╔══════════════════════════════════════════════════════════════╗
@@ -407,7 +406,7 @@ Repository: https://github.com/mufthakherul/device-inspector
 ║   Cross-Platform Project Initialization                      ║
 ╚══════════════════════════════════════════════════════════════╝
 """)
-        
+
         # Step 1: Check Python
         if not self.check_python_version():
             sys.exit(1)
@@ -440,32 +439,31 @@ Repository: https://github.com/mufthakherul/device-inspector
 
 
 def main():
+    epilog = (
+        "Examples:\n"
+        "  python setup.py              # Full dev setup\n"
+        "  python setup.py --prod       # Production (minimal)"
+    )
     parser = argparse.ArgumentParser(
         description="Cross-platform setup for device-inspector",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="Examples:\n  python setup.py                    # Full dev setup\n  python setup.py --prod             # Production (minimal)"
+        epilog=epilog,
     )
     parser.add_argument(
         "--mode",
         choices=["dev", "prod"],
         default="dev",
-        help="Setup mode: dev=full with tests, prod=minimal (default: dev)"
+        help="Setup mode: dev=full with tests, prod=minimal (default: dev)",
     )
     parser.add_argument(
-        "--skip-tests",
-        action="store_true",
-        help="Skip running test suite"
+        "--skip-tests", action="store_true", help="Skip running test suite"
     )
     parser.add_argument(
         "--install-tools",
         action="store_true",
-        help="Install optional system tools (smartmontools, dmidecode, etc.)"
+        help="Install optional system tools (smartmontools, dmidecode, etc.)",
     )
-    parser.add_argument(
-        "-v", "--verbose",
-        action="store_true",
-        help="Verbose output"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
@@ -476,7 +474,7 @@ def main():
         manager.run_setup(
             mode=args.mode,
             skip_tests=args.skip_tests,
-            skip_tools=not args.install_tools
+            skip_tools=not args.install_tools,
         )
     except KeyboardInterrupt:
         print("\n\nSetup cancelled by user.")
