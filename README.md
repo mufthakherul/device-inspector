@@ -39,6 +39,7 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 - 🏗️ **[Architecture Overview](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
 - 🔨 **[Building Guide](docs/BUILDING.md)** - How to build standalone executables
 - 📦 **[Package Channels](docs/PACKAGE_CHANNELS.md)** - Winget/Homebrew/Chocolatey/Scoop + checksum verification workflow
+- 🖥️ **[Desktop App (Sprint 8)](apps/desktop/README.md)** - Offline GUI shell for run/verify/report/artifact workflows
 - 🤖 **[AI & Developer Guide](docs/AI_AGENT_GUIDE.md)** - Guardrails for human and AI collaborators
 - 📋 **[Project Status](PROJECT_STATUS.md)** - Detailed implementation progress
 - 🚀 **[Next Steps](NEXT_STEPS.md)** - Prioritized action items for Sprint 2

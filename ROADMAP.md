@@ -256,20 +256,22 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 8 — Desktop App Suite (Windows/macOS/Linux)
 
+**Status:** ✅ **COMPLETED** (2026-03-29)
+
 **Goal:** GUI applications for non-CLI users.
 
 **Tasks:**
-- Build desktop shell (Tauri or Electron) around local engine.
-- Add run manager, artifact explorer, report viewer, verification UI.
-- Installer outputs:
-  - Windows: `.msix` / `.exe`
-  - macOS: `.dmg` / `.pkg`
-  - Linux: `.AppImage`, `.deb`, `.rpm`, optional Snap/Flatpak
-- Local-only mode toggle with strict network deny policy.
+- ✅ Build desktop shell (Electron) around local engine (`apps/desktop/`).
+- ✅ Add run manager, artifact explorer, report viewer, verification UI.
+- ✅ Installer outputs configured via desktop build pipeline:
+   - Windows: `.exe` (NSIS) in `build-desktop-apps.yml`
+   - macOS: `.dmg` / `.pkg`
+   - Linux: `.AppImage`, `.deb`, `.rpm`
+- ✅ Local-only mode toggle implemented with strict network deny policy (default enabled).
 
 **Acceptance criteria:**
-- GUI app runs offline and launches diagnostics locally.
-- Platform installers built via CI release jobs.
+- ✅ GUI app runs offline and launches diagnostics locally by invoking `python -m agent.cli`.
+- ✅ Platform installers are built via CI workflow (`.github/workflows/build-desktop-apps.yml`).
 
 ---
 
