@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inspecta Nexus logo">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="128" y1="120" x2="384" y2="392" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+    <filter id="shadow" x="80" y="80" width="352" height="352" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect x="32" y="32" width="448" height="448" rx="120" fill="#0F172A"/>
+  <rect x="48" y="48" width="416" height="416" rx="104" fill="url(#bg)" opacity="0.12"/>
+
+  <g filter="url(#shadow)">
+    <circle cx="256" cy="256" r="124" stroke="url(#ring)" stroke-width="20"/>
+    <path d="M256 164V256L320 320" stroke="#E2E8F0" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="256" cy="256" r="20" fill="#E2E8F0"/>
+  </g>
+
+  <path d="M112 368L176 304" stroke="#A5F3FC" stroke-width="12" stroke-linecap="round"/>
+  <path d="M400 368L336 304" stroke="#A7F3D0" stroke-width="12" stroke-linecap="round"/>
+
+  <text x="256" y="430" text-anchor="middle" fill="#E2E8F0" font-size="34" font-family="Segoe UI, Inter, Arial, sans-serif" font-weight="700" letter-spacing="2">IN</text>
+</svg>

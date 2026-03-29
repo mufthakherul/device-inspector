@@ -1,0 +1,32 @@
+<svg width="1600" height="420" viewBox="0 0 1600 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inspecta Nexus hero banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#020617"/>
+      <stop offset="1" stop-color="#0B1120"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="190" y1="76" x2="456" y2="342" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1600" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#22D3EE" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#34D399" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="420" rx="28" fill="url(#bg)"/>
+  <path d="M0 90H1600" stroke="url(#line)"/>
+  <path d="M0 330H1600" stroke="url(#line)"/>
+
+  <circle cx="320" cy="210" r="128" stroke="url(#accent)" stroke-width="18"/>
+  <path d="M320 136V210L385 275" stroke="#E2E8F0" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="320" cy="210" r="16" fill="#E2E8F0"/>
+
+  <text x="510" y="185" fill="#F8FAFC" font-size="72" font-family="Segoe UI, Inter, Arial, sans-serif" font-weight="800" letter-spacing="1.5">INSPECTA NEXUS</text>
+  <text x="510" y="240" fill="#A5B4FC" font-size="30" font-family="Segoe UI, Inter, Arial, sans-serif" font-weight="600">Professional offline diagnostics, trusted evidence, anywhere.</text>
+  <text x="510" y="288" fill="#94A3B8" font-size="24" font-family="Segoe UI, Inter, Arial, sans-serif">Cross-platform • Evidence-first • Portable CLI + Desktop + ISO</text>
+
+  <rect x="510" y="315" width="320" height="42" rx="12" fill="#0F172A" stroke="#1E293B"/>
+  <text x="670" y="343" text-anchor="middle" fill="#67E8F9" font-size="18" font-family="Segoe UI, Inter, Arial, sans-serif" font-weight="700">inspecta-nexus</text>
+</svg>

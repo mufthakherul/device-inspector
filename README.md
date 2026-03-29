@@ -1,5 +1,11 @@
 # Inspecta Nexus
 
+![Inspecta Nexus Hero](assets/branding/inspecta-nexus-hero.svg)
+
+<p align="center">
+  <img src="assets/branding/inspecta-nexus-logo.svg" alt="Inspecta Nexus Logo" width="120" />
+</p>
+
 [![CI](https://github.com/mufthakherul/inspecta-nexus/workflows/CI/badge.svg)](https://github.com/mufthakherul/inspecta-nexus/actions)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![Offline-First](https://img.shields.io/badge/Mode-Offline--First-0A7B83)](#)
@@ -40,6 +46,7 @@ Local-first automated diagnostics for laptops and PCs with verifiable evidence b
 
 ### For Developers
 - 📖 **[Developer Setup Guide](docs/DEV_SETUP.md)** - Complete setup instructions for contributors
+- 🎨 **[Brand Kit](docs/BRAND_KIT.md)** - Official tagline pack and SVG branding assets
 - 🏗️ **[Architecture Overview](docs/ARCHITECTURE.md)** - Technical architecture and design decisions
 - 🔨 **[Building Guide](docs/BUILDING.md)** - How to build standalone executables
 - 📦 **[Package Channels](docs/PACKAGE_CHANNELS.md)** - Winget/Homebrew/Chocolatey/Scoop + checksum verification workflow
