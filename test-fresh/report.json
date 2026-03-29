@@ -1,0 +1,139 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2026-03-29T12:03:54+00:00",
+  "agent": {
+    "name": "inspecta",
+    "version": "0.1.0"
+  },
+  "device": {
+    "vendor": "Dell Inc.",
+    "model": "XPS 15 9560",
+    "serial": "ABC12345",
+    "bios_version": "1.21.0",
+    "bios_date": "05/15/2023",
+    "chassis_type": "Notebook",
+    "sku": "078B",
+    "uuid": "4c4c4544-0042-4310-8034-b2c04f323142",
+    "family": "XPS"
+  },
+  "mode": "quick",
+  "profile": "default",
+  "summary": {
+    "overall_score": 84,
+    "grade": "Good",
+    "recommendation": "Good condition \u2014 suitable for default use with minor issues"
+  },
+  "scores": {
+    "storage": 92,
+    "battery": 80,
+    "memory": 90,
+    "cpu_thermal": 85,
+    "gpu": 85,
+    "network": 90,
+    "security": 75
+  },
+  "tests": [
+    {
+      "name": "smartctl_nvme0n1",
+      "status": "ok",
+      "data": {
+        "name": "/dev/nvme0n1",
+        "model": "Samsung SSD 980 PRO 1TB",
+        "serial": "S5GXNX0T123456A",
+        "nvme_percentage_used": 2,
+        "nvme_critical_warning": 0,
+        "attributes": {}
+      },
+      "status_detail": "sample"
+    },
+    {
+      "name": "battery_health",
+      "status": "ok",
+      "data": {
+        "present": true,
+        "state": "Charging",
+        "percentage": null,
+        "health_pct": 83,
+        "cycle_count": 251,
+        "design_capacity_mwh": 57000,
+        "full_capacity_mwh": 47100,
+        "vendor": "Microsoft",
+        "model": "Microsoft AC Adapter",
+        "device": "battery_ACPI"
+      },
+      "status_detail": "sample"
+    },
+    {
+      "name": "disk_performance",
+      "status": "ok",
+      "data": {
+        "job": "inspecta_quick",
+        "read_mbps": 500.0,
+        "write_mbps": 300.0,
+        "read_iops": 500.0,
+        "write_iops": 300.0
+      },
+      "status_detail": "sample"
+    },
+    {
+      "name": "cpu_benchmark",
+      "status": "ok",
+      "data": {
+        "events_per_second": 1789.35,
+        "total_events": 17900,
+        "total_time_seconds": 10.0028
+      },
+      "status_detail": "sample"
+    },
+    {
+      "name": "memory_test",
+      "status": "ok",
+      "data": {
+        "pass_count": 1,
+        "error_count": 0,
+        "test_results": {
+          "Random Value": true,
+          "Rotate Left": true,
+          "Rotate Right": true,
+          "XOR comparison": true,
+          "SUB comparison": true,
+          "MUL comparison": true,
+          "DIV comparison": true,
+          "OR comparison": true
+        },
+        "status": "ok"
+      },
+      "status_detail": "sample"
+    },
+    {
+      "name": "thermal_snapshot",
+      "status": "ok",
+      "data": {
+        "max_temp": 45.0,
+        "avg_temp": 43.7,
+        "critical": false
+      },
+      "status_detail": "sample"
+    }
+  ],
+  "artifacts": [
+    "artifacts\\agent.log",
+    "artifacts\\battery.json",
+    "artifacts\\cpu_bench.json",
+    "artifacts\\disk_perf.json",
+    "artifacts\\memtest.log",
+    "artifacts\\sensors.csv",
+    "artifacts\\smart_nvme0n1.json",
+    "artifacts\\manifest.json"
+  ],
+  "evidence": {
+    "manifest_sha256": "5d2961e1e73548beb0809fa190d7429968fbaf527e9308e88be14d4e704dc2d7",
+    "signed": false,
+    "manifest_path": "artifacts\\manifest.json"
+  },
+  "native": {
+    "available": false,
+    "binary": null,
+    "reason": "not_found"
+  }
+}

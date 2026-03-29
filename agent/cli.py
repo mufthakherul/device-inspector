@@ -14,7 +14,7 @@ from pathlib import Path
 import click
 
 from . import __version__, native_bridge
-from .evidence import write_evidence_manifest
+from .evidence import verify_evidence_manifest, write_evidence_manifest
 from .logging_utils import setup_logging
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .report import compose_report
@@ -837,8 +837,13 @@ def run(
 
     inspector_logger.info("Step 12: Generating evidence manifest...")
     evidence_candidates: list[str] = []
+    # Exclude agent.log since it's still being written to by the logger
     evidence_candidates.extend(
-        [str(p.relative_to(out_dir)) for p in artifacts_dir.iterdir()]
+        [
+            str(p.relative_to(out_dir))
+            for p in artifacts_dir.iterdir()
+            if not p.name.endswith(".log")
+        ]
     )
 
     txt_report = out_dir / "report.txt"
@@ -929,6 +934,69 @@ def report_cmd(report_file: Path, open_report: bool, report_format: str) -> None
                 f"Failed to open report automatically: {generated_path}"
             )
         click.echo(f"Opened: {generated_path}")
+
+
+@cli.command("verify")
+@click.argument("bundle_dir", type=click.Path(path_type=Path, exists=True))
+@click.option(
+    "--manifest",
+    default="artifacts/manifest.json",
+    help="Path to manifest file (relative to bundle directory).",
+)
+@click.option(
+    "--json",
+    "as_json",
+    is_flag=True,
+    help="Output results as JSON instead of human-readable format.",
+)
+def verify_cmd(bundle_dir: Path, manifest: str, as_json: bool) -> None:
+    """Verify evidence integrity of a report bundle.
+
+    Validates SHA256 hashes stored in the manifest against actual files.
+    Detects tampering, data corruption, or missing artifacts.
+
+    \b
+    Examples:
+      inspecta verify ./output
+      inspecta verify ./output --manifest artifacts/manifest.json
+      inspecta verify ./output --json
+
+    Exit codes:
+      0 - All files intact, no tampering detected
+      1 - Hash mismatch or integrity failure
+      2 - Bundle or manifest not found
+    """
+    if not bundle_dir.is_dir():
+        raise click.BadParameter(f"Bundle directory not found: {bundle_dir}")
+
+    result = verify_evidence_manifest(bundle_dir, manifest)
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2, default=str))
+    else:
+        click.echo(f"Bundle:            {bundle_dir}")
+        click.echo(f"Manifest:          {manifest}")
+        click.echo(f"Files checked:     {result.get('checked', 0)}")
+        click.echo(f"Integrity status:  {'✓ OK' if result.get('ok') else '✗ FAILED'}")
+
+        if result.get("mismatches"):
+            click.echo("\n⚠ Integrity Issues:")
+            for mismatch in result["mismatches"]:
+                path = mismatch.get("path", "unknown")
+                reason = mismatch.get("reason", "unknown")
+                click.echo(f"  - {path}: {reason}")
+                if "expected" in mismatch and "actual" in mismatch:
+                    click.echo(f"    Expected: {mismatch['expected'][:16]}...")
+                    click.echo(f"    Found:    {mismatch['actual'][:16]}...")
+
+        if result.get("missing"):
+            click.echo("\n⚠ Missing Files:")
+            for missing in result["missing"]:
+                click.echo(f"  - {missing}")
+
+    # Exit code based on integrity status
+    integrity_ok = result.get("ok", False)
+    raise SystemExit(0 if integrity_ok else 1)
 
 
 if __name__ == "__main__":

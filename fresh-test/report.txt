@@ -1,0 +1,63 @@
+================================================================================
+DEVICE INSPECTION REPORT
+================================================================================
+
+Generated: 2026-03-29T12:03:15+00:00
+Agent: inspecta v0.1.0
+Mode: quick
+Profile: default
+
+--------------------------------------------------------------------------------
+DEVICE INFORMATION
+--------------------------------------------------------------------------------
+Vendor:       Dell Inc.
+Model:        XPS 15 9560
+Serial:       ABC12345
+BIOS Version: 1.21.0
+SKU:          078B
+
+--------------------------------------------------------------------------------
+OVERALL ASSESSMENT
+--------------------------------------------------------------------------------
+Overall Score: 84/100
+Grade:         Good
+Recommendation: Good condition — suitable for default use with minor issues
+
+--------------------------------------------------------------------------------
+COMPONENT SCORES
+--------------------------------------------------------------------------------
+Battery               80/100
+Cpu Thermal           85/100
+Gpu                   85/100
+Memory                90/100
+Network               90/100
+Security              75/100
+Storage               92/100
+
+--------------------------------------------------------------------------------
+TEST RESULTS
+--------------------------------------------------------------------------------
+✓ smartctl_nvme0n1                         OK (sample)
+  Model: Samsung SSD 980 PRO 1TB
+  Serial: S5GXNX0T123456A
+✓ battery_health                           OK (sample)
+  Model: Microsoft AC Adapter
+✓ disk_performance                         OK (sample)
+✓ cpu_benchmark                            OK (sample)
+✓ memory_test                              OK (sample)
+✓ thermal_snapshot                         OK (sample)
+
+--------------------------------------------------------------------------------
+ARTIFACTS (7 files)
+--------------------------------------------------------------------------------
+  - artifacts\agent.log
+  - artifacts\battery.json
+  - artifacts\cpu_bench.json
+  - artifacts\disk_perf.json
+  - artifacts\memtest.log
+  - artifacts\sensors.csv
+  - artifacts\smart_nvme0n1.json
+
+================================================================================
+END OF REPORT
+================================================================================
