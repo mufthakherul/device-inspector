@@ -1,0 +1,43 @@
+name: Build HarmonyOS (Scaffold)
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  harmonyos-scaffold:
+    name: HarmonyOS HAP Scaffold
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare scaffold bundle
+        shell: bash
+        run: |
+          mkdir -p dist/harmonyos
+          cp -r apps/mobile dist/harmonyos/mobile-source
+          cp docs/HARMONYOS.md dist/harmonyos/HARMONYOS.md
+          cp docs/PLATFORM_CAPABILITY_MATRIX.md dist/harmonyos/PLATFORM_CAPABILITY_MATRIX.md
+
+      - name: Optional HAP build probe
+        shell: bash
+        run: |
+          if command -v hvigorw >/dev/null 2>&1; then
+            echo "hvigorw detected; wiring real HAP build steps is supported in this workflow scaffold."
+          else
+            echo "hvigorw not available on runner; preserving scaffold artifacts only."
+          fi
+
+      - name: Upload HarmonyOS scaffold artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspecta-harmonyos-scaffold
+          path: dist/harmonyos/**
+          retention-days: 30
