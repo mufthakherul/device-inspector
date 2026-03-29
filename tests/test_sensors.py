@@ -343,11 +343,18 @@ class TestDetectCpuThrottling:
 
     @patch("agent.plugins.sensors.has_lm_sensors")
     @patch("agent.plugins.sensors.get_sensors_snapshot_linux")
+    @patch("agent.plugins.sensors.get_cpu_frequency_linux")
     @patch("subprocess.run")
     @patch("subprocess.Popen")
     @patch("time.sleep")
     def test_no_throttling(
-        self, mock_sleep, mock_popen, mock_run, mock_snapshot, mock_has
+        self,
+        mock_sleep,
+        mock_popen,
+        mock_run,
+        mock_freq,
+        mock_snapshot,
+        mock_has,
     ):
         """Test when no throttling detected."""
         mock_has.return_value = True
@@ -358,6 +365,7 @@ class TestDetectCpuThrottling:
             {"max_temp": 55.0},  # Sample 1
             {"max_temp": 58.0},  # Sample 2
         ]
+        mock_freq.side_effect = [3000.0, 2950.0, 2940.0]
 
         mock_run.return_value = MagicMock(returncode=0)
         mock_proc = MagicMock()
