@@ -551,8 +551,8 @@ After running, you'll find:
 
 **Need Help?**
 - Read the full README.md
-- Visit: https://github.com/mufthakherul/device-inspector
-- Report issues: https://github.com/mufthakherul/device-inspector/issues
+- Visit: https://github.com/mufthakherul/inspecta-nexus
+- Report issues: https://github.com/mufthakherul/inspecta-nexus/issues
 
 ## System Requirements
 
@@ -646,8 +646,8 @@ After running, you'll find:
 
 **Need Help?**
 - Read the full README.md
-- Visit: https://github.com/mufthakherul/device-inspector
-- Report issues: https://github.com/mufthakherul/device-inspector/issues
+- Visit: https://github.com/mufthakherul/inspecta-nexus
+- Report issues: https://github.com/mufthakherul/inspecta-nexus/issues
 
 ## System Requirements
 

@@ -86,7 +86,7 @@ The Author reserves the right to seek injunctive or other equitable relief in th
 If you use the Project to collect personal data from end users (e.g., test artifacts that might contain personal information), you are solely responsible for complying with applicable privacy laws (such as GDPR, CCPA) and for obtaining any required consents. The Author is not responsible for data collected by your modified Derivative Works or deployments.
 
 16. Contact for Commercial Licensing or Permissions
-To request a commercial license, redistribution permission, or trademark/use permission, contact the Author via the Project's GitHub profile (https://github.com/mufthakherul) or email (mufthakherul@outlook.com).
+To request a commercial license, redistribution permission, or trademark/use permission, contact the Author via the Project's GitHub profile (https://github.com/mufthakherul) or visit website https://mufthakherul.me.
 
 17. Severability
 If any provision of this License is found to be unenforceable, invalid, or illegal under applicable law, that provision will be limited or eliminated to the minimum extent necessary so that the remaining provisions will otherwise remain in full force and effect and enforceable.

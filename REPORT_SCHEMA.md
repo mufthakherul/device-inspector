@@ -31,7 +31,7 @@ Below is the canonical JSON Schema for report version 1.0.0. This is the authori
 ```json
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/mufthakherul/device-inspector/schemas/report-schema-1.0.0.json",
+  "$id": "https://github.com/mufthakherul/inspecta-nexus/schemas/report-schema-1.0.0.json",
   "title": "device-inspector report",
   "description": "Canonical report schema for inspecta (device-inspector) reports (version 1.0.0).",
   "type": "object",

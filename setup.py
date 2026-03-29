@@ -390,7 +390,7 @@ Next Steps:
    {venv_python} -m ruff check --fix .
 
 For more details, see: README.md
-Repository: https://github.com/mufthakherul/device-inspector
+Repository: https://github.com/mufthakherul/inspecta-nexus
 """)
 
     def run_setup(

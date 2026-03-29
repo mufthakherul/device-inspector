@@ -54,7 +54,7 @@ Complete guide for setting up a local development environment for device-inspect
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/mufthakherul/device-inspector.git
+git clone https://github.com/mufthakherul/inspecta-nexus.git
 cd device-inspector
 
 # 2. Create virtual environment
@@ -83,7 +83,7 @@ pre-commit install
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/mufthakherul/device-inspector.git
+git clone https://github.com/mufthakherul/inspecta-nexus.git
 cd device-inspector
 ```
 

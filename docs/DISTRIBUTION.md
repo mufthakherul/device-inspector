@@ -218,7 +218,7 @@ To run with real hardware inspection, you must "Run as administrator":
 Some antivirus software may flag PyInstaller executables as suspicious. This is a false positive. The executable is safe and open source. You can:
 1. Add an exception in your antivirus
 2. Build from source yourself (see BUILDING.md)
-3. Check the code on GitHub: https://github.com/mufthakherul/device-inspector
+3. Check the code on GitHub: https://github.com/mufthakherul/inspecta-nexus
 
 **Windows Defender SmartScreen:**
 If you see "Windows protected your PC":
@@ -387,9 +387,9 @@ Reports can be shared if you choose:
 - Project Status: [PROJECT_STATUS.md](../PROJECT_STATUS.md)
 
 ### Online Resources
-- GitHub: https://github.com/mufthakherul/device-inspector
-- Report Issues: https://github.com/mufthakherul/device-inspector/issues
-- Discussions: https://github.com/mufthakherul/device-inspector/discussions
+- GitHub: https://github.com/mufthakherul/inspecta-nexus
+- Report Issues: https://github.com/mufthakherul/inspecta-nexus/issues
+- Discussions: https://github.com/mufthakherul/inspecta-nexus/discussions
 
 ### Getting Help
 
@@ -463,4 +463,4 @@ See [ROADMAP.md](../ROADMAP.md) for detailed plans.
 **© 2025 mufthakherul**  
 **Version:** 0.1.0  
 **License:** Custom Non-Commercial  
-**GitHub:** https://github.com/mufthakherul/device-inspector
+**GitHub:** https://github.com/mufthakherul/inspecta-nexus

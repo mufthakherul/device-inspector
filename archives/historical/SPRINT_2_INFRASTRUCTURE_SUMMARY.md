@@ -159,7 +159,7 @@ Common Usage:
   inspecta inventory
 
 Documentation:
-  GitHub: https://github.com/mufthakherul/device-inspector
+  GitHub: https://github.com/mufthakherul/inspecta-nexus
   Docs: See README.md for complete guide
   
 [+ detailed examples, requirements, exit codes, output structure]

@@ -339,7 +339,7 @@ Contact & maintainers
 Project owner / primary maintainer:
 - Name: MD MUFTHAKHERUL ISLAM MIRAZ
 - GitHub: @mufthakherul
-- Email: mufthakherul@outlook.com
+- Email: 130831166+mufthakherul@users.noreply.github.com
 - LinkedIn: https://linkedin.com/in/mufthakherul
 
 Maintainers, reviewers, and community volunteers will be listed in MAINTAINERS.md (to be added).

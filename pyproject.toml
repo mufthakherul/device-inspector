@@ -11,9 +11,9 @@ requires-python = ">=3.11"
 dependencies = ["click>=8.0.0", "jsonschema>=4.0.0"]
 
 [project.urls]
-Homepage = "https://github.com/mufthakherul/device-inspector"
-Repository = "https://github.com/mufthakherul/device-inspector"
-Issues = "https://github.com/mufthakherul/device-inspector/issues"
+Homepage = "https://github.com/mufthakherul/inspecta-nexus"
+Repository = "https://github.com/mufthakherul/inspecta-nexus"
+Issues = "https://github.com/mufthakherul/inspecta-nexus/issues"
 
 [project.scripts]
 inspecta = "agent.cli:cli"

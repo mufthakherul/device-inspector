@@ -234,8 +234,8 @@ echo "All checks passed! ✓"
 ## Support & Help
 
 - 📖 Documentation: [docs/](docs/)
-- 🐛 Issues: https://github.com/mufthakherul/device-inspector/issues
-- 💬 Discussions: https://github.com/mufthakherul/device-inspector/discussions
+- 🐛 Issues: https://github.com/mufthakherul/inspecta-nexus/issues
+- 💬 Discussions: https://github.com/mufthakherul/inspecta-nexus/discussions
 - 📝 Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 - 🆘 Setup Guide: [SETUP.md](SETUP.md)
 

@@ -34,7 +34,7 @@ Inspecta uses PyInstaller to create standalone executables. The build process:
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/mufthakherul/device-inspector.git
+git clone https://github.com/mufthakherul/inspecta-nexus.git
 cd device-inspector
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate

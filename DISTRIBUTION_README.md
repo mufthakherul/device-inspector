@@ -107,8 +107,8 @@ inspecta.exe inventory
 
 ### Still Having Issues?
 - Check `QUICK_START.txt` for detailed troubleshooting
-- Visit: https://github.com/mufthakherul/device-inspector
-- Report bugs: https://github.com/mufthakherul/device-inspector/issues
+- Visit: https://github.com/mufthakherul/inspecta-nexus
+- Report bugs: https://github.com/mufthakherul/inspecta-nexus/issues
 
 ## Privacy & Security
 
@@ -156,7 +156,7 @@ You control your data. Reports are only shared if you choose to share them.
 
 📖 Full documentation: [README.md](README.md)  
 🚀 Quick start: [QUICK_START.txt](QUICK_START.txt)  
-📋 Project: https://github.com/mufthakherul/device-inspector  
+📋 Project: https://github.com/mufthakherul/inspecta-nexus  
 
 ## Support
 
@@ -184,7 +184,7 @@ Commercial licensing: Contact the author via GitHub
 **Inspecta** is an open-source device inspection toolkit created to bring transparency to the used device market. Built with privacy and auditability as core principles.
 
 **Author:** @mufthakherul  
-**GitHub:** https://github.com/mufthakherul/device-inspector  
+**GitHub:** https://github.com/mufthakherul/inspecta-nexus  
 **Version:** 0.1.0  
 **Released:** 2025-10-30  
 

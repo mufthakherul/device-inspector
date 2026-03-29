@@ -21,7 +21,7 @@ If you discover a security issue, please follow the Responsible Disclosure proce
 ## Scope
 
 This policy applies to:
-- Code and files in this repository (https://github.com/mufthakherul/device-inspector).
+- Code and files in this repository (https://github.com/mufthakherul/inspecta-nexus).
 - Official release artifacts published by the project (binaries, ISO images, installers) that originate from this repo.
 
 Out of scope:

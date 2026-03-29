@@ -634,8 +634,8 @@ rmdir /s C:\path\to\device-inspector
 ## Getting Help
 
 - 📖 **Documentation:** See [docs/](../docs/) directory
-- 🐛 **Issues:** https://github.com/mufthakherul/device-inspector/issues
-- 💬 **Discussions:** https://github.com/mufthakherul/device-inspector/discussions
+- 🐛 **Issues:** https://github.com/mufthakherul/inspecta-nexus/issues
+- 💬 **Discussions:** https://github.com/mufthakherul/inspecta-nexus/discussions
 - 📝 **Contributing:** See [CONTRIBUTING.md](../CONTRIBUTING.md)
 
 ---

@@ -1,6 +1,6 @@
 # device-inspector (inspecta)
 
-[![CI](https://github.com/mufthakherul/device-inspector/workflows/CI/badge.svg)](https://github.com/mufthakherul/device-inspector/actions)
+[![CI](https://github.com/mufthakherul/inspecta-nexus/workflows/CI/badge.svg)](https://github.com/mufthakherul/inspecta-nexus/actions)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: Custom](https://img.shields.io/badge/License-Custom%20Non--Commercial-orange.svg)](LICENSE.txt)
@@ -32,7 +32,7 @@ Local-first automated diagnostics for laptops and PCs with offline-first executi
 
 ### For End Users
 - 📦 **[Distribution Guide](docs/DISTRIBUTION.md)** - Download and use standalone executables (v1)
-- 🚀 **Quick Start** - See download links in [Releases](https://github.com/mufthakherul/device-inspector/releases)
+- 🚀 **Quick Start** - See download links in [Releases](https://github.com/mufthakherul/inspecta-nexus/releases)
 
 ### For Developers
 - 📖 **[Developer Setup Guide](docs/DEV_SETUP.md)** - Complete setup instructions for contributors
@@ -145,7 +145,7 @@ Prerequisites (what your machine needs to run quick tests)
    - macOS: `inspecta-0.1.0-macos.zip`
    - Linux: `inspecta-0.1.0-linux.zip`
    
-   Get them from [Releases](https://github.com/mufthakherul/device-inspector/releases)
+  Get them from [Releases](https://github.com/mufthakherul/inspecta-nexus/releases)
 
 2. **Extract** the zip file to any folder
 
@@ -165,7 +165,7 @@ This repository contains the full Python source code. To run from source:
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/mufthakherul/device-inspector.git
+  git clone https://github.com/mufthakherul/inspecta-nexus.git
    cd device-inspector
    ```
 2. Create a Python virtual environment:
@@ -194,7 +194,7 @@ Quickstart — what works now (v0.1.0)
 **Test with sample data (no root privileges required):**
 ```bash
 # Clone and install
-git clone https://github.com/mufthakherul/device-inspector.git
+git clone https://github.com/mufthakherul/inspecta-nexus.git
 cd device-inspector
 python3 -m venv .venv
 source .venv/bin/activate

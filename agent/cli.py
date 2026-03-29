@@ -54,7 +54,7 @@ def cli() -> None:
 
     \b
     Documentation:
-      GitHub: https://github.com/mufthakherul/device-inspector
+    GitHub: https://github.com/mufthakherul/inspecta-nexus
       Docs: See README.md for complete guide
 
     \b
