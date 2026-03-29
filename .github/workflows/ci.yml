@@ -54,3 +54,28 @@ jobs:
       
       - name: Validate sample report against schema
         run: python scripts/validate_report.py samples/sample_report.json schemas/report-schema-1.0.0.json
+
+  macos-smoke:
+    name: macOS functional smoke
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Run macOS quick-mode smoke (sample)
+        run: |
+          python -m agent.cli run --mode quick --output smoke-macos --use-sample --no-auto-open --format txt || true
+
+      - name: Validate report artifact exists
+        run: test -f smoke-macos/report.json

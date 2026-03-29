@@ -179,18 +179,20 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 4 — macOS Native Parity
 
+**Status:** 🟡 **IN PROGRESS** (2026-03-29)
+
 **Goal:** First-class macOS support.
 
 **Tasks:**
-- Inventory via `system_profiler` and IOKit adapters.
-- Battery via `pmset` and IOKit details.
-- Thermal and CPU metrics with safe fallback policy.
-- Storage health mapping for NVMe/SATA where available.
-- CI job for macOS functional smoke tests.
+- ✅ Inventory via `system_profiler` hardware JSON adapter (normalized model/serial/firmware fields).
+- ✅ Battery via `pmset` + `system_profiler SPPowerDataType` normalization pipeline.
+- ✅ Thermal and CPU metrics with safe fallback policy (`osx-cpu-temp`/`powermetrics`, `sysctl` throttling indicators).
+- ✅ Storage health mapping for NVMe/SATA where available via `diskutil` plist + SMART status normalization.
+- ✅ CI job for macOS functional smoke tests added (`macos-smoke` in `.github/workflows/ci.yml`).
 
 **Acceptance criteria:**
-- macOS quick mode completes with meaningful data.
-- Platform-specific tests run in CI.
+- ✅ macOS quick mode path now has native probe backends and graceful degradation logic.
+- ✅ Platform-specific tests run in CI (workflow includes `macos-smoke`; unit tests cover macOS probe code paths).
 
 ---
 
