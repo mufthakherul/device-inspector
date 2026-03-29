@@ -1,0 +1,75 @@
+name: Build Mobile Android
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  android-build:
+    name: Android APK/AAB
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Ensure Flutter project platforms
+        run: flutter create . --platforms=android,ios
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build unsigned APK
+        run: flutter build apk --release --dart-define=LOCAL_ONLY=true
+
+      - name: Build unsigned AAB
+        run: flutter build appbundle --release --dart-define=LOCAL_ONLY=true
+
+      - name: Prepare signed Android build (optional)
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEY_ALIAS != '' && secrets.ANDROID_KEY_PASSWORD != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
+        shell: bash
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release-keystore.jks
+          cat > android/key.properties <<EOF
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          storeFile=release-keystore.jks
+          EOF
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+
+      - name: Build signed APK (optional)
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEY_ALIAS != '' && secrets.ANDROID_KEY_PASSWORD != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
+        run: flutter build apk --release --dart-define=LOCAL_ONLY=true
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspecta-mobile-android
+          path: |
+            apps/mobile/build/app/outputs/flutter-apk/*.apk
+            apps/mobile/build/app/outputs/bundle/release/*.aab
+          retention-days: 30

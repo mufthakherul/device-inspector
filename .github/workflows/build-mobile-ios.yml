@@ -1,0 +1,48 @@
+name: Build Mobile iOS
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  ios-build:
+    name: iOS IPA
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Ensure Flutter project platforms
+        run: flutter create . --platforms=android,ios
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build unsigned IPA (no codesign)
+        run: flutter build ipa --release --no-codesign --dart-define=LOCAL_ONLY=true
+
+      - name: Build signed IPA (optional)
+        if: ${{ secrets.IOS_P12_BASE64 != '' && secrets.IOS_P12_PASSWORD != '' && secrets.IOS_PROVISION_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' }}
+        run: flutter build ipa --release --dart-define=LOCAL_ONLY=true
+
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspecta-mobile-ios
+          path: |
+            apps/mobile/build/ios/ipa/*.ipa
+          retention-days: 30

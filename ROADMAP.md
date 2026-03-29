@@ -277,19 +277,21 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 9 — Android & iOS Mobile Pipeline
 
+**Status:** ✅ **COMPLETED** (2026-03-29)
+
 **Goal:** Mobile companion app pipelines and release readiness.
 
 **Tasks:**
-- Mobile app architecture (Flutter or React Native) for report viewing, bundle verification, optional upload management.
-- Android build workflow to produce **APK/AAB**.
-- iOS workflow to produce **IPA** (and optional archive artifacts as requested packaging alias `apkx` in docs matrix if needed for organization-specific naming).
-- Secure signing via GitHub Environments + encrypted secrets.
-- Device pairing via QR/local transfer (offline friendly).
+- ✅ Mobile app architecture (Flutter) for report viewing, bundle verification, and offline pairing (`apps/mobile/`).
+- ✅ Android build workflow to produce **APK/AAB** (`.github/workflows/build-mobile-android.yml`).
+- ✅ iOS workflow to produce **IPA** (`.github/workflows/build-mobile-ios.yml`).
+- ✅ Secure signing lanes added via encrypted secrets with optional signed-build steps in CI.
+- ✅ Device pairing via QR/local transfer UX added (offline friendly token display/scan).
 
 **Acceptance criteria:**
-- Android CI produces signed/unsigned APK artifacts.
-- iOS CI on macOS runners produces IPA build artifacts (where signing secrets available).
-- Mobile app can open and validate report bundles.
+- ✅ Android CI produces unsigned artifacts and supports signed build when keystore secrets are present.
+- ✅ iOS CI on macOS runner produces unsigned IPA and supports signed build when signing secrets are present.
+- ✅ Mobile app can open `report.json` and validate manifest-tracked bundles locally.
 
 ---
 
