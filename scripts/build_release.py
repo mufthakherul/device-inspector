@@ -14,10 +14,12 @@ Usage:
 """
 
 import argparse
+import base64
 import platform
 import shutil
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 
 
@@ -42,6 +44,33 @@ def check_pyinstaller():
             capture_output=True,
             check=True,
         )
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
+def get_version(root_dir: Path) -> str:
+    """Read package version from pyproject.toml (fallback to 0.1.0)."""
+    pyproject = root_dir / "pyproject.toml"
+    if not pyproject.exists():
+        return "0.1.0"
+
+    try:
+        if sys.version_info >= (3, 11):
+            import tomllib
+        else:
+            import tomli as tomllib  # type: ignore
+
+        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+        return str(data.get("project", {}).get("version", "0.1.0"))
+    except Exception:
+        return "0.1.0"
+
+
+def run_cmd(cmd: list[str], cwd: Path | None = None) -> bool:
+    """Run a command and return success status without raising."""
+    try:
+        subprocess.run(cmd, cwd=cwd, check=True)
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
@@ -72,7 +101,7 @@ def build_executable(root_dir: Path, clean: bool = True):
         return False
 
 
-def create_distribution_package(root_dir: Path, platform_name: str):
+def create_distribution_package(root_dir: Path, platform_name: str, version: str):
     """Create a distribution package with all necessary files."""
     print("\n" + "=" * 60)
     print("Creating distribution package...")
@@ -101,7 +130,6 @@ def create_distribution_package(root_dir: Path, platform_name: str):
         return None
 
     # Create package directory
-    version = "0.1.0"
     package_name = f"inspecta-{version}-{platform_name}"
     package_dir = dist_dir / package_name
 
@@ -149,6 +177,189 @@ def create_distribution_package(root_dir: Path, platform_name: str):
     create_quick_start_guide(package_dir, platform_name)
 
     return package_dir
+
+
+def _build_deb(package_dir: Path, version: str) -> Path | None:
+    """Build a basic .deb package from Linux package directory."""
+    if not shutil.which("dpkg-deb"):
+        print("  - Skipping .deb: dpkg-deb not available")
+        return None
+
+    dist_dir = package_dir.parent
+    staging_root = dist_dir / "_pkg" / "deb"
+    if staging_root.exists():
+        shutil.rmtree(staging_root)
+
+    bin_dst = staging_root / "usr" / "local" / "bin"
+    bin_dst.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(package_dir / "inspecta", bin_dst / "inspecta")
+
+    doc_dst = staging_root / "usr" / "share" / "doc" / "inspecta"
+    doc_dst.mkdir(parents=True, exist_ok=True)
+    for doc in ["README.md", "LICENSE.txt", "CHANGELOG.md", "QUICK_START.txt"]:
+        src = package_dir / doc
+        if src.exists():
+            shutil.copy2(src, doc_dst / doc)
+
+    debian_dir = staging_root / "DEBIAN"
+    debian_dir.mkdir(parents=True, exist_ok=True)
+    control = textwrap.dedent(f"""
+        Package: inspecta
+        Version: {version}
+        Section: utils
+        Priority: optional
+        Architecture: amd64
+        Maintainer: mufthakherul
+        Description: Local-first device diagnostics CLI
+         Inspecta performs offline-first hardware diagnostics and generates
+         verifiable reports for used laptops and desktop systems.
+        """).strip()
+    (debian_dir / "control").write_text(control + "\n", encoding="utf-8")
+
+    output = dist_dir / f"inspecta-{version}-linux-amd64.deb"
+    if output.exists():
+        output.unlink()
+
+    if not run_cmd(["dpkg-deb", "--build", str(staging_root), str(output)]):
+        print("  - Failed to build .deb package")
+        return None
+
+    print(f"  - Built .deb package: {output.name}")
+    return output
+
+
+def _build_rpm(package_dir: Path, version: str) -> Path | None:
+    """Build .rpm package using fpm when available."""
+    if not shutil.which("fpm"):
+        print("  - Skipping .rpm: fpm not available")
+        return None
+
+    dist_dir = package_dir.parent
+    output = dist_dir / f"inspecta-{version}-linux-amd64.rpm"
+    if output.exists():
+        output.unlink()
+
+    cmd = [
+        "fpm",
+        "-s",
+        "dir",
+        "-t",
+        "rpm",
+        "-n",
+        "inspecta",
+        "-v",
+        version,
+        "--architecture",
+        "x86_64",
+        "--description",
+        "Local-first device diagnostics CLI",
+        "--prefix",
+        "/usr/local/bin",
+        "-C",
+        str(package_dir),
+        "inspecta",
+        "-p",
+        str(output),
+    ]
+
+    if not run_cmd(cmd):
+        print("  - Failed to build .rpm package")
+        return None
+
+    print(f"  - Built .rpm package: {output.name}")
+    return output
+
+
+def _build_appimage(package_dir: Path, version: str) -> Path | None:
+    """Build AppImage package using appimagetool when available."""
+    appimagetool = shutil.which("appimagetool")
+    if not appimagetool:
+        print("  - Skipping AppImage: appimagetool not available")
+        return None
+
+    dist_dir = package_dir.parent
+    appdir = dist_dir / "Inspecta.AppDir"
+    if appdir.exists():
+        shutil.rmtree(appdir)
+
+    usr_bin = appdir / "usr" / "bin"
+    usr_bin.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(package_dir / "inspecta", usr_bin / "inspecta")
+
+    apprun = textwrap.dedent("""
+        #!/bin/sh
+        HERE="$(dirname "$(readlink -f "$0")")"
+        exec "$HERE/usr/bin/inspecta" "$@"
+        """).strip()
+    apprun_path = appdir / "AppRun"
+    apprun_path.write_text(apprun + "\n", encoding="utf-8")
+    apprun_path.chmod(0o755)
+
+    desktop = textwrap.dedent("""
+        [Desktop Entry]
+        Type=Application
+        Name=Inspecta
+        Exec=inspecta
+        Icon=inspecta
+        Terminal=true
+        Categories=System;Utility;
+        """).strip()
+    (appdir / "inspecta.desktop").write_text(desktop + "\n", encoding="utf-8")
+
+    # tiny 1x1 PNG used as placeholder icon
+    icon_bytes = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAOqfG6cAAAAASUVORK5CYII="
+    )
+    (appdir / "inspecta.png").write_bytes(icon_bytes)
+
+    output = dist_dir / f"inspecta-{version}-linux-x86_64.AppImage"
+    if output.exists():
+        output.unlink()
+
+    env = dict(**__import__("os").environ)
+    env["ARCH"] = "x86_64"
+    try:
+        subprocess.run([appimagetool, str(appdir), str(output)], check=True, env=env)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("  - Failed to build AppImage package")
+        return None
+
+    output.chmod(0o755)
+    print(f"  - Built AppImage package: {output.name}")
+    return output
+
+
+def build_linux_native_packages(package_dir: Path, version: str) -> list[Path]:
+    """Build Linux native packages where tooling is available."""
+    print("\n" + "=" * 60)
+    print("Building Linux native packages...")
+    print("=" * 60)
+
+    artifacts: list[Path] = []
+    for builder in (_build_deb, _build_rpm, _build_appimage):
+        built = builder(package_dir, version)
+        if built:
+            artifacts.append(built)
+
+    if not artifacts:
+        print("No Linux native packages were produced (missing tooling).")
+    return artifacts
+
+
+def write_checksums(artifacts: list[Path], output_file: Path) -> Path:
+    """Write SHA256SUMS file for release artifacts."""
+    import hashlib
+
+    lines: list[str] = []
+    for artifact in sorted(artifacts, key=lambda p: p.name):
+        if not artifact.exists() or not artifact.is_file():
+            continue
+        digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+        lines.append(f"{digest}  {artifact.name}")
+
+    output_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"\n[OK] Wrote checksums: {output_file}")
+    return output_file
 
 
 def create_launcher_scripts(package_dir: Path, platform_name: str):
@@ -503,6 +714,16 @@ def main():
     parser.add_argument(
         "--no-zip", action="store_true", help="Don't create zip package"
     )
+    parser.add_argument(
+        "--native-linux",
+        action="store_true",
+        help="Build Linux native packages (.deb/.rpm/.AppImage) when platform is linux",
+    )
+    parser.add_argument(
+        "--no-checksums",
+        action="store_true",
+        help="Don't generate SHA256SUMS for generated artifacts",
+    )
 
     args = parser.parse_args()
 
@@ -527,21 +748,31 @@ def main():
 
     # Get root directory
     root_dir = Path(__file__).parent.parent
+    version = get_version(root_dir)
 
     # Build executable
     if not build_executable(root_dir, clean=not args.no_clean):
         return 1
 
     # Create distribution package
-    package_dir = create_distribution_package(root_dir, platform_name)
+    package_dir = create_distribution_package(root_dir, platform_name, version)
     if not package_dir:
         return 1
+
+    generated_artifacts: list[Path] = []
 
     # Create zip
     if not args.no_zip:
         zip_path = create_zip_package(package_dir)
         if not zip_path:
             return 1
+        generated_artifacts.append(zip_path)
+
+    if platform_name == "linux" and args.native_linux:
+        generated_artifacts.extend(build_linux_native_packages(package_dir, version))
+
+    if not args.no_checksums and generated_artifacts:
+        write_checksums(generated_artifacts, package_dir.parent / "SHA256SUMS")
 
         print("\n" + "=" * 60)
         print("[SUCCESS] BUILD COMPLETE!")

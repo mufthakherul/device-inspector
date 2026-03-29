@@ -44,7 +44,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: inspecta-windows
-          path: dist/inspecta-*-windows.zip
+          path: |
+            dist/inspecta-*-windows.zip
+            dist/SHA256SUMS
           retention-days: 30
   
   build-macos:
@@ -76,7 +78,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: inspecta-macos
-          path: dist/inspecta-*-macos.zip
+          path: |
+            dist/inspecta-*-macos.zip
+            dist/SHA256SUMS
           retention-days: 30
   
   build-linux:
@@ -99,21 +103,79 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
           pip install -e .
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev ruby ruby-dev rpm curl
+          sudo gem install --no-document fpm
+          curl -L -o /tmp/appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          sudo mv /tmp/appimagetool.AppImage /usr/local/bin/appimagetool
+          sudo chmod +x /usr/local/bin/appimagetool
       
       - name: Build Linux executable
         run: |
-          python scripts/build_release.py --platform linux
+          python scripts/build_release.py --platform linux --native-linux
       
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: inspecta-linux
-          path: dist/inspecta-*-linux.zip
+          path: |
+            dist/inspecta-*-linux.zip
+            dist/inspecta-*-linux-amd64.deb
+            dist/inspecta-*-linux-amd64.rpm
+            dist/inspecta-*-linux-x86_64.AppImage
+            dist/SHA256SUMS
+          retention-days: 30
+
+  build-python-dist:
+    name: Build Python Distribution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build wheel and sdist
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+          python -m build
+
+      - name: Generate Python dist checksums
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          dist = Path('dist')
+          lines = []
+          for path in sorted(dist.glob('*')):
+            if path.name == 'SHA256SUMS':
+              continue
+            if path.is_file():
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              lines.append(f"{digest}  {path.name}")
+
+          (dist / 'SHA256SUMS').write_text("\n".join(lines) + "\n", encoding='utf-8')
+          PY
+
+      - name: Upload Python dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspecta-python-dist
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/SHA256SUMS
           retention-days: 30
   
   create-release:
     name: Create GitHub Release
-    needs: [build-windows, build-macos, build-linux]
+    needs: [build-windows, build-macos, build-linux, build-python-dist]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     
@@ -126,7 +188,14 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: release-packages/**/*.zip
+          files: |
+            release-packages/**/*.zip
+            release-packages/**/*.deb
+            release-packages/**/*.rpm
+            release-packages/**/*.AppImage
+            release-packages/**/*.whl
+            release-packages/**/*.tar.gz
+            release-packages/**/SHA256SUMS
           draft: false
           prerelease: false
           generate_release_notes: true
