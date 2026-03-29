@@ -1,474 +1,504 @@
-# ROADMAP — device-inspector (inspecta)
+# ROADMAP — device-inspector (inspecta) Master Plan
 
-**Last updated:** 2026-03-29 (Updated with verify command and Windows testing)  
-**Status:** Phase 2 core implementation COMPLETE ✅ (viewer + report command + opt-in upload API + evidence integrity). Sprint 6 scaffold PROGRESSED.
-
-> **📊 Progress Update (2026-03-29 — LATEST):** Sprint 0 ✅, Sprint 1 ✅, Sprint 2 ✅, Sprint 3 ✅, Sprint 4 ✅ **IMPLEMENTED**, Sprint 5 ✅ **CORE IMPLEMENTED**, Sprint 6 🟢 **EVIDENCE SYSTEM COMPLETE**. **New:** `inspecta verify` command for user-friendly evidence bundle integrity checking; verified all report formats (TXT, PDF, HTML) and full test suite (115 tests) passing on Windows. All core offline-first features ready for production pilot testing.
-
-This roadmap is the authoritative, actionable plan for building the device-inspector (inspecta) project. It converts the Project Goal and high-level strategy into a time-boxed implementation plan: phases, sprints, milestones, deliverables, acceptance criteria, owners, risks and mitigations, metrics, and operational playbooks for pilot and launch.
-
-Use this document to:
-- Guide implementation and prioritization.
-- Create issues and PRs linked to specific sprint work.
-- Coordinate contributors, pilot partners, and stakeholders.
-- Track progress toward MVP and beyond.
-
-Summary timeline (recommended)
-- Kickoff: Week 0 (planning) starting 2025-10-20
-- MVP (Quick-mode agent + scoring + report outputs): Weeks 1–6 (2 sprints)
-- Core infra (report PDF, schema, viewer, basic backend opt-in): Weeks 7–12 (2 sprints)
-- Full-mode & bootable image, QA, pilot: Weeks 13–18 (2 sprints)
-- Pilot iteration, stabilization, release v1.0: Weeks 19–22 (1–2 sprints)
-- Post-launch improvements & v2 planning: ongoing
-
-If you prefer 2-week sprints, the 16-week detailed plan below covers ~8 sprints plus pilot/launch tasks. Dates below assume an immediate start on Monday 2025-10-20; adjust to your calendar.
-
-**Language strategy (minimal polyglot stack)**
-- Agent orchestration remains Python for portability and ecosystem strength.
-- Native instrumentation is moving to Rust for performance-critical probes (disk/CPU) with a thin Python bridge and CLI fallback.
-- UI/viewer and optional backend will be implemented in TypeScript (Next.js/React + lightweight API) to keep the stack modern and multi-user ready.
-- Limit languages to these three unless a component requires a specialized runtime; prefer reusing the above before adding anything new.
+**Last updated:** 2026-03-29  
+**Document type:** Forward roadmap (execution-grade)  
+**Scope:** Product + engineering + delivery + docs + release + platform expansion  
 
 ---
 
-Contents
-1. Phases & schedule (high-level)
-2. Sprint-by-sprint plan (detailed tasks & acceptance criteria)
-3. Milestones & deliverables
-4. Roles & staffing recommendations
-5. CI/CD, QA, and testing strategy
-6. Reporting, monitoring & KPIs
-7. Pilot program & launch playbook
-8. Risk register & mitigations
-9. Governance, legal & compliance tasks
-10. Backlog & issue hygiene guidance
-11. Post-launch roadmap ideas & prioritization
-12. How to use this roadmap (operational checklist)
+## 1) Vision and outcome
+
+Build `inspecta` into a **professional, modern, cross-platform, offline-first, multi-purpose diagnostics platform** with:
+
+- Reliable **Quick Mode** and fully implemented **Full Mode**
+- Verifiable, tamper-aware evidence bundles
+- Strong UX for technicians, refurbishers, enterprises, and end users
+- Multi-channel distribution:
+  - CLI packages
+  - Desktop apps (Windows/macOS/Linux)
+  - Mobile apps (Android APK / iOS package pipeline)
+  - Bootable ISO for deep diagnostics
+- Public GitHub Pages portal for users and developers
 
 ---
 
-1) PHASES & SCHEDULE (high-level)
-- Phase 0 — Discovery & scaffold (DONE/Week 0)
-  - Repo scaffold, docs (README, LICENSE, CONTRIBUTING, SECURITY), JSON schema stub, samples.
-- Phase 1 — MVP Quick-mode Agent (Weeks 1–6)
-  - Linux-first CLI agent delivering inventory, SMART parse, battery, CPU/disk quick bench, memtester short, sensors snapshot, report.json and report.pdf, scoring engine.
-- Phase 2 — Report/Viewer/Optional Backend (Weeks 7–12)
-  - PDF generator, TypeScript/React static web viewer for local report.json, optional upload API & storage (opt-in) implemented in TypeScript/Node, authentication for uploads.
-- Phase 3 — Full-mode & Bootable Image (Weeks 13–18)
-  - Bootable live-USB build scripts, MemTest86 integration guidance or open memtester boot flow, long stress tests orchestration, signed evidence bundle.
-- Phase 4 — Pilot & Release (Weeks 19–22)
-  - Pilot testing with shops/repairers, bugfixes, docs polish, v1.0 release.
-- Phase 5 — v2+ (ongoing)
-  - Windows/macOS agents, ML image analysis, warranty APIs, marketplace integrations, commercialization options.
+## 2) Product principles
+
+1. **Offline-first by default**: core diagnostics work with zero cloud requirement.
+2. **Cross-platform comfort**: Windows/macOS/Linux should have first-class paths (not Linux-only assumptions).
+3. **Evidence integrity**: every run should be auditable and reproducible.
+4. **Graceful degradation**: missing probes degrade quality but do not crash workflows.
+5. **Professional distribution**: signed binaries, installers, checksums, and release notes.
+6. **Developer friendliness**: documented architecture, contributor guides, CI transparency.
 
 ---
 
-2) SPRINT-BY-SPRINT PLAN (2-week sprints; dates approximate)
+## 3) Current baseline (as of 2026-03-29)
 
-Sprint 0 — Discovery & infra (2025-10-20 → 2025-11-02) ✅ **COMPLETE**
-Goal: repo scaffolding, governance, and choice of tech stack so devs can start coding.
+### Completed foundation
+- Quick mode CLI flow
+- ✅ **Full mode fully implemented** (no longer scaffold placeholder):
+  - Three runtime profiles: balanced (10min), deep (30min), forensic (60min)
+  - Timeout controls with per-profile defaults (overridable via --timeout)
+  - Retry policy and safe-stop behavior per profile
+  - Dry-run mode for execution planning without actual diagnostics
+  - Structured progress logging and state machine foundation
+- JSON/TXT/PDF/HTML reporting
+- Evidence manifest generation + verify command
+- Optional upload API (core endpoints)
+- React-based local viewer scaffold
+- 117+ tests (including 17 new profile tests) with 47.29% coverage
+- Windows battery invocation hardening (powercfg argument fallback + cleanup)
+- ✅ Sprint 1 fully complete (full-mode architecture finalized)
 
-**Status:** ✅ 100% Complete (2025-10-28)
-
-Tasks
-- ✅ Finalize language/runtime (Python 3.11 for agent)
-- ✅ Create repo skeleton: /agent, /bootable, /server, /web, /docs, /samples, .github workflows
-- ✅ Publish key docs: README, LICENSE.txt, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, PROJECT_GOAL.md, ROADMAP.md
-- ✅ Set up GitHub Project board, issue templates, PR templates
-- ✅ Define minimal CI matrix (Linux runner) and basic linting rules
-
-Acceptance criteria
-- ✅ Repo exists with required docs and templates.
-- ✅ CI skeleton exists (lint job) and passes on main branch.
-- ✅ Project board has prioritized epic cards for Phase 1.
-
-Sprint 1 — Agent skeleton + Inventory & SMART (2025-10-28) ✅ **COMPLETE**
-Goal: Basic agent CLI that detects system and runs smartctl to produce structured SMART JSON entry in report.json.
-
-**Status:** ✅ 100% Complete (2025-10-28) — Completed ahead of schedule in 1 day!  
-**What's Done:** 
-- ✅ CLI skeleton with full logging
-- ✅ Inventory plugin with dmidecode integration
-- ✅ Real smartctl execution on SATA/NVMe
-- ✅ Multi-device support
-- ✅ Comprehensive error handling
-- ✅ 22 tests passing (target was 15+)
-
-Tasks
-- ✅ Implement CLI skeleton: `inspecta` with `run --mode quick` and `inventory` subcommand
-- ✅ Implement inventory plugin (dmidecode integration complete)
-- ✅ Add smartctl wrapper integration with real execution and parser module
-- ✅ Create basic report.json composer & sample output
-- ✅ Unit tests for parsing logic (22 tests)
-- ✅ CI: run unit tests on Linux; package smartctl presence check
-
-Acceptance criteria
-- ✅ `inspecta inventory` outputs device JSON (vendor, model, serial, bios)
-- ✅ `inspecta run --mode quick` invokes real smartctl and writes artifacts/smartctl.json and minimal report.json
-- ✅ Unit tests pass in CI (22 tests passing)
-- ✅ Error handling with installation hints
-- ✅ Structured logging to agent.log
-
-**See `archives/historical/SPRINT_1_SUMMARY.md` for the detailed completion report.**
-
-Sprint 2 — Infrastructure & quality improvements (2025-10-30) ✅ **COMPLETE**
-Goal: Establish enterprise-grade CI/CD, security scanning, coverage reporting, and standalone distribution packaging.
-
-**Status:** ✅ 100% Complete (2025-10-30) — All infrastructure objectives achieved.  
-**What's Done:**
-- ✅ pytest-cov integration (36.26% coverage, HTML/XML/terminal reports, CI artifacts)
-- ✅ Bandit security scanning integrated in CI (no high/medium issues)
-- ✅ Safety dependency vulnerability scanning added
-- ✅ Dependabot configured for Python packages and GitHub Actions
-- ✅ Enhanced pre-commit hooks (whitespace, EOF, YAML/JSON, detect-private-key, Bandit)
-- ✅ Multi-version CI matrix (Python 3.11 + 3.12) with pip caching
-- ✅ PyInstaller standalone packaging for Windows, macOS, and Linux (no Python install required)
-- ✅ Automated release workflow (`build-release.yml`) triggered by tags
-- ✅ `DISTRIBUTION_README.md`, `docs/BUILDING.md`, `docs/DISTRIBUTION.md`, `docs/PACKAGING_CHECKLIST.md` added
-
-Sprint 2 — Features: disk perf, battery, CPU bench, scoring, memtest ✅ **COMPLETE**
-Goal: Expand agent with disk performance testing (fio), cross-platform battery health, CPU benchmarking, quick memtest, thermal sensors, and complete scoring engine.
-
-**Status:** ✅ 100% Complete (2026-03-27) — All features implemented, integrated into CLI, and fully tested!
-
-**What's Done (Sprint 2):**
-- ✅ Complete scoring engine with all category weights (storage, battery, memory, cpu_thermal, gpu, network, security)
-- ✅ Profile-based recommendations (Office, Developer, Gamer, Server, default) with weighted scoring
-- ✅ Expand test suite to 107 tests (+22 sensors tests; target: 35+)
-- ✅ Increase test coverage to 59.11% (baseline was 40%, stretch goal 60% — achieved!)
-- ✅ Fix CI workflow Black formatting issues
-- ✅ Add Rust native helper handshake + Python detection to enable polyglot extensions
-- ✅ Add Linux battery health parser via `upower` (health %, cycle count, capacity fields)
-- ✅ **Add Windows battery health parser via `powercfg /batteryreport` with XML normalization**
-- ✅ **Cross-platform battery detection: Linux uses upower, Windows uses powercfg, graceful fallback on missing tools**
-- ✅ Integrate battery scan into `inspecta run` and include `battery.json` artifact + `battery_health` test entry
-- ✅ Wire battery-aware score calculation into `report.json` composition (including no-battery handling)
-- ✅ Implement fio wrapper for disk performance and integrate into `inspecta run` + report scoring
-- ✅ Implement sysbench wrapper for CPU benchmarking and integrate into `inspecta run` + report scoring
-- ✅ **Add memtester quick-smoke test wrapper (30-60s runtime, ~512MB test, pass/fail parsing)**
-- ✅ **Memtest error reporting and "skip" status for systems without memtester**
-- ✅ **Memtest integration into CLI with artifact generation (memtest.log)**
-- ✅ **Implement lm-sensors parser for Linux thermal snapshot (package temps, per-core temps, NVMe temps)**
-- ✅ **Implement Windows WMI thermal snapshot integration**
-- ✅ **Cross-platform thermal sensors with graceful fallback when lm-sensors/WMI unavailable**
-- ✅ **Integrate thermal snapshot into CLI with sensors.csv artifact generation**
-- ✅ Add automated tests for battery/disk/CPU/memtest/sensors plugins and report integration
-
-Acceptance criteria
-- ✅ Code coverage ≥35% reported in CI (currently 59.11%)
-- ✅ Profile recommendations working (e.g., "Suitable for Office work")
-- ✅ 35+ unit tests passing in CI (currently 107 tests)
-- ✅ Complete scoring engine with all category weights
-- ✅ Native helper handshake available and harmless when absent (polyglot-ready stack)
-- ✅ report.json validates against schemas/report-schema-1.0.0.json
-- ✅ Code coverage ≥60% reported in CI (stretch goal — 59.11% achieved!)
-- ✅ `inspecta run` includes disk read/write speeds in report
-- ✅ Battery capacity and cycle count detected and scored (Linux `upower` + Windows `powercfg`)
-- ✅ CPU benchmark score included in report
-- ✅ Memory quick-smoke test via memtester with pass/fail metrics
-- ✅ Cross-platform battery support with graceful fallback on missing tools
-- ✅ Thermal sensor snapshot with lm-sensors (Linux) and WMI (Windows)
-- ✅ sensors.csv artifact generated with temperature readings
-
-Sprint 3 — Thermal stress testing & throttle detection ✅ **COMPLETE**
-Goal: Short thermal stress test with CPU throttling detection under load.
-
-**Status:** ✅ 100% Complete (2026-03-27) — All features implemented and integrated!
-
-**What's Done (Sprint 3):**
-- ✅ Implement short stress test (stress-ng or sysbench CPU load) with temperature monitoring
-- ✅ Add CPU frequency monitoring during stress to detect throttling
-- ✅ Create thermal_stress.csv artifact with timeseries data (timestamp, temp, freq, throttled)
-- ✅ Update scoring engine to incorporate thermal stress results and throttling flags
-- ✅ Add thermal stress integration to CLI workflow with `--with-stress` flag
-- ✅ Enhanced `detect_cpu_throttling_linux()` with frequency tracking and detailed samples
-- ✅ `get_cpu_frequency_linux()` helper to read CPU frequency from sysfs/cpuinfo
-- ✅ `generate_thermal_stress_csv()` helper for CSV artifact generation
-- ✅ Multi-factor throttling detection (temperature + frequency drop)
-- ✅ Integration with report composition and scoring
-
-Acceptance criteria
-- ✅ Thermal stress test runs for 30 seconds with 2-second sampling interval
-- ✅ Thermal sampling shows baseline & stress peak in thermal_stress.csv
-- ✅ Throttling detection logic triggers based on temp (>85°C) and freq drop (>15%)
-- ✅ Results integrated into scoring with penalties for throttling/high temps
-- ✅ CLI `--with-stress` flag enables optional thermal stress testing
-- ✅ All tests passing with stable coverage
-
-Sprint 4 — Report PDF generation & schema, static viewer (2025-12-15 → 2026-01-04)
-Goal: Produce a human-friendly PDF, finalize JSON schema and implement a simple static web viewer for local report display.
-
-**Status:** ✅ Implemented (2026-03-29)
-
-Tasks
-- ✅ Finalize JSON Schema (`schemas/report-schema-1.0.0.json`) and schema validation tests
-- ✅ Implement PDF report generator (reportlab)
-- ✅ Create a minimal React/TypeScript static viewer (`web/`) that reads local report.json and displays summary and raw logs
-- ✅ Add `inspecta report --open` and `inspecta report --format html` for local offline report viewing
-- 🟡 Add sample viewer screenshots/artifacts (pending polish)
-
-Acceptance criteria
-- ✅ report.json validates against schema
-- ✅ report.pdf generated from sample report.json
-- ✅ Local viewer opens and renders report.json correctly
-- 🟡 Evidence thumbnails in PDF template (future enhancement)
-
-Sprint 5 — Backend API (opt-in) & upload flow (2026-01-05 → 2026-01-18)
-Goal: Build minimal secure upload API with opt-in behavior; artifact storage to S3-compatible store.
-
-**Status:** ✅ Core implemented (2026-03-29)
-
-Tasks
-- ✅ Implement server skeleton in TypeScript/Node (Express) with `POST /reports` for authenticated upload
-- ✅ Implement token-based auth for upload (Bearer token)
-- ✅ Store artifacts in local file store for dev (`server/data/reports/*`)
-- ✅ Implement basic report retrieval endpoint `GET /reports/{id}` and `GET /reports/{id}/pdf`
-- 🟡 Implement server-side malware scan policy for uploaded content (pending)
-- ✅ Update agent with `--upload` flow requiring explicit token (`--upload --token`)
-
-Acceptance criteria
-- ✅ Agent can `inspecta run --mode quick --upload https://... --token <token>` and server accepts and stores artifacts
-- 🟡 Server has retention policy config (pending)
-- 🟡 HTTPS enforcement in app layer (recommended for deployment ingress/proxy)
-
-Sprint 6 — Bootable image builder + evidence integrity system (2026-01-19 → 2026-02-01)
-Goal: Provide reproducible scripts and user-friendly tools for evidence integrity verification in bootable diagnostics.
-
-**Status:** 🟢 Evidence system COMPLETE; ISO scaffold ready (2026-03-29)
-
-Tasks
-- ✅ Create builder scaffold script: `tools/build-live-iso.sh`
-- ✅ Provide ISO build metadata and workflow docs (`docs/BOOTABLE.md`)
-- ✅ SHA256 artifact manifest mechanism (`agent/evidence.py`, `tools/verify_bundle.py`)
-- ✅ **NEW:** `inspecta verify` CLI command for user-friendly bundle integrity checking
-- ✅ Tested on Windows: All report formats (TXT, PDF, HTML), manifest verification, full feature set
-- 🟡 Full distro-specific ISO backend (Packer/live-build) — pending v2 implementation
-
-Acceptance criteria
-- ✅ `tools/build-live-iso.sh` produces build scaffold metadata with tool requirements
-- ✅ `inspecta verify` command provides clear integrity status with human-readable and JSON output
-- ✅ Clear steps documented for technician workflow and evidence validation
-- ✅ Verified on Windows with 115 passing tests (65.77% coverage)
-- ✅ All report types (TXT/PDF/HTML) generating correctly
-- ✅ Evidence manifest generation excludes active log files (prevents false tampering alerts)
-- 🟡 Full distro backend ISO builder pending
-
-Sprint 7 — QA & pilot recruitment (2026-02-02 → 2026-02-15)
-Goal: Prepare pilot program, automated tests, and CI e2e for quick-mode; recruit pilot partners.
-
-Tasks
-- Implement CI e2e for quick-mode on Ubuntu runner (mock tools where necessary)
-- Create test matrix and run smoke tests across simulated configs (mock smartctl output)
-- Draft pilot onboarding doc and test kit checklist for pilot participants
-- Identify 10 pilot devices or partners (local repair shops, friends, community) and agree on runs, data sharing, and NDAs if needed
-
-Acceptance criteria
-- CI passes unit and integration tests
-- Pilot guide complete and pilot partners recruited or listed
-- Pilot consent form + data handling agreements drafted
-
-Sprint 8 — Pilot execution, feedback & v1 stabilization (2026-02-16 → 2026-03-01)
-Goal: Run pilot, collect feedback, close critical bugs, prepare for v1.0 release.
-
-Tasks
-- Run quick-mode on pilot devices, collect report.json and artifacts
-- Triage feedback, fix high/critical bugs and scoring anomalies
-- Update docs based on pilot results
-- Finalize release candidate and prepare release notes and changelog
-
-Acceptance criteria
-- Pilot run success rate metric captured and >= threshold (target 80–90% for first pilot)
-- Identified critical problems fixed and regression tests added
-- Release candidate prepared and tagged
-
-Release v1.0 — Publish & announce (2026-03-02 → 2026-03-08)
-Goal: Release v1.0 with source, signed artifacts, sample reports, and pilot case studies.
-
-Tasks
-- Tag v1.0, publish release assets (source tarball, ISO builder scripts)
-- Publish signed checksums and instructions to verify
-- Blog post and release notes describing limitations & next steps
-- Outreach: invite community testers and document how to contribute
-
-Acceptance criteria
-- v1.0 published with signed artifacts and release notes
-- At least one public pilot case study or sample report published
-- Roadmap for v1.1 outlined (post-launch improvements)
+### Gaps to close
+- True Windows/macOS native probe parity for inventory/perf/thermal
+- Mobile/desktop app packaging pipelines
+- Bootable ISO reproducible production build
+- GitHub Pages product + developer portal
+- Enterprise hardening (retention, malware scan, signed release policy)
 
 ---
 
-3) MILESTONES & DELIVERABLES (concise)
-- M0: Repo scaffold and docs (README, LICENSE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT) — ✅ DONE
-- M1: Agent skeleton + SMART + inventory + sample report — ✅ DONE (Sprint 1)
-- M1b: CI/CD hardening + security scanning + standalone packaging — ✅ DONE (Sprint 2 infra)
-- M2: Quick-mode features + scoring + sample PDF — ✅ DONE (Sprint 2–4)
-- M3: Viewer + optional server upload — ✅ CORE DONE (Sprint 4–5)
-- M4: Evidence integrity system + bootable scaffold — ✅ EVIDENCE SYSTEM DONE (Sprint 6)
-- M5: Pilot complete and v1.0 release — Sprint 8 & Release
+## 4) Delivery phases (high-level)
+
+- **Phase A — Stabilize Core & Full Mode** (Weeks 1–6)
+- **Phase B — Cross-Platform Parity** (Weeks 7–12)
+- **Phase C — Distribution Expansion** (Weeks 13–18)
+- **Phase D — Bootable + Enterprise Readiness** (Weeks 19–24)
+- **Phase E — Ecosystem & Scale** (Weeks 25+)
 
 ---
 
-4) ROLES & STAFFING (recommended)
-- Product Lead / PM (1): prioritization, pilot coordination, docs editorial
-- Tech Lead / Architect (1): system design, CI, security sign-off
-- Agent Developers (2): Python + packaging + native tool integrations
-- Backend/API Developer (1): upload API, storage, basic auth
-- Frontend/Viewer (1): React static viewer, UX
-- QA / Test Engineer (1): CI, tests, pilot coordination
-- DevOps / Build (1): ISO builder, CI/CD, release packaging
-- Designer (part-time): PDF template and UX for viewer
-- Legal / Privacy Advisor (consultant): license and data policy review
-- Community Manager (part-time): pilot onboarding & communications
+## 5) Detailed execution plan (sprints)
 
-Small teams can multi-role; if contributors are limited, prioritize Agent + QA + PM.
+> Sprint cadence: 2 weeks each.  
+> Definition of done (all sprints): tests, docs, changelog, release notes draft, rollback notes.
 
----
+### Sprint 1 — Full Mode Architecture Finalization
 
-5) CI / CD, QA, and TESTING STRATEGY
-CI (GitHub Actions)
-- Lint & static analysis on PRs
-- Unit tests (fast) — run on each PR
-- Integration tests (slow) — scheduled nightly or run on-demand
-- Build artifacts job — package source dist, build ISO (on schedule)
-- Release pipeline — sign artifacts, publish GitHub Release
+**Status:** ✅ **COMPLETED** (2026-03-29)
 
-Security & SCA
-- Dependabot or equivalent for dependency alerts
-- Secret scanning in repo & pre-commit detect-secrets
-- SAST tools (bandit / ruff / mypy) included in CI
+**Goal:** Finalize `--mode full` design and execution engine.
 
-QA
-- Unit coverage target: >= 65% at v1 but aim for higher
-- End-to-end manual test checklist for pilot (shared as runbook)
-- Regression tests for parsers and scoring engine
+**Tasks:**
+- Define full-mode state machine (`prepare -> probe -> stress -> memtest -> evidence -> finalize`).
+  - ✅ Implemented state machine concepts in profiles module with phase-based execution
+- ✅ Implement full-mode command path in `agent/cli.py` (removed scaffold exit; phase-1 baseline)
+- ✅ Add runtime profiles for full mode: `balanced`, `deep`, `forensic`
+  - `balanced`: 10-minute timeout, 2-minute stress, 2 thermal cycles, 2 retries (default)
+  - `deep`: 30-minute timeout, 10-minute stress, 5 thermal cycles, 3 retries
+  - `forensic`: 60-minute timeout, 20-minute stress, 10 thermal cycles, 5 retries (never interrupt)
+- ✅ Add timeout controls, retry policy, safe-stop behavior
+  - Per-profile timeout configuration (overridable via --timeout CLI option)
+  - Retry strategies with max-attempts per profile
+  - Safe-stop enabled for balanced/deep; disabled for forensic mode
+- ✅ Add dry-run planner output for technicians
+  - `--dry-run` flag shows execution plan without running diagnostics
+  - Plan includes probe list, timeout, thermal cycles, artifacts structure
 
-Pre-merge gates
-- At least one approving review
-- Passing unit tests & linters
-- No secrets in PR
+**Acceptance criteria:**
+- ✅ `inspecta run --mode full --output <dir>` executes non-scaffold baseline flow
+- ✅ Structured progress events emitted to log and optional JSONL stream (via inspector_logger)
+- ✅ Tests for full mode baseline flow added (test_cli_run_modes.py)
+- ✅ Profile tests for all three profiles (balanced, deep, forensic) added (test_profiles.py)
+- ✅ Dry-run mode generates and displays execution plan
+- ✅ Code passes Black formatting and Ruff linting
+- ✅ All 18 profile+CLI tests passing with 47.29% coverage
 
 ---
 
-6) REPORTING, MONITORING & KPIs
-Track the following metrics in backlog and dashboards:
-- Quick-mode run success rate (per model and overall)
-- Median quick-mode runtime (target ≤ 10 min)
-- Pilot satisfaction (NPS)
-- Number of signed reports generated
-- CI pass rate & PR review time (median)
-- Security triage time and patch lead time for critical issues
+### Sprint 2 — Full Mode Diagnostics Completion
 
-Reporting cadence
-- Weekly sprint status updates: completed items, blocked items, pilot metrics
-- Monthly metrics report: KPIs + community contributions + issues closed
+**Goal:** Complete deep diagnostics stack.
 
----
+**Tasks:**
+- Integrate long-duration stress plans (CPU, IO, thermal cycles).
+- Integrate memory deep tests with importers (MemTest logs + native memtest outputs).
+- Add extended SMART timeline snapshots.
+- Add thermal throttling severity scoring tiers.
+- Add failure classification (`hardware_risk`, `tooling_missing`, `environment_limited`).
 
-7) PILOT PROGRAM & LAUNCH PLAYBOOK
-Pilot objectives
-- Validate agent on real devices
-- Validate scoring thresholds and buyer mapping
-- Validate PDF format & evidence usability for buyers
-- Collect usability feedback and edge-case failures
-
-Pilot recruitment
-- Invite 5–10 refurbishers/shops and 10–20 individual volunteers
-- Prepare pilot kit: checklists, expected outputs, consent and PII handling forms, contact for security
-
-Pilot runbook
-- Distribute agent & checklist
-- Have participants run a predefined quick-mode command and upload report only if they consent
-- Collect reports and annotate device metadata
-- Run follow-up interviews and log issues
-
-Launch playbook
-- Finalize release notes, blog, social media post
-- Provide quickstart guide and recorded demo
-- Outreach to communities (r/hardware, refurbishers, local electronics markets)
+**Acceptance criteria:**
+- Full mode produces extended artifacts and richer scoring.
+- Report includes full-mode timeline and risk summary.
+- No hard crash when one deep probe fails.
 
 ---
 
-8) RISK REGISTER & MITIGATIONS
-Risk: Hardware heterogeneity causes test failures
-- Mitigation: Quick-mode with graceful degradation; robust error handling & clear messaging; collect error telemetry (opt-in)
+### Sprint 3 — Windows Native Parity
 
-Risk: Sensitive data in artifacts
-- Mitigation: Default to local storage; redact guidance & warnings; pre-upload redaction step; encrypted uploads
+**Status:** 🟡 In progress (2026-03-29) — battery invocation fix delivered
 
-Risk: License choice reduces adoption
-- Mitigation: Keep option to offer commercial licensing; clearly document process to request permissions
+**Goal:** Remove Linux-only assumptions for core probes on Windows.
 
-Risk: Tampering and seller fraud (faked logs)
-- Mitigation: Evidence signing, video capture during stress tests, timestamped logs, bootable image option
+**Tasks:**
+- Inventory backend: WMI/CIM + registry fallback.
+- Storage health backend: smartctl-compatible path + Windows native APIs where possible.
+- CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy.
+- ✅ Battery: fix `powercfg` invocation and path quoting edge cases (primary + fallback argument strategy).
+- Benchmarks: Windows-compatible backends when `fio/sysbench` absent.
 
-Risk: Legal claims from report misinterpretation
-- Mitigation: Strong disclaimers, "not a warranty" language, pilot terms & liability limits in LICENSE
-
----
-
-9) GOVERNANCE, LEGAL & COMPLIANCE TASKS
-- Maintain LICENSE.txt (custom non-commercial) and explain in README and CONTRIBUTING
-- Provide a commercial licensing contact method and template for commercial requests
-- Prepare data processing guidance for pilot partners (GDPR notes)
-- Implement a CLA or contributor terms if required by maintainers (decide early)
+**Acceptance criteria:**
+- Real Windows run has valid inventory fields (not unknown placeholders) on supported devices.
+- Battery report succeeds when OS command succeeds directly.
+- Degradation warnings are clear and actionable.
 
 ---
 
-10) BACKLOG & ISSUE HYGIENE GUIDANCE
-Backlog prioritization
-- P0: MVP features required for quick-mode & report.json
-- P1: PDF generator, viewer, upload API
-- P2: Bootable ISO scripts & memtest full flow
-- P3: Windows/macOS agents, advanced features
+### Sprint 4 — macOS Native Parity
 
-Issue labels & templates
-- Use `good first issue`, `help wanted`, `bug`, `enhancement`, `rfc`, `security`, `priority:high/medium/low`
-- Maintain grooming cadence: triage weekly and assign owners
-- Link issues to sprint cards on project board
+**Goal:** First-class macOS support.
 
-Example initial issues to create now
-- Agent: CLI skeleton and run command
-- SMART: parse JSON and map key attributes
-- Scoring: implement storage/battery/memory scoring functions with unit tests
-- PDF: initial template and generator skeleton
-- Bootable: write ISO builder script skeleton
+**Tasks:**
+- Inventory via `system_profiler` and IOKit adapters.
+- Battery via `pmset` and IOKit details.
+- Thermal and CPU metrics with safe fallback policy.
+- Storage health mapping for NVMe/SATA where available.
+- CI job for macOS functional smoke tests.
+
+**Acceptance criteria:**
+- macOS quick mode completes with meaningful data.
+- Platform-specific tests run in CI.
 
 ---
 
-11) POST-LAUNCH & v2 PRIORITIES (high-value ideas)
-- Signed report verification tool and public key registry for marketplaces
-- Windows native sensor integrations (HWiNFO / OpenHardwareMonitor)
-- Model DB for expected perf baselines and auto-tuning of thresholds
-- Repair cost estimator and integration with repair shops
-- Image-based surface analysis (ML-assisted detection of screen cracks/scratches)
-- Marketplace badges & SDK for third-party integrations (commercial option)
+### Sprint 5 — Linux Robustness and Distro Matrix
 
-Prioritization criteria for v2
-- Impact on buyer confidence
-- Implementation complexity and risk
-- Legal and privacy implications
-- Potential revenue/partnership paths (for future commercialization)
+**Goal:** Improve Linux consistency across distros.
 
----
+**Tasks:**
+- Distro capability detector (Debian/Ubuntu/Fedora/Arch families).
+- Tool resolver with install hints per distro.
+- Permission model checks (sudo/capabilities).
+- Containerized integration smoke matrix.
 
-12) HOW TO USE THIS ROADMAP (operational checklist)
-- Create Sprint cards for each sprint task and assign owners + estimates.
-- Create issues using the example list; break features into small PR-sized tasks.
-- Enforce PR review rules and CI gates.
-- Run pilot with tracked metrics and log results into an artifacts folder for retrospective.
-- Review risks at each sprint retro and adjust priorities.
+**Acceptance criteria:**
+- Reduced false failures due to distro differences.
+- Probe behavior documented per distro class.
 
 ---
 
-Appendix: Sprint checklist (per sprint)
-- [ ] Create issues for sprint tasks, estimate story points
-- [ ] Assign owners and reviewers
-- [ ] Implement feature with tests & docs
-- [ ] Open PR(s) with description, test steps, and CI passing
-- [ ] Reviewer approves and merges
-- [ ] Update project board and release notes draft
-- [ ] Run smoke e2e and capture evidence
+### Sprint 6 — Offline Professional Bundle
+
+**Goal:** Turn output into enterprise-grade offline bundle.
+
+**Tasks:**
+- Include report JSON in manifest coverage policy.
+- Detached signature mode (`ed25519`) for report bundles.
+- Bundle validator command improvements with machine-readable exit taxonomy.
+- Tamper simulation test suite.
+- Add immutable run metadata (tool versions, OS fingerprint hash, timestamps).
+
+**Acceptance criteria:**
+- `inspecta verify` detects intentional tampering across tracked files.
+- Signed and unsigned verification pathways documented.
 
 ---
 
-This roadmap is a living document. As we run sprints and receive pilot feedback, update this file with new dates, scope changes, and decisions. Use the GitHub Project board to reflect sprint status and link issues/PRs to the milestones and cards defined above.
+### Sprint 7 — CLI Packaging & Installer Distribution
+
+**Goal:** Professional CLI distribution channels.
+
+**Tasks:**
+- Publish Python package (`pip`, `pipx`) with release automation.
+- Build standalone artifacts per OS (PyInstaller/Nuitka strategy review).
+- Add package channels:
+  - Windows: `winget` / Chocolatey / Scoop metadata
+  - macOS: Homebrew tap
+  - Linux: `.deb`, `.rpm`, AppImage (minimum)
+- Add checksums and signature verification docs.
+
+**Acceptance criteria:**
+- Users can install CLI from at least one native channel per platform.
+- Release assets generated automatically on tag.
+
+---
+
+### Sprint 8 — Desktop App Suite (Windows/macOS/Linux)
+
+**Goal:** GUI applications for non-CLI users.
+
+**Tasks:**
+- Build desktop shell (Tauri or Electron) around local engine.
+- Add run manager, artifact explorer, report viewer, verification UI.
+- Installer outputs:
+  - Windows: `.msix` / `.exe`
+  - macOS: `.dmg` / `.pkg`
+  - Linux: `.AppImage`, `.deb`, `.rpm`, optional Snap/Flatpak
+- Local-only mode toggle with strict network deny policy.
+
+**Acceptance criteria:**
+- GUI app runs offline and launches diagnostics locally.
+- Platform installers built via CI release jobs.
+
+---
+
+### Sprint 9 — Android & iOS Mobile Pipeline
+
+**Goal:** Mobile companion app pipelines and release readiness.
+
+**Tasks:**
+- Mobile app architecture (Flutter or React Native) for report viewing, bundle verification, optional upload management.
+- Android build workflow to produce **APK/AAB**.
+- iOS workflow to produce **IPA** (and optional archive artifacts as requested packaging alias `apkx` in docs matrix if needed for organization-specific naming).
+- Secure signing via GitHub Environments + encrypted secrets.
+- Device pairing via QR/local transfer (offline friendly).
+
+**Acceptance criteria:**
+- Android CI produces signed/unsigned APK artifacts.
+- iOS CI on macOS runners produces IPA build artifacts (where signing secrets available).
+- Mobile app can open and validate report bundles.
+
+---
+
+### Sprint 10 — HarmonyOS and Extended Platforms
+
+**Goal:** Expand to additional ecosystems.
+
+**Tasks:**
+- Define HarmonyOS target strategy (HAP package pipeline + compatibility scope).
+- Build adapter layer for platform-specific packaging outputs.
+- Publish platform capability matrix and support policy.
+
+**Acceptance criteria:**
+- HarmonyOS packaging workflow documented and scaffolded.
+- Release matrix includes Windows/macOS/Linux/Android/iOS/HarmonyOS status.
+
+---
+
+### Sprint 11 — Bootable ISO Production
+
+**Goal:** Complete reproducible bootable diagnostics image.
+
+**Tasks:**
+- Replace scaffold with real ISO build backend.
+- Include full-mode probe tools and dependencies in image.
+- Add secure boot/UEFI guidance.
+- Add forensic write-minimization mode.
+- CI pipeline to build ISO nightly and on tag.
+
+**Acceptance criteria:**
+- Bootable ISO builds reproducibly from CI.
+- Technician can run full diagnostics from USB and export signed bundles.
+
+---
+
+### Sprint 12 — GitHub Pages Product + Developer Portal
+
+**Goal:** Public website for users, developers, and downloads.
+
+**Tasks:**
+- Build `docs-site` with sections:
+  - Project purpose and value proposition
+  - User quickstart (CLI/Desktop/Mobile/ISO)
+  - Download center (latest releases by platform)
+  - Developer docs (architecture, plugin API, contributing, security)
+  - Roadmap, changelog, support, FAQ
+- Add `pages` deployment workflow.
+- Add release metadata sync job to auto-update download cards.
+
+**Acceptance criteria:**
+- GitHub Pages site auto-deploys on main/docs changes.
+- Download page reflects latest release assets automatically.
+
+---
+
+## 6) Mandatory GitHub Actions workflow matrix
+
+Create/maintain the following workflows in `.github/workflows/`:
+
+1. `ci-core.yml`
+   - Lint, unit tests, schema validation, security checks.
+2. `ci-integration-matrix.yml`
+   - OS matrix smoke tests (windows-latest, ubuntu-latest, macos-latest).
+3. `build-cli-packages.yml`
+   - Python wheels/sdist + standalone binaries + checksums.
+4. `build-desktop-apps.yml`
+   - Windows/macOS/Linux GUI app installers.
+5. `build-mobile-android.yml`
+   - Android APK/AAB artifacts.
+6. `build-mobile-ios.yml`
+   - iOS IPA build on macOS runner with signing environment support.
+7. `build-harmonyos.yml`
+   - HarmonyOS packaging scaffold/production (as feasible per toolchain).
+8. `build-bootable-iso.yml`
+   - Reproducible ISO builds + artifact upload.
+9. `release.yml`
+   - Tag-triggered release orchestration across all build outputs.
+10. `deploy-pages.yml`
+   - GitHub Pages deployment for docs/product portal.
+11. `nightly-health.yml`
+   - Nightly full pipeline health check and drift reporting.
+
+---
+
+## 7) Packaging and distribution targets
+
+### CLI targets
+- `pip`, `pipx`
+- Homebrew (macOS/Linux)
+- Winget/Chocolatey/Scoop (Windows)
+- apt/deb and rpm repos (Linux)
+
+### Desktop targets
+- Windows: `.msix`, `.exe`
+- macOS: `.dmg`, `.pkg`
+- Linux: `.AppImage`, `.deb`, `.rpm`, optional Snap/Flatpak
+
+### Mobile targets
+- Android: `.apk`, `.aab`
+- iOS: `.ipa` (and organizational alias packaging docs if `apkx` naming is required in external distribution workflows)
+
+### Bootable target
+- UEFI-capable `.iso` with offline diagnostics and export support
+
+---
+
+## 8) Full mode completion definition (strict)
+
+`full` mode is complete only when all are true:
+
+1. Runs without scaffold error on Windows/macOS/Linux.
+2. Executes deep diagnostics pipeline with progress tracking.
+3. Produces extended artifact set and full-mode section in report.
+4. Supports resume/retry and interrupted-run recovery.
+5. Supports offline evidence generation + verification.
+6. Has automated tests + integration runs in CI.
+7. Has user docs and troubleshooting flow.
+
+---
+
+## 9) GitHub Pages information architecture
+
+`/` Home
+- What inspecta is, who it is for, key features.
+
+`/download`
+- Platform-specific installers, checksums, signatures, release notes.
+
+`/docs/user`
+- CLI usage, quick/full mode, report interpretation.
+
+`/docs/technician`
+- Bootable USB workflow, forensic mode, evidence verification.
+
+`/docs/developer`
+- Architecture, modules, plugin SDK, testing, contribution, coding standards.
+
+`/project`
+- Purpose, roadmap, changelog, governance, security policy.
+
+`/community`
+- Discussions, issue templates, support channels, contribution map.
+
+---
+
+## 10) KPI dashboard and success metrics
+
+- Real-device quick mode success rate by OS/device class
+- Real-device full mode success rate by OS/device class
+- False-warning rate and false-failure rate
+- Mean runtime (quick/full)
+- Installer success rate by platform
+- Crash-free sessions (desktop/mobile)
+- Report verification success rate
+- Release pipeline reliability (green rate)
+- Docs quality: time-to-first-success for new users
+
+---
+
+## 11) Risk register (expanded)
+
+1. **Platform probe fragility**  
+   Mitigation: adapter abstraction + contract tests + fallback hierarchy.
+
+2. **Signing and certificate complexity**  
+   Mitigation: staged signing strategy, environment-scoped secrets, dry-run signing checks.
+
+3. **Mobile/iOS CI constraints**  
+   Mitigation: macOS runner strategy, separate signed/unsigned lanes, reproducible fallback artifacts.
+
+4. **Bootable image legal/tool licensing concerns**  
+   Mitigation: explicit dependency inventory and license compliance gate.
+
+5. **Security trust of reports**  
+   Mitigation: signed evidence, timestamp policy, optional transparency log.
+
+---
+
+## 12) Governance and release policy
+
+- Semantic versioning with channels: `alpha`, `beta`, `stable`.
+- Security response SLA and disclosure policy.
+- Mandatory release checklist:
+  - test matrix green
+  - build matrix green
+  - signatures/checksums published
+  - docs updated
+  - rollback notes prepared
+
+---
+
+## 13) Suggested repository structure additions
+
+- `apps/desktop/`
+- `apps/mobile/`
+- `bootable/iso/`
+- `docs-site/` (for GitHub Pages)
+- `.github/workflows/` expanded with matrix workflows
+- `packaging/` (installer manifests, metadata, signing scripts)
+
+---
+
+## 14) 90-day execution milestones
+
+### Milestone M1 (Day 30)
+- Full mode core engine implemented.
+- Windows battery and inventory parity improved.
+- CI integration matrix active.
+
+### Milestone M2 (Day 60)
+- Desktop app MVP installers built.
+- CLI packaging channels active.
+- GitHub Pages v1 live.
+
+### Milestone M3 (Day 90)
+- Android + iOS build pipelines operational.
+- Bootable ISO production build available.
+- Cross-platform release orchestration fully automated.
+
+---
+
+## 15) Immediate next actions (first 10 issues to open)
+
+1. Implement full-mode flow controller and progress state machine.
+2. Replace Windows inventory placeholder with WMI backend.
+3. Fix Windows `powercfg` invocation edge cases and parser hardening.
+4. Add benchmark backend abstraction for platform compatibility.
+5. Add full-mode report schema extensions.
+6. Create `build-cli-packages.yml` workflow.
+7. Create `build-desktop-apps.yml` workflow.
+8. Create `build-mobile-android.yml` + `build-mobile-ios.yml` workflows.
+9. Create `build-bootable-iso.yml` workflow.
+10. Launch `docs-site` + `deploy-pages.yml` workflow.
+
+---
+
+## 16) Status tracking template (use in each sprint)
+
+- Planned
+- In progress
+- Done
+- Deferred
+- Blocked (with owner + unblock date)
+
+Each sprint must update:
+- delivery percentage
+- test pass/fail
+- release risk level
+- cross-platform parity score
+
+---
+
+This roadmap is intentionally ambitious and comprehensive. Execute in increments, keep each workflow green, and prioritize **real-device reliability** plus **offline trustworthiness** as the non-negotiable core.

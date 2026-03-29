@@ -8,6 +8,7 @@ Windows implementation uses powercfg to generate and parse battery reports.
 from __future__ import annotations
 
 import logging
+import os
 import platform
 import re
 import subprocess
@@ -264,16 +265,27 @@ def execute_powercfg(use_sample: bool = False) -> Dict[str, Any]:
         report_path = tmp.name
 
     try:
+        # Preferred invocation on Windows PowerCfg.
         result = subprocess.run(
-            ["powercfg", "/batteryreport", f"/output:{report_path}"],
+            ["powercfg", "/batteryreport", "/output", report_path],
             capture_output=True,
             text=True,
             timeout=15,
             check=False,
         )
 
+        # Fallback for environments that require the legacy colon syntax.
         if result.returncode != 0:
-            stderr = result.stderr.strip()
+            result = subprocess.run(
+                ["powercfg", "/batteryreport", f"/output:{report_path}"],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                check=False,
+            )
+
+        if result.returncode != 0:
+            stderr = result.stderr.strip() or result.stdout.strip() or "unknown error"
             if "no battery" in stderr.lower():
                 raise BatteryError(f"No battery detected: {stderr}")
             raise BatteryError(f"powercfg failed: {stderr}")
@@ -291,6 +303,11 @@ def execute_powercfg(use_sample: bool = False) -> Dict[str, Any]:
         raise BatteryError("powercfg not available (Windows only)") from exc
     except OSError as exc:
         raise BatteryError(f"Failed to read powercfg report: {exc}") from exc
+    finally:
+        try:
+            os.remove(report_path)
+        except OSError:
+            pass
 
 
 def scan_battery(use_sample: bool = False) -> Dict[str, Any]:

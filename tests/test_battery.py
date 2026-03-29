@@ -166,9 +166,46 @@ def test_execute_powercfg_success(mock_tmpfile, mock_run):
     with patch("builtins.open", mock_open(read_data=xml_content)):
         result = battery.execute_powercfg(use_sample=False)
 
+    first_call_args = mock_run.call_args_list[0][0][0]
+    assert first_call_args[:3] == ["powercfg", "/batteryreport", "/output"]
+
     assert result["status"] == "ok"
     assert result["data"]["health_pct"] == 90
     assert result["data"]["cycle_count"] == 50
+
+
+@patch("subprocess.run")
+@patch("tempfile.NamedTemporaryFile")
+def test_execute_powercfg_fallback_to_colon_syntax(mock_tmpfile, mock_run):
+    """If /output <path> fails, fallback to /output:<path> should be attempted."""
+    mock_file = MagicMock()
+    mock_file.__enter__.return_value.name = "/tmp/battery.xml"
+    mock_tmpfile.return_value = mock_file
+
+    mock_run.side_effect = [
+        MagicMock(returncode=1, stderr="Invalid Parameters", stdout=""),
+        MagicMock(returncode=0, stderr="", stdout="OK"),
+    ]
+
+    xml_content = """<?xml version="1.0" encoding="utf-8"?>
+<BatteryReport>
+  <BatteryInformation>
+    <BatteryName>Fallback Battery</BatteryName>
+    <ManufacturerName>FallbackMfg</ManufacturerName>
+    <CycleCount>42</CycleCount>
+    <StatusDescription>Charging</StatusDescription>
+  </BatteryInformation>
+  <DesignCapacity>50000</DesignCapacity>
+  <FullChargeCapacity>40000</FullChargeCapacity>
+</BatteryReport>"""
+
+    with patch("builtins.open", mock_open(read_data=xml_content)):
+        result = battery.execute_powercfg(use_sample=False)
+
+    assert result["status"] == "ok"
+    assert len(mock_run.call_args_list) == 2
+    second_call_args = mock_run.call_args_list[1][0][0]
+    assert second_call_args[2].startswith("/output:")
 
 
 @patch("subprocess.run")

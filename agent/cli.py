@@ -17,6 +17,7 @@ from . import __version__, native_bridge
 from .evidence import verify_evidence_manifest, write_evidence_manifest
 from .logging_utils import setup_logging
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
+from .profiles import get_profile, is_valid_profile
 from .report import compose_report
 from .report_formatter import (
     generate_html_report,
@@ -94,7 +95,9 @@ def inventory_cmd(use_sample: bool) -> None:
     "--mode",
     type=click.Choice(["quick", "full"]),
     default="quick",
-    help="Inspection mode: 'quick' for fast check, 'full' for comprehensive (future)",
+    help=(
+        "Inspection mode: 'quick' for fast check, 'full' for enhanced comprehensive run"
+    ),
 )
 @click.option(
     "--output",
@@ -158,6 +161,32 @@ def inventory_cmd(use_sample: bool) -> None:
     default=None,
     help="Upload token for authenticated report upload (used with --upload)",
 )
+@click.option(
+    "--modes-profile",
+    type=click.Choice(["balanced", "deep", "forensic"]),
+    default="balanced",
+    help=(
+        "Full-mode runtime profile: balanced (10min), deep (30min), "
+        "forensic (60min, max instrumentation)"
+    ),
+)
+@click.option(
+    "--timeout",
+    type=int,
+    default=None,
+    help=(
+        "Override timeout in seconds (default: profile-dependent). "
+        "Use for custom hardware scenarios."
+    ),
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help=(
+        "Plan-only mode: display execution plan and probe configurations "
+        "without actually running diagnostics"
+    ),
+)
 def run(
     mode: str,
     output: Path,
@@ -171,6 +200,9 @@ def run(
     with_stress: bool,
     upload: str | None,
     token: str | None,
+    modes_profile: str,
+    timeout: int | None,
+    dry_run: bool,
 ) -> None:
     """Run a complete device inspection and generate report.
 
@@ -224,8 +256,8 @@ def run(
       20  - Failure (unsupported mode or critical errors)
 
     \b
-    Note: Currently only 'quick' mode is implemented. 'full' mode
-    (bootable diagnostics) is planned for future releases.
+    Note: 'full' mode currently runs an enhanced comprehensive pipeline
+    that builds on quick mode with thermal stress enabled by default.
     """
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -265,10 +297,61 @@ def run(
 
     logger.info("Starting inspecta run (mode=%s, profile=%s)", mode, profile)
 
-    if mode != "quick":
-        logger.error("Only quick mode is supported in this scaffold. Exiting.")
-        inspector_logger.error("Unsupported mode: %s", mode)
-        raise SystemExit(20)
+    # ========================================================================
+    # Full-mode Profile and Timeout Configuration
+    # ========================================================================
+    if mode == "full":
+        # Load and validate full-mode profile
+        if not is_valid_profile(modes_profile):
+            logger.error(
+                "Invalid full-mode profile: %s. Available: balanced, deep, forensic",
+                modes_profile,
+            )
+            raise SystemExit(1)
+
+        runtime_profile = get_profile(modes_profile)
+        inspector_logger.info(
+            "Full mode enabled: profile=%s (timeout=%ds, "
+            "stress_duration=%ds, thermal_cycles=%d)",
+            runtime_profile.name,
+            runtime_profile.timeout_seconds,
+            runtime_profile.stress_duration_seconds,
+            runtime_profile.enable_thermal_cycles,
+        )
+
+        # Override timeout if specified
+        effective_timeout = (
+            timeout if timeout is not None else runtime_profile.timeout_seconds
+        )
+        inspector_logger.info("Effective timeout: %d seconds", effective_timeout)
+
+        # Phase-1 full mode baseline: enforce thermal stress unless explicitly set.
+        if not with_stress:
+            with_stress = True
+            inspector_logger.info(
+                "Full mode auto-enabled thermal stress test (--with-stress)."
+            )
+
+        # ====================================================================
+        # Dry-run Mode: Display Plan Without Execution
+        # ====================================================================
+        if dry_run:
+            inspector_logger.info("DRY-RUN MODE: No actual probes will be executed")
+            plan_output = _generate_dry_run_plan(
+                mode=mode,
+                profile_name=modes_profile,
+                runtime_profile=runtime_profile,
+                timeout=effective_timeout,
+                use_sample=use_sample,
+            )
+            inspector_logger.info("Execution Plan:")
+            inspector_logger.info(plan_output)
+            print(plan_output)  # Also print to console
+            raise SystemExit(0)  # Exit after plan display
+    else:
+        # Quick mode: use default timeout of 300s
+        effective_timeout = timeout if timeout is not None else 300
+        inspector_logger.info("Quick mode: timeout=%d seconds", effective_timeout)
 
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -997,6 +1080,109 @@ def verify_cmd(bundle_dir: Path, manifest: str, as_json: bool) -> None:
     # Exit code based on integrity status
     integrity_ok = result.get("ok", False)
     raise SystemExit(0 if integrity_ok else 1)
+
+
+# ============================================================================
+# Helper Functions for Full-Mode Planning and Configuration
+# ============================================================================
+
+
+def _generate_dry_run_plan(
+    mode: str,
+    profile_name: str,
+    runtime_profile,
+    timeout: int,
+    use_sample: bool,
+) -> str:
+    """Generate a human-readable execution plan for dry-run mode.
+
+    Args:
+        mode: Inspection mode (quick or full)
+        profile_name: Full-mode profile name (balanced, deep, forensic)
+        runtime_profile: RuntimeProfile instance with configuration
+        timeout: Effective timeout in seconds
+        use_sample: Whether sample data will be used
+
+    Returns:
+        Formatted plan text
+    """
+    lines = [
+        "",
+        "=" * 70,
+        "INSPECTA DRY-RUN EXECUTION PLAN",
+        "=" * 70,
+        "",
+        f"Mode                  : {mode.upper()}",
+        f"Profile               : {profile_name.upper()}",
+        f"Sample Data           : {'Yes' if use_sample else 'No (Real Hardware)'}",
+        f"Timeout               : {timeout} seconds ({timeout // 60} min)",
+        "Auto-Open Report      : No (dry-run only)",
+        "",
+        "FULL-MODE CONFIGURATION:",
+        "-" * 70,
+        f"  Stress Duration     : {runtime_profile.stress_duration_seconds} seconds",
+        f"  Thermal Cycles      : {runtime_profile.enable_thermal_cycles}",
+        f"  Memory Test Enabled : {runtime_profile.enable_memtest}",
+        f"  SMART Timeline      : {runtime_profile.enable_smart_timeline}",
+        f"  Retry Max Attempts  : {runtime_profile.retry_max_attempts}",
+        f"  Safe-Stop Enabled   : {runtime_profile.safe_stop_enabled}",
+        "",
+        "PLANNED PROBES:",
+        "-" * 70,
+        "  1. Device Inventory (vendor, model, serial, BIOS)",
+        "  2. Storage SMART Health (all drives: SATA, NVMe, USB)",
+        "  3. Battery Health (cycle count, capacity, design)",
+        "  4. Disk Performance (fio benchmark: read/write throughput)",
+        "  5. CPU Benchmarking (sysbench: events/sec or frequency)",
+    ]
+
+    if mode == "full":
+        lines.extend(
+            [
+                "  6. Thermal Stress Testing (CPU load + throttle detection)",
+                "  7. Memory Testing (memtest86 integration [future])",
+                "  8. Extended SMART Timeline (per-device snapshots)",
+                "  9. Thermal Cycling Measurements (phase transitions)",
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
+            "OUTPUT ARTIFACTS:",
+            "-" * 70,
+            "  report.json           : Main inspection report with scores",
+            "  report.txt            : Human-readable text report",
+            "  artifacts/",
+            "    agent.log           : Detailed execution log",
+            "    smart_*.json        : Raw SMART data per device",
+            "    battery.json        : Battery health details",
+            "    disk_perf.json      : fio benchmark summary",
+            "    cpu_bench.json      : sysbench benchmark summary",
+        ]
+    )
+
+    if mode == "full":
+        lines.extend(
+            [
+                "    thermal_stress.json : Thermal test results",
+                "    memtest.log         : Memory test results [future]",
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
+            "TO EXECUTE THIS PLAN, run without --dry-run:",
+            "-" * 70,
+            "  inspecta run --mode full --output <dir> --modes-profile " + profile_name,
+            "",
+            "=" * 70,
+            "",
+        ]
+    )
+
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
