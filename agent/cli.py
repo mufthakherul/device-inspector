@@ -353,6 +353,10 @@ def run(
         effective_timeout = timeout if timeout is not None else 300
         inspector_logger.info("Quick mode: timeout=%d seconds", effective_timeout)
 
+    # Runtime profile defaults when quick mode is used
+    if mode != "full":
+        runtime_profile = None
+
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts_dir = out_dir / "artifacts"
@@ -449,6 +453,42 @@ def run(
         if use_sample:
             smart_status = "sample"
             inspector_logger.info("Using sample SMART data (no real execution)")
+
+    # Sprint 2: SMART timeline snapshots for full mode.
+    if mode == "full" and runtime_profile and runtime_profile.enable_smart_timeline:
+        timeline_devices = [r.get("device") for r in smart_results if r.get("device")]
+        timeline_result = smart.collect_timeline_snapshots(
+            devices=timeline_devices,
+            intervals_seconds=[0, max(1, runtime_profile.stress_duration_seconds // 2)],
+            use_sample=use_sample,
+        )
+
+        timeline_artifact = artifacts_dir / "smart_timeline.json"
+        timeline_artifact.write_text(
+            json.dumps(timeline_result, indent=2),
+            encoding="utf-8",
+        )
+        tests_list.append(
+            {
+                "name": "smart_timeline",
+                "status": (
+                    "ok"
+                    if timeline_result.get("status") in {"ok", "partial"}
+                    else "skip"
+                ),
+                "data": {
+                    "timeline_status": timeline_result.get("status"),
+                    "snapshot_count": len(timeline_result.get("snapshots", [])),
+                    "error_count": len(timeline_result.get("errors", [])),
+                },
+                "status_detail": "sample" if use_sample else "executed",
+            }
+        )
+        inspector_logger.info(
+            "SMART timeline collected: snapshots=%d errors=%d",
+            len(timeline_result.get("snapshots", [])),
+            len(timeline_result.get("errors", [])),
+        )
 
     # Scan battery health
     inspector_logger.info("Step 3: Scanning battery health...")
@@ -558,23 +598,36 @@ def run(
         )
 
     inspector_logger.info("Step 6: Running memory test...")
-    memtest_result = memtest.scan_memory(use_sample=use_sample)
+    memtest_duration = 30
+    if mode == "full" and runtime_profile:
+        memtest_duration = max(30, runtime_profile.stress_duration_seconds // 2)
+
+    memtest_result = memtest.scan_memory(
+        duration_seconds=memtest_duration,
+        use_sample=use_sample,
+    )
     if memtest_result["status"] == "ok":
         # Write memtest log artifact
         memtest_artifact = artifacts_dir / "memtest.log"
-        memtest_artifact.write_text(
-            memtest_result.get("raw_text", "OK\n"), encoding="utf-8"
+        memtest_raw_text = memtest_result.get("raw_text", "OK\n")
+        memtest_artifact.write_text(memtest_raw_text, encoding="utf-8")
+
+        # Sprint 2: importer-based deep parsing (memtester source for now).
+        imported_memtest = memtest.import_memtest_log(
+            memtest_raw_text, source="memtester"
         )
         tests_list.append(
             {
                 "name": "memory_test",
                 "status": "ok",
-                "data": memtest_result["data"],
+                "data": imported_memtest,
                 "status_detail": "sample" if use_sample else "executed",
             }
         )
         inspector_logger.info(
-            "Memory test OK: result=%s", memtest_result["data"].get("result", "PASS")
+            "Memory test OK: pass_count=%s error_count=%s",
+            imported_memtest.get("pass_count", "N/A"),
+            imported_memtest.get("error_count", "N/A"),
         )
     elif memtest_result["status"] == "skip":
         # Write placeholder when memtester not available
@@ -707,8 +760,15 @@ def run(
         inspector_logger.warning("Thermal snapshot failed: %s", str(e))
 
     # Step 8: Thermal stress test (optional, enabled with --with-stress)
+    stress_duration = 30
+    if mode == "full" and runtime_profile:
+        stress_duration = runtime_profile.stress_duration_seconds
+
     if with_stress:
-        inspector_logger.info("Step 8: Running thermal stress test (30s)...")
+        inspector_logger.info(
+            "Step 8: Running thermal stress test (%ss)...",
+            stress_duration,
+        )
         try:
             if use_sample:
                 # Sample thermal stress data
@@ -721,7 +781,7 @@ def run(
                     "avg_freq_mhz": 3500.0,
                     "throttling_detected": False,
                     "throttle_reason": None,
-                    "duration_seconds": 30,
+                    "duration_seconds": stress_duration,
                     "num_samples": 15,
                     "samples": [
                         {
@@ -746,8 +806,14 @@ def run(
                 }
             else:
                 thermal_stress_result = sensors.detect_cpu_throttling(
-                    duration_seconds=30
+                    duration_seconds=stress_duration
                 )
+
+            thermal_severity = sensors.classify_thermal_severity(
+                peak_temp=thermal_stress_result.get("peak_temp"),
+                throttling_detected=thermal_stress_result.get("throttling_detected"),
+                throttle_reason=thermal_stress_result.get("throttle_reason"),
+            )
 
             # Write thermal stress CSV artifact
             if thermal_stress_result.get("samples"):
@@ -772,6 +838,8 @@ def run(
                             "baseline_freq_mhz"
                         ),
                         "min_freq_mhz": thermal_stress_result.get("min_freq_mhz"),
+                        "thermal_severity": thermal_severity.get("severity"),
+                        "thermal_penalty": thermal_severity.get("score_penalty"),
                     },
                     "status_detail": "sample" if use_sample else "executed",
                 }

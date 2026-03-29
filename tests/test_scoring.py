@@ -35,3 +35,31 @@ def test_score_cpu_thermal_from_sysbench_events():
     assert scoring.score_cpu_thermal({"events_per_second": 1500}) == 85
     assert scoring.score_cpu_thermal({"events_per_second": 900}) == 70
     assert scoring.score_cpu_thermal({"events_per_second": 400}) == 50
+
+
+def test_score_memory_from_importer_fields():
+    assert (
+        scoring.score_memory({"pass_count": 2, "error_count": 0, "status": "ok"}) == 95
+    )
+    assert (
+        scoring.score_memory({"pass_count": 1, "error_count": 0, "status": "ok"}) == 90
+    )
+    assert (
+        scoring.score_memory({"pass_count": 1, "error_count": 2, "status": "error"})
+        == 20
+    )
+
+
+def test_score_cpu_thermal_applies_severity_penalty():
+    base = scoring.score_cpu_thermal({"events_per_second": 1500})
+    penalized = scoring.score_cpu_thermal(
+        {
+            "events_per_second": 1500,
+            "peak_temp": 92,
+            "throttled": True,
+            "thermal_severity": "critical",
+        }
+    )
+
+    assert base == 85
+    assert penalized < base

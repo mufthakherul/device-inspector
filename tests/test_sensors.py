@@ -349,3 +349,35 @@ class TestDetectPlatform:
         """Test unknown platform detection."""
         mock_system.return_value = "Darwin"
         assert sensors.detect_platform() == "unknown"
+
+
+class TestThermalSeverityClassification:
+    """Test Sprint 2 thermal severity tier classification."""
+
+    def test_low_severity(self):
+        result = sensors.classify_thermal_severity(
+            peak_temp=72.0, throttling_detected=False
+        )
+        assert result["severity"] == "low"
+        assert result["score_penalty"] == 0
+
+    def test_moderate_severity(self):
+        result = sensors.classify_thermal_severity(
+            peak_temp=84.0, throttling_detected=False
+        )
+        assert result["severity"] == "moderate"
+        assert result["score_penalty"] == 10
+
+    def test_high_severity(self):
+        result = sensors.classify_thermal_severity(
+            peak_temp=91.0, throttling_detected=False
+        )
+        assert result["severity"] == "high"
+        assert result["score_penalty"] == 22
+
+    def test_critical_severity(self):
+        result = sensors.classify_thermal_severity(
+            peak_temp=97.0, throttling_detected=True
+        )
+        assert result["severity"] == "critical"
+        assert result["score_penalty"] == 35

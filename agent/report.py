@@ -14,6 +14,53 @@ from typing import Any, Dict, List, Optional
 from . import scoring
 
 
+def _classify_failures(tests: List[Dict[str, Any]]) -> List[str]:
+    """Classify failures for Sprint 2 report semantics.
+
+    Categories:
+    - hardware_risk: Deep diagnostics indicate actual hardware faults
+    - tooling_missing: Probe skipped due to missing tools
+    - environment_limited: Environment/permission/timeouts constrained execution
+    """
+    categories: set[str] = set()
+
+    for test in tests:
+        status = test.get("status")
+        name = test.get("name", "")
+        reason = str(test.get("reason", "")).lower()
+        error = str(test.get("error", "")).lower()
+        data = test.get("data", {}) or {}
+
+        if status in {"skip", "missing"}:
+            if (
+                "not found" in reason
+                or "not available" in reason
+                or "install" in reason
+            ):
+                categories.add("tooling_missing")
+            else:
+                categories.add("environment_limited")
+
+        if status == "error":
+            if "permission" in error or "timeout" in error:
+                categories.add("environment_limited")
+            elif "not found" in error or "install" in error:
+                categories.add("tooling_missing")
+            else:
+                categories.add("hardware_risk")
+
+        if name == "memory_test" and int(data.get("error_count", 0) or 0) > 0:
+            categories.add("hardware_risk")
+
+        if name == "thermal_stress" and data.get("thermal_severity") in {
+            "high",
+            "critical",
+        }:
+            categories.add("hardware_risk")
+
+    return sorted(categories)
+
+
 def _now_iso() -> str:
     return datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat()
 
@@ -53,6 +100,7 @@ def compose_report(
             "overall_score": 0,
             "grade": "unknown",
             "recommendation": "",
+            "failure_classification": [],
         },
         "scores": {},
         "tests": tests,
@@ -66,6 +114,7 @@ def compose_report(
     # Simple scoring heuristics based on tests
     storage_score = 50  # Default
     battery_score = scoring.score_battery({})
+    memory_score = scoring.score_memory({})
     cpu_score = scoring.score_cpu_thermal({})
     if tests:
         # Check for SMART test results
@@ -95,6 +144,7 @@ def compose_report(
 
         cpu_tests = [t for t in tests if t.get("name") == "cpu_benchmark"]
         thermal_stress_tests = [t for t in tests if t.get("name") == "thermal_stress"]
+        memory_tests = [t for t in tests if t.get("name") == "memory_test"]
 
         # Merge CPU benchmark and thermal stress data
         cpu_thermal_data = {}
@@ -108,16 +158,22 @@ def compose_report(
                 {
                     "peak_temp": stress_data.get("peak_temp"),
                     "throttled": stress_data.get("throttled"),
+                    "thermal_severity": stress_data.get("thermal_severity"),
                 }
             )
 
         if cpu_thermal_data:
             cpu_score = scoring.score_cpu_thermal(cpu_thermal_data)
 
+        if memory_tests and memory_tests[0].get("status") in {"ok", "error"}:
+            memory_score = scoring.score_memory(memory_tests[0].get("data", {}))
+
+    failure_classification = _classify_failures(tests)
+
     report["scores"] = {
         "storage": storage_score,
         "battery": battery_score,
-        "memory": scoring.score_memory({}),
+        "memory": memory_score,
         "cpu_thermal": cpu_score,
         "gpu": scoring.score_gpu({}),
         "network": scoring.score_network({}),
@@ -132,5 +188,6 @@ def compose_report(
     report["summary"]["recommendation"] = scoring.get_profile_recommendation(
         overall, grade, profile, report["scores"]
     )
+    report["summary"]["failure_classification"] = failure_classification
 
     return report

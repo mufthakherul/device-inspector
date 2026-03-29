@@ -551,6 +551,49 @@ def generate_thermal_stress_csv(samples: list) -> str:
     return "\n".join(lines) + "\n"
 
 
+def classify_thermal_severity(
+    peak_temp: Optional[float],
+    throttling_detected: Optional[bool],
+    throttle_reason: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Classify thermal risk severity from stress-test outcomes.
+
+    Severity tiers:
+    - low: no throttling and peak < 80°C
+    - moderate: no throttling but elevated peak temperature (80-89.9°C)
+    - high: throttling detected or peak temperature 90-94.9°C
+    - critical: throttling detected with peak >= 95°C
+    """
+    peak = float(peak_temp) if peak_temp is not None else None
+    throttled = bool(throttling_detected) if throttling_detected is not None else False
+
+    severity = "unknown"
+    score_penalty = 0
+
+    if peak is None and throttling_detected is None:
+        severity = "unknown"
+    elif throttled and peak is not None and peak >= 95:
+        severity = "critical"
+        score_penalty = 35
+    elif throttled or (peak is not None and peak >= 90):
+        severity = "high"
+        score_penalty = 22
+    elif peak is not None and peak >= 80:
+        severity = "moderate"
+        score_penalty = 10
+    else:
+        severity = "low"
+        score_penalty = 0
+
+    return {
+        "severity": severity,
+        "score_penalty": score_penalty,
+        "peak_temp": peak_temp,
+        "throttling_detected": throttling_detected,
+        "throttle_reason": throttle_reason,
+    }
+
+
 def detect_cpu_throttling(duration_seconds: int = 30) -> Dict[str, Any]:
     """Detect CPU thermal throttling on the current platform."""
     plat = detect_platform()

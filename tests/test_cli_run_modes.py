@@ -36,3 +36,5 @@ def test_run_full_mode_executes_pipeline(tmp_path):
 
     test_names = {t.get("name") for t in report.get("tests", [])}
     assert "thermal_stress" in test_names
+    assert "smart_timeline" in test_names
+    assert "failure_classification" in report["summary"]

@@ -11,6 +11,7 @@ import json
 import logging
 import re
 import subprocess
+import time
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -273,3 +274,81 @@ def scan_all_devices(use_sample: bool = False) -> List[Dict[str, Any]]:
             )
 
     return results
+
+
+def collect_timeline_snapshots(
+    devices: List[str],
+    intervals_seconds: List[int],
+    use_sample: bool = False,
+) -> Dict[str, Any]:
+    """Collect SMART snapshots for devices at multiple timeline points.
+
+    Args:
+        devices: List of device paths (e.g. ['/dev/sda', '/dev/nvme0n1'])
+        intervals_seconds: Relative offsets to capture snapshots at
+        use_sample: If True, use sample smartctl output without sleeping
+
+    Returns:
+        Timeline result with per-device snapshots and status metadata.
+    """
+    timeline: Dict[str, Any] = {
+        "status": "ok",
+        "intervals_seconds": intervals_seconds,
+        "snapshots": [],
+        "errors": [],
+    }
+
+    if not devices:
+        timeline["status"] = "skip"
+        timeline["errors"].append("No devices provided for SMART timeline")
+        return timeline
+
+    sorted_intervals = sorted([max(0, int(i)) for i in intervals_seconds])
+    start = time.time()
+
+    for idx, interval in enumerate(sorted_intervals):
+        if not use_sample:
+            target_elapsed = interval
+            elapsed = time.time() - start
+            sleep_for = target_elapsed - elapsed
+            if sleep_for > 0:
+                time.sleep(sleep_for)
+
+        point: Dict[str, Any] = {
+            "offset_seconds": interval,
+            "captured_at_epoch": time.time(),
+            "devices": [],
+        }
+
+        for device in devices:
+            try:
+                raw = execute_smartctl(device, use_sample=use_sample)
+                parsed = parse_smart_json(raw)
+                point["devices"].append(
+                    {
+                        "device": device,
+                        "status": "ok",
+                        "data": parsed,
+                    }
+                )
+            except SmartError as exc:
+                timeline["status"] = "partial"
+                message = str(exc)
+                point["devices"].append(
+                    {
+                        "device": device,
+                        "status": "error",
+                        "error": message,
+                    }
+                )
+                timeline["errors"].append(
+                    f"offset={interval}s device={device}: {message}"
+                )
+
+        timeline["snapshots"].append(point)
+
+        # In sample mode, avoid repeated waits but still capture all points.
+        if use_sample and idx < len(sorted_intervals) - 1:
+            continue
+
+    return timeline

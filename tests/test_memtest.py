@@ -125,3 +125,34 @@ def test_scan_memory_error_handling(mock_execute):
 
     assert result["status"] == "error"
     assert "failed" in result["error"].lower()
+
+
+def test_import_memtest_log_memtester_source():
+    """Importer should normalize memtester logs via existing parser."""
+    raw = "[main] All done. Pass count: 2/2, errors: 0"
+    imported = memtest.import_memtest_log(raw, source="memtester")
+
+    assert imported["source"] == "memtester"
+    assert imported["pass_count"] == 2
+    assert imported["error_count"] == 0
+    assert imported["status"] == "ok"
+
+
+def test_import_memtest_log_memtest86_source():
+    """Importer should parse simple memtest86 summary lines."""
+    raw = "MemTest86 Summary\nPass: 3\nErrors: 0\n"
+    imported = memtest.import_memtest_log(raw, source="memtest86")
+
+    assert imported["source"] == "memtest86"
+    assert imported["pass_count"] == 3
+    assert imported["error_count"] == 0
+    assert imported["status"] == "ok"
+
+
+def test_import_memtest_log_unsupported_source_raises():
+    """Unsupported source identifiers should raise MemtestError."""
+    try:
+        memtest.import_memtest_log("Pass: 1", source="unknown")
+        assert False, "Expected MemtestError"
+    except memtest.MemtestError as exc:
+        assert "Unsupported memory log source" in str(exc)

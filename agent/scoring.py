@@ -65,10 +65,33 @@ def score_battery(battery_info: Dict[str, Any]) -> int:
 
 
 def score_memory(mem_info: Dict[str, Any]) -> int:
-    """Score memory stability. Placeholder: return 90 unless errors reported."""
+    """Score memory stability using deep-test importer fields when available."""
+    if not mem_info:
+        return 90
+
+    # Explicit status from importer pipeline
+    if mem_info.get("status") == "error":
+        return 20
+
+    try:
+        error_count = int(mem_info.get("error_count", 0) or 0)
+        pass_count = int(mem_info.get("pass_count", 0) or 0)
+    except Exception:
+        error_count = 0
+        pass_count = 0
+
+    if error_count > 0:
+        return 25
+    if pass_count >= 2:
+        return 95
+    if pass_count == 1:
+        return 90
+
+    # Backward compatibility with legacy `errors` flag.
     if mem_info.get("errors"):
         return 20
-    return 90
+
+    return 85
 
 
 def score_disk_performance(perf_info: Dict[str, Any]) -> int:
@@ -126,6 +149,7 @@ def score_cpu_thermal(thermal_info: Dict[str, Any]) -> int:
     # Apply thermal stress penalties if data available
     peak_temp = thermal_info.get("peak_temp")
     throttled = thermal_info.get("throttled")
+    thermal_severity = thermal_info.get("thermal_severity")
 
     if peak_temp is not None or throttled is not None:
         # Thermal stress data available
@@ -143,6 +167,14 @@ def score_cpu_thermal(thermal_info: Dict[str, Any]) -> int:
         # Throttling penalties
         if throttled:
             penalties += 20  # Throttling detected
+
+        # Severity-tier penalty from Sprint 2 classification (if present)
+        if thermal_severity == "critical":
+            penalties += 15
+        elif thermal_severity == "high":
+            penalties += 10
+        elif thermal_severity == "moderate":
+            penalties += 5
 
         # Apply penalties but don't go below 0
         final_score = max(0, base_score - penalties)

@@ -87,6 +87,56 @@ def _extract_pass_fail(output: str) -> Dict[str, Any]:
     return result
 
 
+def import_memtest_log(raw_text: str, source: str = "memtester") -> Dict[str, Any]:
+    """Import and normalize memory test logs from supported sources.
+
+    Supported source values:
+    - memtester: Native memtester text output
+    - memtest86: Text export containing `Pass` / `Error` summary lines
+
+    Args:
+        raw_text: Log content to parse
+        source: Source format identifier
+
+    Returns:
+        Parsed dictionary with pass_count/error_count/status and source metadata.
+    """
+    source_key = (source or "").strip().lower()
+
+    if source_key == "memtester":
+        parsed = _extract_pass_fail(raw_text)
+        parsed["source"] = "memtester"
+        return parsed
+
+    if source_key == "memtest86":
+        result: Dict[str, Any] = {
+            "pass_count": 0,
+            "error_count": 0,
+            "test_results": {},
+            "status": "unknown",
+            "source": "memtest86",
+        }
+
+        pass_match = re.search(r"pass(?:es)?\s*[:=]\s*(\d+)", raw_text, re.IGNORECASE)
+        err_match = re.search(r"error(?:s)?\s*[:=]\s*(\d+)", raw_text, re.IGNORECASE)
+
+        if pass_match:
+            result["pass_count"] = int(pass_match.group(1))
+        if err_match:
+            result["error_count"] = int(err_match.group(1))
+
+        if result["error_count"] > 0:
+            result["status"] = "error"
+        elif result["pass_count"] > 0:
+            result["status"] = "ok"
+
+        return result
+
+    raise MemtestError(
+        f"Unsupported memory log source '{source}'. Use 'memtester' or 'memtest86'."
+    )
+
+
 def execute_memtest(
     duration_seconds: int = 30, use_sample: bool = False
 ) -> Dict[str, Any]:

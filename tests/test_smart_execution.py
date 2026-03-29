@@ -186,3 +186,26 @@ def test_execute_smartctl_success(mock_run):
     assert isinstance(result, dict)
     assert result["device"]["name"] == "/dev/sda"
     mock_run.assert_called_once()
+
+
+def test_collect_timeline_snapshots_with_sample():
+    """SMART timeline should collect multiple snapshot points in sample mode."""
+    result = smart.collect_timeline_snapshots(
+        devices=["/dev/nvme0n1"],
+        intervals_seconds=[0, 2],
+        use_sample=True,
+    )
+
+    assert result["status"] == "ok"
+    assert result["intervals_seconds"] == [0, 2]
+    assert len(result["snapshots"]) == 2
+    assert result["snapshots"][0]["devices"][0]["status"] == "ok"
+
+
+def test_collect_timeline_snapshots_without_devices():
+    """SMART timeline should skip gracefully when no devices provided."""
+    result = smart.collect_timeline_snapshots(
+        devices=[], intervals_seconds=[0, 1], use_sample=True
+    )
+    assert result["status"] == "skip"
+    assert "No devices provided" in result["errors"][0]
