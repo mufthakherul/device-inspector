@@ -1,0 +1,52 @@
+name: Build Bootable ISO
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+  schedule:
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build-iso:
+    name: Bootable ISO (reproducible)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ISO backend dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorriso
+
+      - name: Build bootable ISO
+        env:
+          SOURCE_DATE_EPOCH: "1704067200"
+        run: |
+          python -m tools.bootable_iso \
+            --output dist/bootable-iso \
+            --profile ubuntu-minimal \
+            --iso-name inspecta-live.iso \
+            --volume-id INSPECTA_LIVE \
+            --forensic
+
+      - name: Upload ISO artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: inspecta-bootable-iso
+          path: |
+            dist/bootable-iso/*.iso
+            dist/bootable-iso/iso-build-manifest.json
+            dist/bootable-iso/SHA256SUMS
+          retention-days: 30
