@@ -1,25 +1,25 @@
 {
-  "version": "0.1.0",
-  "description": "Local-first device diagnostics CLI with evidence bundle support",
-  "homepage": "https://github.com/mufthakherul/device-inspector",
-  "license": "Custom Non-Commercial",
-  "architecture": {
-    "64bit": {
-      "url": "https://github.com/mufthakherul/device-inspector/releases/download/v0.1.0/inspecta-0.1.0-windows.zip",
-      "hash": "REPLACE_WITH_SHA256",
-      "extract_dir": "inspecta-0.1.0-windows"
-    }
-  },
-  "bin": "inspecta.exe",
-  "checkver": {
-    "github": "https://github.com/mufthakherul/device-inspector"
-  },
-  "autoupdate": {
+    "version": "0.1.0",
+    "description": "Local-first device diagnostics CLI with evidence bundle support",
+    "homepage": "https://github.com/mufthakherul/device-inspector",
+    "license": "Custom Non-Commercial",
     "architecture": {
-      "64bit": {
-        "url": "https://github.com/mufthakherul/device-inspector/releases/download/v$version/inspecta-$version-windows.zip",
-        "extract_dir": "inspecta-$version-windows"
-      }
+        "64bit": {
+            "url": "https://github.com/mufthakherul/device-inspector/releases/download/v0.1.0/inspecta-0.1.0-windows.zip",
+            "hash": "REPLACE_WITH_SHA256",
+            "extract_dir": "inspecta-0.1.0-windows"
+        }
+    },
+    "bin": "inspecta.exe",
+    "checkver": {
+        "github": "https://github.com/mufthakherul/device-inspector"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/mufthakherul/device-inspector/releases/download/v$version/inspecta-$version-windows.zip",
+                "extract_dir": "inspecta-$version-windows"
+            }
+        }
     }
-  }
 }

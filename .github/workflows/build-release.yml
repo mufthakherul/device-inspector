@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 0.1.0)'
+        description: "Release version (e.g., 0.1.0)"
         required: true
-        default: '0.1.0'
+        default: "0.1.0"
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -18,28 +18,28 @@ jobs:
   build-windows:
     name: Build Windows Package
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      
+          python-version: "3.11"
+          cache: "pip"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
           pip install -e .
-      
+
       - name: Build Windows executable
         run: |
           python scripts/build_release.py --platform windows
-      
+
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
@@ -48,32 +48,32 @@ jobs:
             dist/inspecta-*-windows.zip
             dist/SHA256SUMS
           retention-days: 30
-  
+
   build-macos:
     name: Build macOS Package
     runs-on: macos-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      
+          python-version: "3.11"
+          cache: "pip"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
           pip install -e .
-      
+
       - name: Build macOS executable
         run: |
           python scripts/build_release.py --platform macos
-      
+
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
@@ -82,21 +82,21 @@ jobs:
             dist/inspecta-*-macos.zip
             dist/SHA256SUMS
           retention-days: 30
-  
+
   build-linux:
     name: Build Linux Package
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      
+          python-version: "3.11"
+          cache: "pip"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -109,11 +109,11 @@ jobs:
           curl -L -o /tmp/appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           sudo mv /tmp/appimagetool.AppImage /usr/local/bin/appimagetool
           sudo chmod +x /usr/local/bin/appimagetool
-      
+
       - name: Build Linux executable
         run: |
           python scripts/build_release.py --platform linux --native-linux
-      
+
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
@@ -137,7 +137,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Build wheel and sdist
         run: |
@@ -172,19 +172,19 @@ jobs:
             dist/*.tar.gz
             dist/SHA256SUMS
           retention-days: 30
-  
+
   create-release:
     name: Create GitHub Release
     needs: [build-windows, build-macos, build-linux, build-python-dist]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    
+
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-packages
-      
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:

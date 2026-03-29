@@ -1,100 +1,101 @@
 :root {
-  color-scheme: light;
-  font-family: Inter, Segoe UI, Arial, sans-serif;
+    color-scheme: light;
+    font-family: Inter, Segoe UI, Arial, sans-serif;
 }
 
 body {
-  margin: 0;
-  background: #f6f8fb;
-  color: #1f2937;
+    margin: 0;
+    background: #f6f8fb;
+    color: #1f2937;
 }
 
 .container {
-  max-width: 1180px;
-  margin: 20px auto;
-  padding: 0 16px 24px;
+    max-width: 1180px;
+    margin: 20px auto;
+    padding: 0 16px 24px;
 }
 
 .grid {
-  display: grid;
-  gap: 16px;
+    display: grid;
+    gap: 16px;
 }
 
 .grid.two {
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #dbe2ef;
-  border-radius: 12px;
-  padding: 16px;
+    background: #fff;
+    border: 1px solid #dbe2ef;
+    border-radius: 12px;
+    padding: 16px;
 }
 
-h1, h2 {
-  margin-top: 0;
+h1,
+h2 {
+    margin-top: 0;
 }
 
 .row {
-  margin-bottom: 12px;
+    margin-bottom: 12px;
 }
 
 .row label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
 }
 
 .inline {
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 }
 
 input[type="text"],
 select,
 button {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #c7d2fe;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #c7d2fe;
 }
 
 input[type="text"] {
-  width: 100%;
+    width: 100%;
 }
 
 button {
-  background: #2563eb;
-  color: white;
-  border: 0;
-  cursor: pointer;
+    background: #2563eb;
+    color: white;
+    border: 0;
+    cursor: pointer;
 }
 
 button:hover {
-  background: #1d4ed8;
+    background: #1d4ed8;
 }
 
 .log {
-  background: #0f172a;
-  color: #cbd5e1;
-  padding: 10px;
-  border-radius: 8px;
-  min-height: 120px;
-  white-space: pre-wrap;
+    background: #0f172a;
+    color: #cbd5e1;
+    padding: 10px;
+    border-radius: 8px;
+    min-height: 120px;
+    white-space: pre-wrap;
 }
 
 ul {
-  margin: 0;
-  padding-left: 20px;
-  max-height: 250px;
-  overflow: auto;
+    margin: 0;
+    padding-left: 20px;
+    max-height: 250px;
+    overflow: auto;
 }
 
 .checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .error {
-  color: #dc2626;
+    color: #dc2626;
 }

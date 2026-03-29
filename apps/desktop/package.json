@@ -1,48 +1,48 @@
 {
-  "name": "inspecta-desktop",
-  "version": "0.1.0",
-  "private": true,
-  "main": "main.js",
-  "description": "Inspecta desktop shell for local diagnostics and evidence verification",
-  "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder --publish never"
-  },
-  "devDependencies": {
-    "electron": "^31.7.7",
-    "electron-builder": "^24.13.3"
-  },
-  "build": {
-    "appId": "com.inspecta.desktop",
-    "productName": "Inspecta Desktop",
-    "directories": {
-      "output": "dist"
+    "name": "inspecta-desktop",
+    "version": "0.1.0",
+    "private": true,
+    "main": "main.js",
+    "description": "Inspecta desktop shell for local diagnostics and evidence verification",
+    "scripts": {
+        "start": "electron .",
+        "dist": "electron-builder --publish never"
     },
-    "files": [
-      "main.js",
-      "preload.js",
-      "renderer/**",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        "nsis"
-      ]
+    "devDependencies": {
+        "electron": "^31.7.7",
+        "electron-builder": "^24.13.3"
     },
-    "mac": {
-      "target": [
-        "dmg",
-        "pkg"
-      ],
-      "category": "public.app-category.utilities"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb",
-        "rpm"
-      ],
-      "category": "Utility"
+    "build": {
+        "appId": "com.inspecta.desktop",
+        "productName": "Inspecta Desktop",
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "main.js",
+            "preload.js",
+            "renderer/**",
+            "package.json"
+        ],
+        "win": {
+            "target": [
+                "nsis"
+            ]
+        },
+        "mac": {
+            "target": [
+                "dmg",
+                "pkg"
+            ],
+            "category": "public.app-category.utilities"
+        },
+        "linux": {
+            "target": [
+                "AppImage",
+                "deb",
+                "rpm"
+            ],
+            "category": "Utility"
+        }
     }
-  }
 }
