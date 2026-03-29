@@ -44,6 +44,7 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 - 🧭 **[Platform Capability Matrix](docs/PLATFORM_CAPABILITY_MATRIX.md)** - Cross-platform packaging status and support policy
 - 🌸 **[HarmonyOS Strategy (Sprint 10)](docs/HARMONYOS.md)** - HAP pipeline scope, workflow scaffold, and promotion path
 - 💿 **[Bootable ISO Guide (Sprint 11)](docs/BOOTABLE.md)** - Reproducible ISO backend, UEFI/Secure Boot guidance, forensic mode
+- 🌐 **[Docs Site Portal (Sprint 12)](docs-site/index.html)** - Product/developer portal with auto-synced release download cards
 - 🤖 **[AI & Developer Guide](docs/AI_AGENT_GUIDE.md)** - Guardrails for human and AI collaborators
 - 📋 **[Project Status](PROJECT_STATUS.md)** - Detailed implementation progress
 - 🚀 **[Next Steps](NEXT_STEPS.md)** - Prioritized action items for Sprint 2

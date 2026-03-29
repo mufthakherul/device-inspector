@@ -333,25 +333,24 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 12 — GitHub Pages Product + Developer Portal
 
+**Status:** ✅ **COMPLETED** (2026-03-29)
+
 **Goal:** Public website for users, developers, and downloads.
 
 **Tasks:**
-- Build `docs-site` with sections:
-  - Project purpose and value proposition
-  - User quickstart (CLI/Desktop/Mobile/ISO)
-  - Download center (latest releases by platform)
-  - Developer docs (architecture, plugin API, contributing, security)
-  - Roadmap, changelog, support, FAQ
-- Add `pages` deployment workflow.
-- Add release metadata sync job to auto-update download cards.
+- ✅ Build `docs-site` with sections for purpose, quickstart, download center, developer docs, project status, and support.
+- ✅ Add `pages` deployment workflow (`.github/workflows/deploy-pages.yml`).
+- ✅ Add release metadata sync job to auto-update download cards (`.github/workflows/release-metadata-sync.yml`, `tools/sync_release_metadata.py`).
 
 **Acceptance criteria:**
-- GitHub Pages site auto-deploys on main/docs changes.
-- Download page reflects latest release assets automatically.
+- ✅ GitHub Pages site auto-deploys on `main` docs-site changes.
+- ✅ Download page is driven by synced release metadata (`docs-site/data/releases.json`).
 
 ---
 
 ## 6) Mandatory GitHub Actions workflow matrix
+
+**Status:** ✅ **IMPLEMENTED** (2026-03-29)
 
 Create/maintain the following workflows in `.github/workflows/`:
 

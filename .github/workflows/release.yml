@@ -1,0 +1,73 @@
+name: Release Orchestration
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  orchestration-precheck:
+    name: Validate release workflow matrix
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Ensure required workflows exist
+        shell: bash
+        run: |
+          required=(
+            ".github/workflows/build-cli-packages.yml"
+            ".github/workflows/build-desktop-apps.yml"
+            ".github/workflows/build-mobile-android.yml"
+            ".github/workflows/build-mobile-ios.yml"
+            ".github/workflows/build-harmonyos.yml"
+            ".github/workflows/build-bootable-iso.yml"
+            ".github/workflows/deploy-pages.yml"
+            ".github/workflows/nightly-health.yml"
+            ".github/workflows/publish-pypi.yml"
+            ".github/workflows/release-metadata-sync.yml"
+          )
+
+          for wf in "${required[@]}"; do
+            test -f "$wf" || { echo "Missing required workflow: $wf"; exit 1; }
+            echo "OK: $wf"
+          done
+
+  finalize-release:
+    name: Finalize release metadata sync
+    runs-on: ubuntu-latest
+    needs:
+      - orchestration-precheck
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync docs-site release metadata
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python -m tools.sync_release_metadata --owner mufthakherul --repo device-inspector --output docs-site/data/releases.json
+
+      - name: Commit metadata update (if changed)
+        shell: bash
+        run: |
+          if git diff --quiet -- docs-site/data/releases.json; then
+            echo "No metadata changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs-site/data/releases.json
+          git commit -m "chore(release): refresh docs-site release metadata"
+          git push
