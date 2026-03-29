@@ -109,7 +109,7 @@ def get_profile(profile_name: str) -> RuntimeProfile:
     if profile_name not in PROFILES:
         available = ", ".join(PROFILES.keys())
         raise ValueError(
-            f"Unknown full-mode profile '{profile_name}'. " f"Available: {available}"
+            f"Unknown full-mode profile '{profile_name}'. Available: {available}"
         )
     return PROFILES[profile_name]
 

@@ -328,6 +328,31 @@ class TestDetectCpuThrottling:
         assert result["peak_temp"] == 58.0
         assert result["throttling_detected"] is False
 
+    @patch("agent.plugins.sensors._collect_windows_perf_sample")
+    @patch("time.sleep")
+    def test_detect_cpu_throttling_windows(self, _mock_sleep, mock_collect):
+        mock_collect.side_effect = [
+            {"freq_mhz": 3600, "max_mhz": 4200, "temp_c": 45.0},
+            {"freq_mhz": 3000, "max_mhz": 4200, "temp_c": 75.0},
+            {"freq_mhz": 2950, "max_mhz": 4200, "temp_c": 78.0},
+        ]
+
+        result = sensors.detect_cpu_throttling_windows(duration_seconds=4)
+
+        assert result["platform"] == "windows"
+        assert result["throttling_detected"] is True
+        assert result["min_freq_mhz"] == 2950
+
+    @patch("agent.plugins.sensors.detect_platform", return_value="windows")
+    @patch("agent.plugins.sensors.detect_cpu_throttling_windows")
+    def test_detect_cpu_throttling_dispatch_windows(self, mock_windows, _mock_platform):
+        mock_windows.return_value = {
+            "platform": "windows",
+            "throttling_detected": False,
+        }
+        result = sensors.detect_cpu_throttling(duration_seconds=6)
+        assert result["platform"] == "windows"
+
 
 class TestDetectPlatform:
     """Test detect_platform function."""

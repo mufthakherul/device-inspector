@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import platform
 import re
 import subprocess
 import time
@@ -20,6 +21,77 @@ logger = logging.getLogger("inspecta.smart")
 
 class SmartError(Exception):
     """Raised when SMART operations fail."""
+
+
+def execute_windows_storage_health() -> List[Dict[str, Any]]:
+    """Collect Windows storage health using PowerShell/CIM.
+
+    Returns:
+        List of disk records normalized to SMART-like structure.
+    """
+    ps_script = (
+        "Get-PhysicalDisk | "
+        "Select-Object FriendlyName,SerialNumber,MediaType,"
+        "HealthStatus,OperationalStatus,Size | ConvertTo-Json -Compress"
+    )
+
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise SmartError("PowerShell not found for Windows storage probe") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise SmartError("Windows storage probe timed out") from exc
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip() or result.stdout.strip()
+        raise SmartError(f"Windows storage probe failed: {stderr}")
+
+    try:
+        payload = json.loads(result.stdout.strip() or "[]")
+    except Exception as exc:
+        raise SmartError(
+            f"Could not parse Windows storage probe output: {exc}"
+        ) from exc
+
+    # PowerShell returns dict for single row, list for multiple rows.
+    rows = payload if isinstance(payload, list) else [payload]
+    normalized: List[Dict[str, Any]] = []
+
+    for idx, row in enumerate(rows):
+        if not isinstance(row, dict):
+            continue
+
+        health = str(row.get("HealthStatus", "Unknown")).lower()
+        operational = str(row.get("OperationalStatus", "Unknown")).lower()
+        failed = health not in {"healthy", "ok"} or "ok" not in operational
+
+        normalized.append(
+            {
+                "device": f"physicaldisk{idx}",
+                "type": str(row.get("MediaType", "unknown")).lower(),
+                "status": "ok" if not failed else "error",
+                "data": {
+                    "name": row.get("FriendlyName"),
+                    "model": row.get("FriendlyName"),
+                    "serial": row.get("SerialNumber"),
+                    "attributes": {
+                        "HealthStatus": row.get("HealthStatus"),
+                        "OperationalStatus": row.get("OperationalStatus"),
+                        "Size": row.get("Size"),
+                    },
+                    "windows_health_status": row.get("HealthStatus"),
+                },
+                "raw_json": row,
+            }
+        )
+
+    return normalized
 
 
 def detect_storage_devices() -> List[str]:
@@ -232,6 +304,20 @@ def scan_all_devices(use_sample: bool = False) -> List[Dict[str, Any]]:
         except SmartError as e:
             logger.error("Failed to load sample SMART data: %s", e)
         return results
+
+    if platform.system().lower() == "windows":
+        try:
+            return execute_windows_storage_health()
+        except SmartError as e:
+            logger.warning("Windows storage health probe failed: %s", e)
+            return [
+                {
+                    "device": "windows-storage",
+                    "type": "unknown",
+                    "status": "error",
+                    "error": str(e),
+                }
+            ]
 
     # Detect devices
     try:

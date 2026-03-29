@@ -594,6 +594,122 @@ def classify_thermal_severity(
     }
 
 
+def _collect_windows_perf_sample() -> Dict[str, Any]:
+    """Collect a single Windows CPU/thermal sample via PowerShell."""
+    ps_script = (
+        "$cpu=Get-CimInstance Win32_Processor | Select-Object -First 1;"
+        "$tz=Get-CimInstance MSAcpi_ThermalZoneTemperature "
+        "-ErrorAction SilentlyContinue "
+        "| Select-Object -First 1;"
+        "$temp=$null;"
+        "if($tz -and $tz.CurrentTemperature){"
+        "$temp=[math]::Round(($tz.CurrentTemperature/10)-273.15,1)"
+        "};"
+        "$obj=[ordered]@{"
+        "freq_mhz=$cpu.CurrentClockSpeed;"
+        "max_mhz=$cpu.MaxClockSpeed;"
+        "temp_c=$temp"
+        "};"
+        "$obj | ConvertTo-Json -Compress"
+    )
+
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", ps_script],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise SensorError("PowerShell not found for Windows thermal probe") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise SensorError("Windows thermal probe timed out") from exc
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip() or result.stdout.strip()
+        raise SensorError(f"Windows thermal probe failed: {stderr}")
+
+    import json
+
+    try:
+        payload = json.loads(result.stdout.strip() or "{}")
+    except Exception as exc:
+        raise SensorError(
+            f"Could not parse Windows thermal probe output: {exc}"
+        ) from exc
+
+    return payload
+
+
+def detect_cpu_throttling_windows(duration_seconds: int = 30) -> Dict[str, Any]:
+    """Detect Windows CPU throttling using sampled current clock speed."""
+    sample_interval = 2
+    sample_count = max(1, duration_seconds // sample_interval)
+
+    baseline = _collect_windows_perf_sample()
+    baseline_freq = baseline.get("freq_mhz")
+    samples = []
+    temps = []
+    freqs = []
+
+    for _ in range(sample_count):
+        time.sleep(sample_interval)
+        sample = _collect_windows_perf_sample()
+        freq = sample.get("freq_mhz")
+        temp = sample.get("temp_c")
+
+        throttled = False
+        if baseline_freq and freq and float(freq) < (float(baseline_freq) * 0.85):
+            throttled = True
+
+        samples.append(
+            {
+                "timestamp": time.time(),
+                "temp_c": temp,
+                "freq_mhz": freq,
+                "throttled": throttled,
+            }
+        )
+
+        if temp is not None:
+            temps.append(float(temp))
+        if freq is not None:
+            freqs.append(float(freq))
+
+    min_freq = min(freqs) if freqs else None
+    avg_freq = round(sum(freqs) / len(freqs), 1) if freqs else None
+    peak_temp = max(temps) if temps else None
+    avg_temp = round(sum(temps) / len(temps), 1) if temps else None
+
+    throttled_samples = [s for s in samples if s.get("throttled")]
+    throttling_detected = len(throttled_samples) > 0
+
+    reason = None
+    if throttling_detected and baseline_freq and min_freq:
+        drop_pct = (
+            (float(baseline_freq) - float(min_freq)) / float(baseline_freq)
+        ) * 100
+        reason = (
+            f"CPU frequency dropped {drop_pct:.1f}% ({baseline_freq} -> {min_freq} MHz)"
+        )
+
+    return {
+        "platform": "windows",
+        "baseline_max_temp": baseline.get("temp_c"),
+        "baseline_freq_mhz": baseline_freq,
+        "peak_temp": peak_temp,
+        "avg_stress_temp": avg_temp,
+        "min_freq_mhz": min_freq,
+        "avg_freq_mhz": avg_freq,
+        "samples": samples,
+        "throttling_detected": throttling_detected,
+        "throttle_reason": reason,
+        "duration_seconds": duration_seconds,
+        "num_samples": len(samples),
+    }
+
+
 def detect_cpu_throttling(duration_seconds: int = 30) -> Dict[str, Any]:
     """Detect CPU thermal throttling on the current platform."""
     plat = detect_platform()
@@ -601,14 +717,7 @@ def detect_cpu_throttling(duration_seconds: int = 30) -> Dict[str, Any]:
     if plat == "linux":
         return detect_cpu_throttling_linux(duration_seconds)
     elif plat == "windows":
-        # Windows throttling detection is more complex
-        # and requires WMI or specialized tools
-        # For now, return a placeholder
-        return {
-            "platform": "windows",
-            "throttling_detected": None,
-            "note": "Throttling detection not yet implemented for Windows",
-        }
+        return detect_cpu_throttling_windows(duration_seconds)
     else:
         raise SensorError(f"Unsupported platform: {platform.system()}")
 

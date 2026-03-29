@@ -209,3 +209,42 @@ def test_collect_timeline_snapshots_without_devices():
     )
     assert result["status"] == "skip"
     assert "No devices provided" in result["errors"][0]
+
+
+@patch("agent.plugins.smart.subprocess.run")
+def test_execute_windows_storage_health_success(mock_run):
+    mock_run.return_value = MagicMock(
+        returncode=0,
+        stdout=(
+            '[{"FriendlyName":"Samsung SSD","SerialNumber":"ABC123",'
+            '"MediaType":"SSD","HealthStatus":"Healthy",'
+            '"OperationalStatus":"OK","Size":1000204886016}]'
+        ),
+        stderr="",
+    )
+
+    result = smart.execute_windows_storage_health()
+
+    assert len(result) == 1
+    assert result[0]["status"] == "ok"
+    assert result[0]["data"]["model"] == "Samsung SSD"
+
+
+@patch("agent.plugins.smart.platform.system", return_value="Windows")
+@patch("agent.plugins.smart.subprocess.run")
+def test_scan_all_devices_windows_backend(mock_run, _mock_platform):
+    mock_run.return_value = MagicMock(
+        returncode=0,
+        stdout=(
+            '[{"FriendlyName":"WD Disk","SerialNumber":"W123",'
+            '"MediaType":"HDD","HealthStatus":"Healthy",'
+            '"OperationalStatus":"OK","Size":500107862016}]'
+        ),
+        stderr="",
+    )
+
+    result = smart.scan_all_devices(use_sample=False)
+
+    assert len(result) == 1
+    assert result[0]["device"] == "physicaldisk0"
+    assert result[0]["status"] == "ok"
