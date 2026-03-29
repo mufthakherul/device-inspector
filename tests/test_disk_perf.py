@@ -74,6 +74,21 @@ def test_scan_disk_performance_windows_winsat(mock_run, _mock_platform):
     assert result["data"]["write_mbps"] == 250.75
 
 
+@patch("agent.plugins.disk_perf.platform.system", return_value="Windows")
+@patch("agent.plugins.disk_perf.subprocess.run")
+def test_scan_disk_performance_windows_winsat_requires_elevation(
+    mock_run, _mock_platform
+):
+    elevation_error = OSError("requires elevation")
+    elevation_error.winerror = 740
+    mock_run.side_effect = elevation_error
+
+    result = disk_perf.scan_disk_performance(use_sample=False)
+
+    assert result["status"] == "error"
+    assert "requires elevated privileges" in result["error"]
+
+
 def test_run_io_stress_cycles_with_sample():
     result = disk_perf.run_io_stress_cycles(cycles=2, use_sample=True)
 

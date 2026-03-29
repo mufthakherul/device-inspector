@@ -876,15 +876,27 @@ def run(
             )
 
             if thermal_stress_result.get("throttling_detected"):
+                peak_temp = thermal_stress_result.get("peak_temp")
+                peak_temp_display = (
+                    f"{peak_temp:.1f}°C"
+                    if isinstance(peak_temp, (int, float))
+                    else "N/A"
+                )
                 inspector_logger.warning(
-                    "⚠️  Throttling detected! Peak: %.1f°C, Reason: %s",
-                    thermal_stress_result.get("peak_temp", 0),
+                    "⚠️  Throttling detected! Peak: %s, Reason: %s",
+                    peak_temp_display,
                     thermal_stress_result.get("throttle_reason", "Unknown"),
                 )
             else:
+                peak_temp = thermal_stress_result.get("peak_temp")
+                peak_temp_display = (
+                    f"{peak_temp:.1f}°C"
+                    if isinstance(peak_temp, (int, float))
+                    else "N/A"
+                )
                 inspector_logger.info(
-                    "Thermal stress OK: Peak=%.1f°C, no throttling detected",
-                    thermal_stress_result.get("peak_temp", 0),
+                    "Thermal stress OK: Peak=%s, no throttling detected",
+                    peak_temp_display,
                 )
 
         except sensors.SensorError as e:

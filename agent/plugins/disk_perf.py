@@ -126,6 +126,18 @@ def execute_windows_winsat() -> Dict[str, Any]:
         )
     except FileNotFoundError as exc:
         raise DiskPerfError("winsat not found on Windows") from exc
+    except PermissionError as exc:
+        if getattr(exc, "winerror", None) == 740:
+            raise DiskPerfError(
+                "winsat requires elevated privileges (run terminal as Administrator)"
+            ) from exc
+        raise DiskPerfError("winsat permission denied") from exc
+    except OSError as exc:
+        if getattr(exc, "winerror", None) == 740:
+            raise DiskPerfError(
+                "winsat requires elevated privileges (run terminal as Administrator)"
+            ) from exc
+        raise DiskPerfError(f"winsat launch failed: {exc}") from exc
     except subprocess.TimeoutExpired as exc:
         raise DiskPerfError("winsat timed out") from exc
 
