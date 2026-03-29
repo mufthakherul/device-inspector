@@ -5,15 +5,22 @@
 
 ## Overview
 
-This document describes how to distribute and use the standalone Inspecta v1 CLI packages for Windows and macOS. Users can run the tool with a **single click** without installing Python, dependencies, or any additional services.
+This document describes how to distribute and use the standalone Inspecta v1 CLI packages for Windows, macOS, and Linux. Users can run the tool with a **single click** without installing Python, dependencies, or any additional services.
 
 ## Distribution Packages
 
-Inspecta v1 is distributed as zip files containing everything needed:
+Inspecta v1 is distributed as zip files plus native package channels:
 
 - **Windows:** `inspecta-0.1.0-windows.zip` (~20-25 MB)
 - **macOS:** `inspecta-0.1.0-macos.zip` (~20-25 MB)
 - **Linux:** `inspecta-0.1.0-linux.zip` (~15-20 MB)
+
+Additional Linux-native release assets may include:
+- `inspecta-0.1.0-linux-amd64.deb`
+- `inspecta-0.1.0-linux-amd64.rpm`
+- `inspecta-0.1.0-linux-x86_64.AppImage`
+
+For package channel metadata (winget, scoop, chocolatey, homebrew), see `docs/PACKAGE_CHANNELS.md`.
 
 ## What's Inside Each Package
 

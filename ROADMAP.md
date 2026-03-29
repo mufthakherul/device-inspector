@@ -235,20 +235,22 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 7 — CLI Packaging & Installer Distribution
 
+**Status:** ✅ **COMPLETED** (2026-03-29)
+
 **Goal:** Professional CLI distribution channels.
 
 **Tasks:**
-- Publish Python package (`pip`, `pipx`) with release automation.
-- Build standalone artifacts per OS (PyInstaller/Nuitka strategy review).
-- Add package channels:
-  - Windows: `winget` / Chocolatey / Scoop metadata
-  - macOS: Homebrew tap
-  - Linux: `.deb`, `.rpm`, AppImage (minimum)
-- Add checksums and signature verification docs.
+- ✅ Publish Python package (`pip`, `pipx`) with release automation (`.github/workflows/publish-pypi.yml`).
+- ✅ Build standalone artifacts per OS retained and expanded in release automation (`.github/workflows/build-release.yml`, `scripts/build_release.py`).
+- ✅ Add package channels metadata:
+   - Windows: `winget` / Chocolatey / Scoop metadata under `packaging/`
+   - macOS: Homebrew formula template under `packaging/homebrew/`
+   - Linux: `.deb`, `.rpm`, `.AppImage` build path in Linux release pipeline
+- ✅ Add checksums and signature verification docs (`docs/RELEASE.md`, `docs/PACKAGE_CHANNELS.md`).
 
 **Acceptance criteria:**
-- Users can install CLI from at least one native channel per platform.
-- Release assets generated automatically on tag.
+- ✅ Users can install CLI from at least one native channel per platform (metadata/formula/spec published for Windows/macOS and Linux native artifact channels).
+- ✅ Release assets are generated automatically on tag (zip + python dist + linux native package targets + checksums).
 
 ---
 
