@@ -150,7 +150,7 @@ def inventory_cmd(use_sample: bool) -> None:
 @click.option(
     "--upload",
     default=None,
-    help=("Optional upload base URL (or /reports endpoint). " "Requires --token."),
+    help=("Optional upload base URL (or /reports endpoint). Requires --token."),
 )
 @click.option(
     "--token",
