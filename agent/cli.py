@@ -19,7 +19,12 @@ from typing import Any
 import click
 
 from . import __version__, native_bridge
-from .evidence import EvidenceError, verify_evidence_manifest, write_evidence_manifest
+from .evidence import (
+    EvidenceError,
+    audit_evidence_bundle,
+    verify_evidence_manifest,
+    write_evidence_manifest,
+)
 from .logging_utils import setup_logging
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .profiles import get_profile, is_valid_profile
@@ -412,7 +417,11 @@ def run(
     smart_status = checkpoint_state.get("smart_status", "missing")
 
     # Get device inventory
-    if checkpoint_enabled and "inventory" in completed_steps and device_info is not None:
+    if (
+        checkpoint_enabled
+        and "inventory" in completed_steps
+        and device_info is not None
+    ):
         inspector_logger.info("Step 1: Inventory restored from checkpoint")
     else:
         inspector_logger.info("Step 1: Detecting device inventory...")
@@ -542,7 +551,9 @@ def run(
         if checkpoint_enabled and "smart_timeline" in completed_steps:
             inspector_logger.info("SMART timeline restored from checkpoint")
         else:
-            timeline_devices = [r.get("device") for r in smart_results if r.get("device")]
+            timeline_devices = [
+                r.get("device") for r in smart_results if r.get("device")
+            ]
             timeline_result = smart.collect_timeline_snapshots(
                 devices=timeline_devices,
                 intervals_seconds=[
@@ -1474,6 +1485,77 @@ def verify_cmd(
     raise SystemExit(int(result.get("exit_code", 1)))
 
 
+@cli.command("audit")
+@click.argument("bundle_dir", type=click.Path(path_type=Path, exists=True))
+@click.option(
+    "--manifest",
+    default="artifacts/manifest.json",
+    help="Path to manifest file (relative to bundle directory).",
+)
+@click.option(
+    "--json",
+    "as_json",
+    is_flag=True,
+    help="Output results as JSON instead of human-readable format.",
+)
+@click.option(
+    "--public-key",
+    default=None,
+    help="Optional Ed25519 public key (PEM) when auditing signed manifests.",
+)
+def audit_cmd(
+    bundle_dir: Path,
+    manifest: str,
+    as_json: bool,
+    public_key: str | None,
+) -> None:
+    """Audit bundle reproducibility and deterministic evidence properties.
+
+    Combines integrity verification with deterministic-entry checks and
+    re-index comparison to ensure a bundle can be reproduced consistently.
+
+    Exit codes:
+      0 - Reproducible and integrity verified
+      1 - Integrity or reproducibility checks failed
+      2 - Bundle or manifest not found / invalid manifest JSON
+    """
+    if not bundle_dir.is_dir():
+        raise click.BadParameter(f"Bundle directory not found: {bundle_dir}")
+
+    result = audit_evidence_bundle(
+        output_dir=bundle_dir,
+        manifest_rel_path=manifest,
+        public_key_path=Path(public_key) if public_key else None,
+    )
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2, default=str))
+    else:
+        click.echo(f"Bundle:                 {bundle_dir}")
+        click.echo(f"Manifest:               {manifest}")
+        click.echo(
+            f"Integrity:              {'✓ OK' if result.get('integrity_ok') else '✗ FAILED'}"
+        )
+        click.echo(
+            "Deterministic entries:   "
+            f"{'✓ OK' if result.get('deterministic_entries') else '✗ FAILED'}"
+        )
+        click.echo(
+            "Metadata completeness:   "
+            f"{'✓ OK' if result.get('entry_metadata_complete') else '✗ FAILED'}"
+        )
+        click.echo(
+            "Re-indexed parity:       "
+            f"{'✓ OK' if result.get('reindexed_entries_match') else '✗ FAILED'}"
+        )
+        click.echo(
+            "Result code:             "
+            f"{result.get('exit_code')} ({result.get('exit_reason')})"
+        )
+
+    raise SystemExit(int(result.get("exit_code", 1)))
+
+
 # ============================================================================
 # Helper Functions for Full-Mode Planning and Configuration
 # ============================================================================
@@ -1599,9 +1681,9 @@ def _save_full_mode_checkpoint(
     completed_steps = set(checkpoint_data.get("completed_steps", []))
     completed_steps.add(completed_step)
     checkpoint_data["completed_steps"] = sorted(completed_steps)
-    checkpoint_data["updated_at"] = datetime.now(timezone.utc).replace(
-        microsecond=0
-    ).isoformat()
+    checkpoint_data["updated_at"] = (
+        datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    )
 
     state = checkpoint_data.setdefault("state", {})
     state.update(state_updates)

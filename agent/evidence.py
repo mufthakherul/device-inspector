@@ -152,9 +152,10 @@ def build_evidence_manifest(
     relative_paths: Iterable[str],
     agent_version: str,
     run_metadata: Dict[str, Any] | None = None,
+    generated_at: str | None = None,
 ) -> Tuple[Dict[str, Any], str]:
     """Build deterministic manifest and return (manifest_obj, manifest_sha256)."""
-    generated_at = (
+    generated_at = generated_at or (
         datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat()
     )
     entries = generate_manifest_entries(base_dir, relative_paths)
@@ -182,6 +183,7 @@ def write_evidence_manifest(
     run_metadata: Dict[str, Any] | None = None,
     sign_key_path: Path | None = None,
     signature_filename: str = "manifest.sig",
+    generated_at: str | None = None,
 ) -> Tuple[str, str]:
     """Write evidence manifest to artifacts and return (manifest_rel_path, sha256)."""
     manifest, manifest_sha = build_evidence_manifest(
@@ -189,6 +191,7 @@ def write_evidence_manifest(
         relative_paths=relative_paths,
         agent_version=agent_version,
         run_metadata=run_metadata,
+        generated_at=generated_at,
     )
 
     artifacts_dir = output_dir / "artifacts"
@@ -349,4 +352,101 @@ def verify_evidence_manifest(
         "missing": missing,
         "exit_code": 0,
         "exit_reason": "verified",
+    }
+
+
+def audit_evidence_bundle(
+    output_dir: Path,
+    manifest_rel_path: str,
+    public_key_path: Path | None = None,
+) -> Dict[str, Any]:
+    """Audit bundle reproducibility and determinism characteristics.
+
+    The audit validates integrity first, then verifies deterministic-entry
+    guarantees (sorted, unique paths and complete metadata) and checks that
+    re-indexing live files yields the same entry metadata.
+    """
+    manifest_path = output_dir / manifest_rel_path
+    if not manifest_path.exists():
+        return {
+            "ok": False,
+            "integrity_ok": False,
+            "deterministic_entries": False,
+            "entry_metadata_complete": False,
+            "reindexed_entries_match": False,
+            "exit_code": 2,
+            "exit_reason": "manifest_not_found",
+            "error": f"Manifest not found: {manifest_rel_path}",
+        }
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return {
+            "ok": False,
+            "integrity_ok": False,
+            "deterministic_entries": False,
+            "entry_metadata_complete": False,
+            "reindexed_entries_match": False,
+            "exit_code": 2,
+            "exit_reason": "manifest_invalid_json",
+            "error": f"Invalid manifest JSON: {exc}",
+        }
+
+    integrity = verify_evidence_manifest(
+        output_dir=output_dir,
+        manifest_rel_path=manifest_rel_path,
+        public_key_path=public_key_path,
+    )
+
+    entries = manifest.get("entries", []) if isinstance(manifest, dict) else []
+    raw_paths = [e.get("path") for e in entries if isinstance(e, dict)]
+    path_values = [p for p in raw_paths if isinstance(p, str)]
+
+    deterministic_entries = path_values == sorted(path_values) and len(
+        path_values
+    ) == len(set(path_values))
+    entry_metadata_complete = all(
+        isinstance(e, dict)
+        and isinstance(e.get("path"), str)
+        and isinstance(e.get("size"), int)
+        and isinstance(e.get("sha256"), str)
+        and len(e.get("sha256", "")) == 64
+        for e in entries
+    )
+
+    listed_paths = [e["path"] for e in entries if isinstance(e, dict) and "path" in e]
+    reindexed_entries = generate_manifest_entries(output_dir, listed_paths)
+
+    declared_by_path = {
+        e.get("path"): {"size": e.get("size"), "sha256": e.get("sha256")}
+        for e in entries
+        if isinstance(e, dict) and isinstance(e.get("path"), str)
+    }
+    reindexed_by_path = {
+        e["path"]: {"size": e["size"], "sha256": e["sha256"]} for e in reindexed_entries
+    }
+    reindexed_entries_match = declared_by_path == reindexed_by_path
+
+    ok = (
+        bool(integrity.get("ok"))
+        and deterministic_entries
+        and entry_metadata_complete
+        and reindexed_entries_match
+    )
+
+    return {
+        "ok": ok,
+        "integrity_ok": bool(integrity.get("ok")),
+        "deterministic_entries": deterministic_entries,
+        "entry_metadata_complete": entry_metadata_complete,
+        "reindexed_entries_match": reindexed_entries_match,
+        "checked": int(integrity.get("checked", 0)),
+        "mismatches": integrity.get("mismatches", []),
+        "missing": integrity.get("missing", []),
+        "manifest_sha256": _sha256_bytes(
+            _canonical_manifest_bytes(manifest) if isinstance(manifest, dict) else b"{}"
+        ),
+        "exit_code": 0 if ok else 1,
+        "exit_reason": "reproducible" if ok else "reproducibility_check_failed",
     }

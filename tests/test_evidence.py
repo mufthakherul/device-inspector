@@ -3,7 +3,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from agent.evidence import verify_evidence_manifest, write_evidence_manifest
+from agent.evidence import (
+    audit_evidence_bundle,
+    build_evidence_manifest,
+    verify_evidence_manifest,
+    write_evidence_manifest,
+)
 
 
 def test_write_and_verify_evidence_manifest(tmp_path: Path):
@@ -68,3 +73,55 @@ def test_verify_manifest_missing_file_taxonomy(tmp_path: Path):
     assert result["ok"] is False
     assert result["exit_code"] == 2
     assert result["exit_reason"] == "manifest_not_found"
+
+
+def test_build_manifest_is_deterministic_with_fixed_timestamp(tmp_path: Path):
+    out = tmp_path
+    artifacts = out / "artifacts"
+    artifacts.mkdir()
+    (artifacts / "b.txt").write_text("beta", encoding="utf-8")
+    (artifacts / "a.txt").write_text("alpha", encoding="utf-8")
+
+    fixed_generated_at = "2026-03-30T00:00:00+00:00"
+
+    manifest_a, sha_a = build_evidence_manifest(
+        base_dir=out,
+        relative_paths=["artifacts/b.txt", "artifacts/a.txt", "artifacts/b.txt"],
+        agent_version="0.1.0",
+        generated_at=fixed_generated_at,
+    )
+    manifest_b, sha_b = build_evidence_manifest(
+        base_dir=out,
+        relative_paths=["artifacts/a.txt", "artifacts/b.txt"],
+        agent_version="0.1.0",
+        generated_at=fixed_generated_at,
+    )
+
+    assert sha_a == sha_b
+    assert manifest_a == manifest_b
+    assert [e["path"] for e in manifest_a["entries"]] == [
+        "artifacts/a.txt",
+        "artifacts/b.txt",
+    ]
+
+
+def test_audit_evidence_bundle_reports_reproducible_for_valid_bundle(tmp_path: Path):
+    out = tmp_path
+    artifacts = out / "artifacts"
+    artifacts.mkdir()
+    (artifacts / "agent.log").write_text("ok", encoding="utf-8")
+
+    rel, _ = write_evidence_manifest(
+        output_dir=out,
+        relative_paths=["artifacts/agent.log"],
+        agent_version="0.1.0",
+    )
+
+    result = audit_evidence_bundle(out, rel)
+    assert result["ok"] is True
+    assert result["integrity_ok"] is True
+    assert result["deterministic_entries"] is True
+    assert result["entry_metadata_complete"] is True
+    assert result["reindexed_entries_match"] is True
+    assert result["exit_code"] == 0
+    assert result["exit_reason"] == "reproducible"
