@@ -9,6 +9,25 @@ function guessWorkspaceRoot() {
     return path.resolve(__dirname, '..', '..');
 }
 
+function loadCapabilityMatrix() {
+    const root = guessWorkspaceRoot();
+    const matrixPath = path.join(root, 'schemas', 'capability-matrix-1.0.0.json');
+    if (!fs.existsSync(matrixPath)) {
+        return { ok: false, error: 'Capability matrix not found.' };
+    }
+
+    try {
+        const payload = JSON.parse(fs.readFileSync(matrixPath, 'utf-8'));
+        return {
+            ok: true,
+            matrixVersion: payload.matrix_version,
+            desktop: payload.surfaces?.desktop || null
+        };
+    } catch (error) {
+        return { ok: false, error: error.message };
+    }
+}
+
 function createWindow() {
     const win = new BrowserWindow({
         width: 1200,
@@ -98,6 +117,10 @@ ipcMain.handle('ui:pick-directory', async () => {
 ipcMain.handle('ui:set-local-only-mode', async (_event, enabled) => {
     localOnlyMode = Boolean(enabled);
     return { enabled: localOnlyMode };
+});
+
+ipcMain.handle('ui:get-capabilities', async () => {
+    return loadCapabilityMatrix();
 });
 
 ipcMain.handle('ui:run-inspection', async (_event, payload) => {

@@ -12,6 +12,7 @@ import datetime
 from typing import Any, Dict, List, Optional
 
 from . import scoring
+from .schema_compat import REPORT_SCHEMA_VERSION
 
 
 def _classify_failures(tests: List[Dict[str, Any]]) -> List[str]:
@@ -90,7 +91,7 @@ def compose_report(
         native: Optional native helper metadata/capabilities
     """
     report: Dict[str, Any] = {
-        "report_version": "1.0.0",
+        "report_version": REPORT_SCHEMA_VERSION,
         "generated_at": _now_iso(),
         "agent": {"name": "inspecta", "version": agent_version},
         "device": device,

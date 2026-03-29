@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -34,8 +35,31 @@ class MobileHomePage extends StatefulWidget {
 class _MobileHomePageState extends State<MobileHomePage> {
   Map<String, dynamic>? _report;
   Map<String, dynamic>? _verifyResult;
+  Map<String, dynamic>? _capabilityInfo;
   String? _status;
   String _pairingToken = 'inspecta:pairing:offline';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCapabilityMatrix();
+  }
+
+  Future<void> _loadCapabilityMatrix() async {
+    try {
+      final text = await rootBundle.loadString('assets/capability-matrix.json');
+      final parsed = jsonDecode(text) as Map<String, dynamic>;
+      final surfaces = parsed['surfaces'] as Map<String, dynamic>?;
+      setState(() {
+        _capabilityInfo = {
+          'matrix_version': parsed['matrix_version'],
+          'mobile': surfaces?['mobile'],
+        };
+      });
+    } catch (_) {
+      // Keep app functional even if asset is absent.
+    }
+  }
 
   Future<void> _pickReportJson() async {
     final result = await FilePicker.platform.pickFiles(
@@ -207,6 +231,24 @@ class _MobileHomePageState extends State<MobileHomePage> {
               ),
             ),
           ),
+          if (_capabilityInfo != null)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Capability Matrix', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Text('Version: ${_capabilityInfo?['matrix_version'] ?? 'N/A'}'),
+                    const SizedBox(height: 4),
+                    Text('Mobile capabilities:'),
+                    ...( ((_capabilityInfo?['mobile'] as Map<String, dynamic>?)?['capabilities'] as List<dynamic>? ?? const [])
+                        .map((cap) => Text('- $cap'))),
+                  ],
+                ),
+              ),
+            ),
           if (_status != null)
             Padding(
               padding: const EdgeInsets.only(top: 10),

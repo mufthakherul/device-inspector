@@ -87,9 +87,9 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 > Definition of done: code + tests + docs + changelog + rollback notes + risk updates.
 
 ### Sprint 1 — Baseline integrity and compatibility freeze
-- Lock report schema compatibility policy.
-- Add versioned capability matrix consumed by CLI/desktop/mobile.
-- Add migration guards for legacy artifacts.
+- ✅ Lock report schema compatibility policy (`agent/schema_compat.py` + guarded `report` command).
+- ✅ Add versioned capability matrix consumed by CLI/desktop/mobile (`schemas/capability-matrix-1.0.0.json`, `inspecta capabilities`, desktop/mobile consumers).
+- ✅ Add migration guards for legacy artifacts (`migrate_legacy_report`, legacy manifest normalization in evidence verification).
 
 ### Sprint 2 — Offline evidence v2
 - Add deterministic bundle mode with canonical ordering.
@@ -368,7 +368,7 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 |---|---|---|---|---|---|
 | 1 Vision | Core outcomes measurable and shipped | In progress | product + release outputs | PM | Rolling |
 | 2 Principles | Offline, parity, integrity, degradation validated | In progress | tests + real-device runs | Eng Lead | Rolling |
-| 3 Baseline | Claims match repository reality | Planned | docs audits | Maintainer | Sprint 1 |
+| 3 Baseline | Claims match repository reality | In progress | `ROADMAP.md` + schema/capability/migration guard implementation | Maintainer | Sprint 1 |
 | 4 Phases | Milestones mapped to delivery | In progress | planning board | PM | Rolling |
 | 5 Sprints | DoD satisfied for each sprint | In progress | sprint reports | Team | Rolling |
 | 6 Workflows | Required CI/CD/security workflows green | In progress | GitHub Actions | DevOps | Sprint 2 |

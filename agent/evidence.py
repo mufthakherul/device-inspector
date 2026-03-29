@@ -19,6 +19,20 @@ class EvidenceError(Exception):
     """Raised when evidence signing/verification operations fail."""
 
 
+def _normalize_manifest_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
+    normalized = dict(entry)
+    rel = normalized.get("path")
+    if isinstance(rel, str) and rel.startswith("./"):
+        normalized["path"] = rel[2:]
+
+    # Legacy compatibility: historical manifests may use `hash` instead of
+    # `sha256` for entry checksum naming.
+    if "sha256" not in normalized and isinstance(normalized.get("hash"), str):
+        normalized["sha256"] = normalized["hash"]
+
+    return normalized
+
+
 def _sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as fh:
@@ -253,7 +267,12 @@ def verify_evidence_manifest(
             "exit_reason": "manifest_invalid_json",
         }
 
-    entries = manifest.get("entries", [])
+    raw_entries = manifest.get("entries", [])
+    entries = [
+        _normalize_manifest_entry(entry)
+        for entry in raw_entries
+        if isinstance(entry, dict)
+    ]
     mismatches: List[Dict[str, str]] = []
     missing: List[str] = []
 
@@ -399,7 +418,15 @@ def audit_evidence_bundle(
         public_key_path=public_key_path,
     )
 
-    entries = manifest.get("entries", []) if isinstance(manifest, dict) else []
+    entries = (
+        [
+            _normalize_manifest_entry(entry)
+            for entry in manifest.get("entries", [])
+            if isinstance(entry, dict)
+        ]
+        if isinstance(manifest, dict)
+        else []
+    )
     raw_paths = [e.get("path") for e in entries if isinstance(e, dict)]
     path_values = [p for p in raw_paths if isinstance(p, str)]
 

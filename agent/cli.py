@@ -19,6 +19,7 @@ from typing import Any
 import click
 
 from . import __version__, native_bridge
+from .capability_matrix import get_surface_capabilities, load_capability_matrix
 from .evidence import (
     EvidenceError,
     audit_evidence_bundle,
@@ -35,6 +36,7 @@ from .report_formatter import (
     generate_txt_report,
     open_file,
 )
+from .schema_compat import ensure_supported_report_version, migrate_legacy_report
 from .upload_client import UploadError, upload_report_bundle
 
 # Simple console logger for CLI (detailed logging set up in run command)
@@ -1379,7 +1381,9 @@ def report_cmd(report_file: Path, open_report: bool, report_format: str) -> None
         raise click.BadParameter("report_file must be a JSON file")
 
     with open(report_file, encoding="utf-8") as fh:
-        report = json.load(fh)
+        report = migrate_legacy_report(json.load(fh))
+
+    ensure_supported_report_version(str(report.get("report_version", "0.0.0")))
 
     output_dir = report_file.parent
     generated_path: Path | None = None
@@ -1403,6 +1407,36 @@ def report_cmd(report_file: Path, open_report: bool, report_format: str) -> None
                 f"Failed to open report automatically: {generated_path}"
             )
         click.echo(f"Opened: {generated_path}")
+
+
+@cli.command("capabilities")
+@click.option(
+    "--surface",
+    type=click.Choice(["cli", "desktop", "mobile"]),
+    default="cli",
+    help="Target surface to view capability declarations for.",
+)
+@click.option(
+    "--json",
+    "as_json",
+    is_flag=True,
+    help="Output capability payload as JSON.",
+)
+def capabilities_cmd(surface: str, as_json: bool) -> None:
+    """Show versioned capability matrix data for CLI/Desktop/Mobile surfaces."""
+    matrix = load_capability_matrix()
+    payload = get_surface_capabilities(surface)
+
+    if as_json:
+        click.echo(json.dumps(payload, indent=2))
+        return
+
+    click.echo(f"Capability Matrix Version: {matrix.get('matrix_version')}")
+    click.echo(f"Surface: {payload.get('surface')}")
+    click.echo(f"Description: {payload.get('description')}")
+    click.echo("Capabilities:")
+    for item in payload.get("capabilities", []):
+        click.echo(f"  - {item}")
 
 
 @cli.command("verify")

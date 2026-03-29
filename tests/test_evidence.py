@@ -125,3 +125,29 @@ def test_audit_evidence_bundle_reports_reproducible_for_valid_bundle(tmp_path: P
     assert result["reindexed_entries_match"] is True
     assert result["exit_code"] == 0
     assert result["exit_reason"] == "reproducible"
+
+
+def test_verify_manifest_accepts_legacy_hash_and_dot_slash_path(tmp_path: Path):
+    out = tmp_path
+    artifacts = out / "artifacts"
+    artifacts.mkdir()
+
+    target = artifacts / "agent.log"
+    target.write_text("ok", encoding="utf-8")
+
+    rel, _ = write_evidence_manifest(
+        output_dir=out,
+        relative_paths=["artifacts/agent.log"],
+        agent_version="0.1.0",
+    )
+
+    manifest_path = out / rel
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    entry = manifest["entries"][0]
+    entry["path"] = f"./{entry['path']}"
+    entry["hash"] = entry.pop("sha256")
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    result = verify_evidence_manifest(out, rel)
+    assert result["ok"] is True
+    assert result["exit_reason"] == "verified"

@@ -51,3 +51,33 @@ def test_report_command_generates_txt(tmp_path):
 
     assert result.exit_code == 0
     assert (tmp_path / "report.txt").exists()
+
+
+def test_report_command_migrates_legacy_report_shape(tmp_path):
+    legacy = {
+        "agent_version": "0.0.9",
+        "generated_at": "2026-03-29T00:00:00Z",
+        "summary": {"overall_score": 77},
+        "scores": {},
+    }
+    report_path = tmp_path / "report.json"
+    report_path.write_text(json.dumps(legacy), encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", str(report_path), "--format", "txt"])
+
+    assert result.exit_code == 0
+    assert (tmp_path / "report.txt").exists()
+
+
+def test_report_command_rejects_unsupported_schema_major(tmp_path):
+    report = _sample_report()
+    report["report_version"] = "2.0.0"
+    report_path = tmp_path / "report.json"
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["report", str(report_path), "--format", "txt"])
+
+    assert result.exit_code != 0
+    assert "Unsupported report schema major version" in str(result.exception)
