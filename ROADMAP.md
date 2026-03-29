@@ -173,6 +173,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 - ✅ Real Windows run has valid inventory fields (not unknown placeholders) on supported devices.
 - ✅ Battery report succeeds when OS command succeeds directly.
 - ✅ Degradation warnings are clear and actionable.
+- ✅ Fresh real-device **no-sample** run completes end-to-end with graceful degradation (non-admin `winsat` elevation surfaced as warning, no CLI crash).
 
 ---
 
