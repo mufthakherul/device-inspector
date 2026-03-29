@@ -1,14 +1,14 @@
 {
-  "matrix_version": "1.0.0",
-  "surfaces": {
-    "mobile": {
-      "description": "Mobile companion for offline report review and verification",
-      "capabilities": [
-        "report_viewer",
-        "bundle_import",
-        "verify_bundle",
-        "offline_mode"
-      ]
+    "matrix_version": "1.0.0",
+    "surfaces": {
+        "mobile": {
+            "description": "Mobile companion for offline report review and verification",
+            "capabilities": [
+                "report_viewer",
+                "bundle_import",
+                "verify_bundle",
+                "offline_mode"
+            ]
+        }
     }
-  }
 }

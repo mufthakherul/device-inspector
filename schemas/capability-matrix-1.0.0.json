@@ -1,39 +1,39 @@
 {
-  "matrix_version": "1.0.0",
-  "generated_at": "2026-03-30T00:00:00Z",
-  "surfaces": {
-    "cli": {
-      "description": "Terminal-first operations for diagnostics and verification",
-      "capabilities": [
-        "run_quick",
-        "run_full",
-        "verify_bundle",
-        "audit_bundle",
-        "report_render",
-        "inventory_probe"
-      ]
+    "matrix_version": "1.0.0",
+    "generated_at": "2026-03-30T00:00:00Z",
+    "surfaces": {
+        "cli": {
+            "description": "Terminal-first operations for diagnostics and verification",
+            "capabilities": [
+                "run_quick",
+                "run_full",
+                "verify_bundle",
+                "audit_bundle",
+                "report_render",
+                "inventory_probe"
+            ]
+        },
+        "desktop": {
+            "description": "Desktop UX for report viewing and local bundle validation",
+            "capabilities": [
+                "report_viewer",
+                "bundle_import",
+                "verify_bundle",
+                "offline_mode"
+            ]
+        },
+        "mobile": {
+            "description": "Mobile companion for offline report review and verification",
+            "capabilities": [
+                "report_viewer",
+                "bundle_import",
+                "verify_bundle",
+                "offline_mode"
+            ]
+        }
     },
-    "desktop": {
-      "description": "Desktop UX for report viewing and local bundle validation",
-      "capabilities": [
-        "report_viewer",
-        "bundle_import",
-        "verify_bundle",
-        "offline_mode"
-      ]
-    },
-    "mobile": {
-      "description": "Mobile companion for offline report review and verification",
-      "capabilities": [
-        "report_viewer",
-        "bundle_import",
-        "verify_bundle",
-        "offline_mode"
-      ]
+    "policy": {
+        "compatibility": "major-version compatible",
+        "source_of_truth": "schemas/capability-matrix-1.0.0.json"
     }
-  },
-  "policy": {
-    "compatibility": "major-version compatible",
-    "source_of_truth": "schemas/capability-matrix-1.0.0.json"
-  }
 }
