@@ -6,9 +6,11 @@ Generates TXT and PDF reports from inspection data.
 
 from __future__ import annotations
 
+import json
 import os
 import platform
 import subprocess
+from html import escape
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -352,6 +354,144 @@ def generate_pdf_report(report: Dict[str, Any], output_path: Path) -> Optional[P
     # Build PDF
     doc.build(story)
     return pdf_path
+
+
+def generate_html_report(report: Dict[str, Any], output_path: Path) -> Path:
+    """Generate a static HTML report file.
+
+    Args:
+            report: Report dictionary from compose_report()
+            output_path: Directory where the report should be saved
+
+    Returns:
+            Path to generated HTML report
+    """
+    summary = report.get("summary", {})
+    device = report.get("device", {})
+    scores = report.get("scores", {})
+    tests = report.get("tests", [])
+
+    generated_at = escape(str(report.get("generated_at", "N/A")))
+    agent_version = escape(str(report.get("agent", {}).get("version", "N/A")))
+    vendor = escape(str(device.get("vendor", "Unknown")))
+    model = escape(str(device.get("model", "Unknown")))
+    serial = escape(str(device.get("serial", "N/A")))
+    bios_version = escape(str(device.get("bios_version", "N/A")))
+    grade = escape(str(summary.get("grade", "unknown")))
+    recommendation = escape(str(summary.get("recommendation", "N/A")))
+    overall_score = int(summary.get("overall_score", 0))
+
+    score_rows = "\n".join(
+        (
+            f"<tr><td>{escape(name.replace('_', ' ').title())}</td>"
+            f"<td>{int(value)}/100</td></tr>"
+        )
+        for name, value in sorted(scores.items())
+    )
+
+    test_rows = "\n".join(
+        (
+            "<tr>"
+            f"<td>{escape(str(test.get('name', 'unknown')))}</td>"
+            f"<td>{escape(str(test.get('status', 'unknown')).upper())}</td>"
+            f"<td>{escape(str(test.get('status_detail', '')))}</td>"
+            f"<td>{escape(str(test.get('error', '')))}</td>"
+            "</tr>"
+        )
+        for test in tests
+    )
+
+    raw_json = escape(json.dumps(report, indent=2, ensure_ascii=False))
+
+    html_parts = [
+        "<!doctype html>",
+        '<html lang="en">',
+        "<head>",
+        '  <meta charset="utf-8" />',
+        '  <meta name="viewport" content="width=device-width, initial-scale=1" />',
+        "  <title>inspecta report viewer</title>",
+        "  <style>",
+        (
+            "    body { font-family: Inter, Segoe UI, Arial, sans-serif; "
+            "margin: 2rem; color: #1f2937; }"
+        ),
+        (
+            "    .grid { display: grid; grid-template-columns: "
+            "repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }"
+        ),
+        (
+            "    .card { border: 1px solid #e5e7eb; border-radius: 10px; "
+            "padding: 1rem; background: #fff; }"
+        ),
+        "    h1 { margin-top: 0; }",
+        "    table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }",
+        (
+            "    th, td { border-bottom: 1px solid #e5e7eb; text-align: left; "
+            "padding: 0.5rem; font-size: 0.95rem; }"
+        ),
+        "    th { background: #f9fafb; }",
+        "    .muted { color: #6b7280; }",
+        (
+            "    .pill { display: inline-block; padding: 0.2rem 0.6rem; "
+            "border-radius: 999px; background: #eef2ff; }"
+        ),
+        (
+            "    pre { white-space: pre-wrap; word-break: break-word; "
+            "background: #f9fafb; padding: 0.75rem; border-radius: 8px; "
+            "border: 1px solid #e5e7eb; }"
+        ),
+        "  </style>",
+        "</head>",
+        "<body>",
+        "  <h1>inspecta report viewer</h1>",
+        f'  <p class="muted">Generated: {generated_at} · Agent: {agent_version}</p>',
+        '  <div class="grid">',
+        '    <section class="card">',
+        "      <h2>Device</h2>",
+        f"      <p><strong>Vendor:</strong> {vendor}</p>",
+        f"      <p><strong>Model:</strong> {model}</p>",
+        f"      <p><strong>Serial:</strong> {serial}</p>",
+        f"      <p><strong>BIOS:</strong> {bios_version}</p>",
+        "    </section>",
+        '    <section class="card">',
+        "      <h2>Summary</h2>",
+        f'      <p><span class="pill">Score {overall_score}/100</span></p>',
+        f"      <p><strong>Grade:</strong> {grade}</p>",
+        f"      <p><strong>Recommendation:</strong> {recommendation}</p>",
+        "    </section>",
+        "  </div>",
+        '  <section class="card">',
+        "    <h2>Component Scores</h2>",
+        "    <table>",
+        "      <thead><tr><th>Component</th><th>Score</th></tr></thead>",
+        "      <tbody>",
+        score_rows,
+        "      </tbody>",
+        "    </table>",
+        "  </section>",
+        '  <section class="card">',
+        "    <h2>Test Results</h2>",
+        "    <table>",
+        (
+            "      <thead><tr><th>Test</th><th>Status</th><th>Detail</th>"
+            "<th>Error</th></tr></thead>"
+        ),
+        "      <tbody>",
+        test_rows,
+        "      </tbody>",
+        "    </table>",
+        "  </section>",
+        '  <section class="card">',
+        "    <h2>Raw JSON</h2>",
+        f"    <pre>{raw_json}</pre>",
+        "  </section>",
+        "</body>",
+        "</html>",
+    ]
+
+    html_path = output_path / "report.html"
+    html_path.write_text("\n".join(html_parts), encoding="utf-8")
+    return html_path
 
 
 def open_file(file_path: Path) -> bool:

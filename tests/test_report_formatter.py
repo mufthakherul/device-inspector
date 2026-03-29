@@ -5,6 +5,7 @@ import pytest
 
 from agent.report_formatter import (
     format_txt_report,
+    generate_html_report,
     generate_pdf_report,
     generate_txt_report,
     open_file,
@@ -121,6 +122,19 @@ def test_generate_pdf_report(sample_report, tmp_path):
     else:
         # reportlab not installed, which is acceptable
         pass
+
+
+def test_generate_html_report(sample_report, tmp_path):
+    """Test HTML report generation for browser-based local viewing."""
+    html_path = generate_html_report(sample_report, tmp_path)
+
+    assert html_path.exists()
+    assert html_path.name == "report.html"
+
+    content = html_path.read_text(encoding="utf-8")
+    assert "inspecta report viewer" in content
+    assert "Test Vendor" in content
+    assert "Raw JSON" in content
 
 
 def test_generate_pdf_report_without_reportlab(sample_report, tmp_path, monkeypatch):

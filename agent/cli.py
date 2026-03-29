@@ -17,7 +17,13 @@ from . import __version__, native_bridge
 from .logging_utils import setup_logging
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .report import compose_report
-from .report_formatter import generate_pdf_report, generate_txt_report, open_file
+from .report_formatter import (
+    generate_html_report,
+    generate_pdf_report,
+    generate_txt_report,
+    open_file,
+)
+from .upload_client import UploadError, upload_report_bundle
 
 # Simple console logger for CLI (detailed logging set up in run command)
 logger = logging.getLogger("inspecta")
@@ -129,17 +135,27 @@ def inventory_cmd(use_sample: bool) -> None:
 )
 @click.option(
     "--format",
-    type=click.Choice(["txt", "pdf", "both"]),
+    type=click.Choice(["txt", "pdf", "html", "both"]),
     default="txt",
     help=(
         "Report format: 'txt' for text, 'pdf' for PDF (requires reportlab), "
-        "'both' for both formats"
+        "'html' for browser-friendly HTML, 'both' for txt+pdf"
     ),
 )
 @click.option(
     "--with-stress",
     is_flag=True,
     help="Include thermal stress test with CPU throttling detection (adds ~30s)",
+)
+@click.option(
+    "--upload",
+    default=None,
+    help=("Optional upload base URL (or /reports endpoint). " "Requires --token."),
+)
+@click.option(
+    "--token",
+    default=None,
+    help="Upload token for authenticated report upload (used with --upload)",
 )
 def run(
     mode: str,
@@ -152,6 +168,8 @@ def run(
     no_auto_open: bool,
     format: str,
     with_stress: bool,
+    upload: str | None,
+    token: str | None,
 ) -> None:
     """Run a complete device inspection and generate report.
 
@@ -212,6 +230,10 @@ def run(
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts_dir = out_dir / "artifacts"
     artifacts_dir.mkdir(parents=True, exist_ok=True)
+
+    if upload and not token:
+        logger.error("--upload requires --token")
+        raise SystemExit(20)
 
     # Set up structured logging to file
     log_file = artifacts_dir / "agent.log"
@@ -769,6 +791,16 @@ def run(
             logger.warning("Failed to generate PDF report: %s", e)
             inspector_logger.warning("PDF report generation failed: %s", e)
 
+    if format == "html":
+        try:
+            html_report_path = generate_html_report(report, out_dir)
+            logger.info("HTML report written to %s", html_report_path)
+            inspector_logger.info("HTML report generated: %s", html_report_path)
+            report_to_open = html_report_path
+        except Exception as e:
+            logger.warning("Failed to generate HTML report: %s", e)
+            inspector_logger.warning("HTML report generation failed: %s", e)
+
     # Auto-open the report if requested
     if should_auto_open and report_to_open:
         inspector_logger.info("Opening report: %s", report_to_open)
@@ -782,6 +814,26 @@ def run(
             )
             inspector_logger.warning("Failed to auto-open report")
 
+    if upload and token:
+        inspector_logger.info("Step 11: Uploading report bundle (opt-in)...")
+        try:
+            upload_result = upload_report_bundle(
+                upload_url=upload,
+                token=token,
+                output_dir=out_dir,
+                metadata={
+                    "mode": mode,
+                    "profile": profile,
+                    "use_sample": use_sample,
+                    "agent_version": __version__,
+                },
+            )
+            inspector_logger.info("Upload successful: %s", upload_result)
+            logger.info("Upload successful (status=%s)", upload_result.get("status"))
+        except UploadError as e:
+            inspector_logger.warning("Upload failed: %s", str(e))
+            logger.warning("Upload failed: %s", str(e))
+
     inspector_logger.info("=" * 60)
     inspector_logger.info("Inspection complete. Log file: %s", log_file)
     inspector_logger.info("=" * 60)
@@ -793,6 +845,53 @@ def run(
             "Quick run used sample artifacts; reporting partial success (WARN)"
         )
         raise SystemExit(10)
+
+
+@cli.command("report")
+@click.argument("report_file", type=click.Path(path_type=Path, exists=True))
+@click.option(
+    "--open",
+    "open_report",
+    is_flag=True,
+    help="Open report in default app/browser after generating requested format.",
+)
+@click.option(
+    "--format",
+    "report_format",
+    type=click.Choice(["txt", "pdf", "html"]),
+    default="html",
+    help="Format to generate from report.json.",
+)
+def report_cmd(report_file: Path, open_report: bool, report_format: str) -> None:
+    """Generate/open human-readable outputs from an existing report.json."""
+    if report_file.suffix.lower() != ".json":
+        raise click.BadParameter("report_file must be a JSON file")
+
+    with open(report_file, encoding="utf-8") as fh:
+        report = json.load(fh)
+
+    output_dir = report_file.parent
+    generated_path: Path | None = None
+
+    if report_format == "txt":
+        generated_path = generate_txt_report(report, output_dir)
+    elif report_format == "pdf":
+        generated_path = generate_pdf_report(report, output_dir)
+        if generated_path is None:
+            raise click.ClickException(
+                "PDF generation unavailable. Install optional deps: reportlab"
+            )
+    elif report_format == "html":
+        generated_path = generate_html_report(report, output_dir)
+
+    click.echo(f"Generated: {generated_path}")
+
+    if open_report and generated_path is not None:
+        if not open_file(generated_path):
+            raise click.ClickException(
+                f"Failed to open report automatically: {generated_path}"
+            )
+        click.echo(f"Opened: {generated_path}")
 
 
 if __name__ == "__main__":
