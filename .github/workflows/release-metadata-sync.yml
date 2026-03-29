@@ -1,0 +1,46 @@
+name: Release Metadata Sync
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync-release-metadata:
+    name: Sync docs-site release metadata
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sync release metadata
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m tools.sync_release_metadata --owner mufthakherul --repo device-inspector --output docs-site/data/releases.json
+
+      - name: Commit metadata updates
+        shell: bash
+        run: |
+          if git diff --quiet -- docs-site/data/releases.json; then
+            echo "No release metadata changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs-site/data/releases.json
+          git commit -m "chore(docs-site): sync release metadata"
+          git push
