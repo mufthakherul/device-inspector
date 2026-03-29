@@ -62,6 +62,8 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
    - Windows benchmark fallback backends when Linux tools unavailable:
       - Disk: `winsat` sequential read/write backend
       - CPU: PowerShell/CIM derived CPU performance estimate backend
+   - Windows storage health backend via PowerShell `Get-PhysicalDisk` (health/operational status mapping)
+   - Windows CPU throttling detection backend via CIM sampling (frequency-drop based)
 
 ### Gaps to close
 - True Windows/macOS native probe parity for inventory/perf/thermal
@@ -144,7 +146,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 3 — Windows Native Parity
 
-**Status:** 🟡 In progress (2026-03-29) — battery + inventory + benchmark fallback delivered
+**Status:** 🟡 In progress (2026-03-29) — battery + inventory + benchmark fallback + storage/thermal backends delivered
 
 **Goal:** Remove Linux-only assumptions for core probes on Windows.
 
@@ -157,8 +159,11 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 - ✅ Benchmarks: Windows-compatible backends when `fio/sysbench` absent.
    - Disk fallback via `winsat` backend in `agent/plugins/disk_perf.py`
    - CPU fallback via CIM estimate backend in `agent/plugins/cpu_bench.py`
-- ⏳ Storage health backend: smartctl-compatible path + Windows native APIs where possible.
-- ⏳ CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy (deep throttling parity pending).
+- ✅ Storage health backend: smartctl-compatible path + Windows native APIs where possible.
+   - Added native Windows storage-health probe via `Get-PhysicalDisk` in `agent/plugins/smart.py`
+- ✅ CPU/thermal: robust PowerShell/WMI/OpenHardwareMonitor adapter strategy.
+   - Added Windows throttling detection pipeline using CIM sampling in `agent/plugins/sensors.py`
+   - OpenHardwareMonitor optional adapter remains future enhancement (non-blocking)
 
 **Acceptance criteria:**
 - Real Windows run has valid inventory fields (not unknown placeholders) on supported devices.
