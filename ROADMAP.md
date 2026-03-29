@@ -297,16 +297,18 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, m
 
 ### Sprint 10 — HarmonyOS and Extended Platforms
 
+**Status:** ✅ **COMPLETED** (2026-03-29)
+
 **Goal:** Expand to additional ecosystems.
 
 **Tasks:**
-- Define HarmonyOS target strategy (HAP package pipeline + compatibility scope).
-- Build adapter layer for platform-specific packaging outputs.
-- Publish platform capability matrix and support policy.
+- ✅ Define HarmonyOS target strategy (HAP package pipeline + compatibility scope) in `docs/HARMONYOS.md`.
+- ✅ Build adapter layer for platform-specific packaging outputs (`tools/platform_adapter.py`).
+- ✅ Publish platform capability matrix and support policy (`docs/PLATFORM_CAPABILITY_MATRIX.md`).
 
 **Acceptance criteria:**
-- HarmonyOS packaging workflow documented and scaffolded.
-- Release matrix includes Windows/macOS/Linux/Android/iOS/HarmonyOS status.
+- ✅ HarmonyOS packaging workflow documented and scaffolded (`.github/workflows/build-harmonyos.yml`).
+- ✅ Release matrix includes Windows/macOS/Linux/Android/iOS/HarmonyOS status (`docs/PLATFORM_CAPABILITY_MATRIX.md`).
 
 ---
 

@@ -41,6 +41,8 @@ Local-first automated diagnostics for used laptops & PCs — quick-mode audits, 
 - 📦 **[Package Channels](docs/PACKAGE_CHANNELS.md)** - Winget/Homebrew/Chocolatey/Scoop + checksum verification workflow
 - 🖥️ **[Desktop App (Sprint 8)](apps/desktop/README.md)** - Offline GUI shell for run/verify/report/artifact workflows
 - 📱 **[Mobile App (Sprint 9)](apps/mobile/README.md)** - Flutter companion for report viewing, bundle verification, and offline pairing
+- 🧭 **[Platform Capability Matrix](docs/PLATFORM_CAPABILITY_MATRIX.md)** - Cross-platform packaging status and support policy
+- 🌸 **[HarmonyOS Strategy (Sprint 10)](docs/HARMONYOS.md)** - HAP pipeline scope, workflow scaffold, and promotion path
 - 🤖 **[AI & Developer Guide](docs/AI_AGENT_GUIDE.md)** - Guardrails for human and AI collaborators
 - 📋 **[Project Status](PROJECT_STATUS.md)** - Detailed implementation progress
 - 🚀 **[Next Steps](NEXT_STEPS.md)** - Prioritized action items for Sprint 2
