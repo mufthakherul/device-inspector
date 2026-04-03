@@ -1,0 +1,60 @@
+name: WASM Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  wasm-build:
+    name: Build and validate WASM modules
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Add wasm target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Build wasm modules when available
+        run: |
+          mkdir -p wasm-artifacts
+          if [ -d native/wasm ]; then
+            echo "native/wasm detected; building all Cargo crates in tree"
+            find native/wasm -name Cargo.toml -print0 | while IFS= read -r -d '' manifest; do
+              crate_dir=$(dirname "$manifest")
+              echo "Building $crate_dir"
+              cargo build --release --target wasm32-unknown-unknown --manifest-path "$manifest"
+            done
+            find native/wasm -path "*/target/wasm32-unknown-unknown/release/*.wasm" -exec cp {} wasm-artifacts/ \;
+          else
+            echo "No native/wasm directory yet; workflow scaffold validated." > wasm-artifacts/README.txt
+          fi
+
+      - name: Validate wasm output set
+        run: |
+          ls -la wasm-artifacts
+          if [ -f wasm-artifacts/README.txt ]; then
+            echo "WASM modules not yet implemented; scaffold path OK."
+          elif ls wasm-artifacts/*.wasm >/dev/null 2>&1; then
+            echo "WASM modules built successfully."
+          else
+            echo "No wasm artifacts produced and no scaffold note found."
+            exit 1
+          fi
+
+      - name: Upload wasm artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-artifacts
+          path: wasm-artifacts/
+          retention-days: 30

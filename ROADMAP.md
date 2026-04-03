@@ -1,6 +1,6 @@
 # ROADMAP — device-inspector (inspecta) Next-Generation Master Plan
 
-**Last updated:** 2026-03-30  
+**Last updated:** 2026-04-04  
 **Document type:** Strategic + execution roadmap (polyglot modernization)  
 **Scope:** Product, architecture, diagnostics depth, distribution, security, governance, ecosystem scale
 
@@ -313,8 +313,8 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 1. Reconcile roadmap claims vs current implementation artifacts.
 2. ✅ Implement interrupted-run recovery checkpoints for full mode (CLI checkpoint + resume path).
 3. ✅ Add deterministic bundle mode test suite (`tests/test_evidence.py` fixed-timestamp + canonical ordering assertions).
-4. Add `sbom-security.yml` workflow.
-5. Add performance regression benchmark workflow.
+4. ✅ Add `sbom-security.yml` workflow.
+5. ✅ Add performance regression benchmark workflow.
 6. Implement route-based docs-site IA (`/download`, `/docs/*`, etc.).
 7. Add `.msix` packaging lane validation.
 8. Add Linux repo publication workflow strategy (`deb/rpm index`).

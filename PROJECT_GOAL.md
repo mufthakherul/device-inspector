@@ -1,8 +1,15 @@
 # Project Goal — device-inspector (inspecta)
 
-Last updated: 2025-10-18
+Last updated: 2026-04-04
 
 This document defines the mission, vision, scope, objectives, acceptance criteria, success metrics, constraints, non-goals, stakeholders, assumptions, risks, and high-level architecture for the device-inspector (inspecta) project. It is intended to be definitive guidance for contributors, maintainers, pilot partners, and early adopters during the design and implementation phases.
+
+Current implementation snapshot (2026-04-04)
+- CLI quick/full execution paths are implemented and actively tested.
+- Evidence integrity flows are implemented (`inspecta verify`, `inspecta audit`) with manifest generation and validation.
+- Cross-platform build/test workflow family exists for core CI, integration matrix, desktop/mobile/ISO packaging, security/SBOM, performance guardrails, and polyglot/wasm scaffolding.
+- Setup automation exists for Windows/Linux/macOS and a launcher-first precheck flow is available (`scripts/launch_inspecta.py`, `launch_inspecta.ps1`, `launch_inspecta.sh`).
+- Real-device execution has been validated on Windows in current sprint with report/artifact generation.
 
 Table of contents
 - Mission & vision

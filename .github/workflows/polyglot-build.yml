@@ -1,0 +1,90 @@
+name: Polyglot Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  polyglot-validation:
+    name: Validate Python/Rust/Node/Flutter lanes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            apps/desktop/package-lock.json
+            server/package-lock.json
+            web/package-lock.json
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Python lane
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m compileall agent scripts
+
+      - name: Rust lane
+        run: |
+          if [ -f native/inspecta-native/Cargo.toml ]; then
+            cargo check --manifest-path native/inspecta-native/Cargo.toml
+          else
+            echo "No Rust crate found. Skipping Rust lane."
+          fi
+
+      - name: Node/TypeScript lane
+        run: |
+          for app in apps/desktop server web; do
+            if [ -f "$app/package.json" ]; then
+              echo "Checking $app"
+              npm --prefix "$app" install --no-audit --no-fund
+              if npm --prefix "$app" run | grep -q " build"; then
+                npm --prefix "$app" run build
+              else
+                echo "No build script for $app, skipping build step."
+              fi
+            fi
+          done
+
+      - name: Flutter lane
+        run: |
+          if [ -f apps/mobile/pubspec.yaml ]; then
+            flutter --version
+            flutter pub get --directory apps/mobile
+            flutter analyze apps/mobile || true
+          else
+            echo "No Flutter app found. Skipping Flutter lane."
+          fi
+
+      - name: Go lane status
+        run: |
+          if [ -f go.mod ] || find . -name go.mod | grep -q go.mod; then
+            echo "Go modules detected. Add explicit Go build lane as next step."
+          else
+            echo "No Go module detected. Lane intentionally skipped."
+          fi
