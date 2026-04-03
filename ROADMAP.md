@@ -135,6 +135,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add channel promotion workflow (nightly -> beta -> stable).
 - Add package notarization/signing automation where supported.
 - Publish machine-readable distribution manifest per release.
+- ✅ Channel promotion planning workflow added for nightly/alpha/beta/stable progression (`.github/workflows/channel-promotion.yml`, `tools/channel_promotion.py`).
 - ✅ Machine-readable distribution manifest generation added and wired into release metadata workflows (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
 
 ### Sprint 9 — Smart analytics (offline)
@@ -184,6 +185,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 13. `performance-regression.yml` — benchmark guardrails for core probes.
 14. `polyglot-build.yml` — validates Python/Rust/TypeScript/Flutter/Go build integrity.
 15. `wasm-artifacts.yml` — builds and validates WebAssembly modules used by UI/analytics components.
+16. `channel-promotion.yml` — generates release channel promotion plans for nightly/alpha/beta/stable transitions.
 
 ---
 
@@ -341,6 +343,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 14. ✅ Add reproducibility audit command for bundles (`inspecta audit` in `agent/cli.py`).
 15. ✅ Refresh README/CHANGELOG/PROJECT_READINESS consistency.
 16. ✅ Publish quarterly architecture review notes (`docs/ARCHITECTURE_REVIEW_2026_Q2.md`).
+17. ✅ Add channel promotion planning automation (`channel-promotion.yml`, `tools/channel_promotion.py`, `tests/test_channel_promotion.py`).
 
 ---
 

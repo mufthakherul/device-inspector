@@ -39,6 +39,10 @@ All notable changes to this project will be documented in this file.
 - Added offline analytics runtime profile with ONNX CPU detection and rules-only fallback (`agent/analytics_profile.py`, `agent/report.py`).
 - Added desktop dual-shell adapter contract scaffold for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Added mobile verification queue with integrity badge history in companion app (`apps/mobile/lib/main.dart`).
+- Added channel promotion planning automation for nightly/alpha/beta/stable transitions:
+  - `tools/channel_promotion.py`
+  - `.github/workflows/channel-promotion.yml`
+  - `tests/test_channel_promotion.py`
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

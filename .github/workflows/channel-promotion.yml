@@ -1,0 +1,54 @@
+name: Channel Promotion Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to evaluate (example: v1.2.3-beta.1)"
+        required: true
+  push:
+    tags:
+      - "v*"
+  schedule:
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  generate-promotion-plan:
+    name: Generate release promotion plan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Resolve tag
+        id: resolve
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            tag="${{ github.event.inputs.tag }}"
+          elif [ -n "${GITHUB_REF_NAME}" ]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="v0.0.0-nightly.0"
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate plan artifact
+        run: |
+          python -m tools.channel_promotion --tag "${{ steps.resolve.outputs.tag }}" --output channel-promotion-plan.json
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: channel-promotion-plan
+          path: channel-promotion-plan.json
+          retention-days: 30

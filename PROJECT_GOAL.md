@@ -29,6 +29,7 @@ Current implementation snapshot (2026-04-04)
 - Probe reliability and parity metrics are emitted in report summaries for degraded probe-set scoring (`agent/reliability.py`).
 - Bootable ISO staging now emits layered profile manifests and export bundle metadata (`tools/bootable_iso.py`).
 - Release metadata automation now emits machine-readable distribution manifests for channel/audit tooling (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
+- Channel promotion planning automation is now implemented for nightly/alpha/beta/stable progression (`tools/channel_promotion.py`, `.github/workflows/channel-promotion.yml`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 

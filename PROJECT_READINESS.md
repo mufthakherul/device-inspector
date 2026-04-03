@@ -24,6 +24,7 @@ The project is in a strong development-ready state with:
 - Desktop dual-shell adapter contract scaffold is now present for Electron/Tauri parity
 - Mobile verification queue with integrity badges is now present in the companion app
 - Offline analytics runtime profile now supports ONNX CPU detection with rules-only fallback
+- Channel promotion planning automation is now present for nightly/alpha/beta/stable progression
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -33,8 +34,8 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `235 passed`
-- ✅ **Coverage gate:** `73.22%` (required `35%`)
+- ✅ **Tests:** `244 passed`
+- ✅ **Coverage gate:** `73.33%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -82,6 +83,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - `polyglot-build.yml`
 - `wasm-artifacts.yml`
 - `release-channel-gates.yml`
+- `channel-promotion.yml`
 - `validate-msix-lane.yml`
 - `linux-repo-index.yml`
 - `kpi-dashboard.yml`
