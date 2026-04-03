@@ -31,16 +31,20 @@ jobs:
         run: |
           python -m tools.sync_release_metadata --owner mufthakherul --repo inspecta-nexus --output docs-site/data/releases.json
 
+      - name: Generate distribution manifest
+        run: |
+          python -m tools.generate_distribution_manifest --repo-root . --releases-json docs-site/data/releases.json --output docs-site/data/distribution-manifest.json
+
       - name: Commit metadata updates
         shell: bash
         run: |
-          if git diff --quiet -- docs-site/data/releases.json; then
+          if git diff --quiet -- docs-site/data/releases.json docs-site/data/distribution-manifest.json; then
             echo "No release metadata changes to commit"
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs-site/data/releases.json
-          git commit -m "chore(docs-site): sync release metadata"
+          git add docs-site/data/releases.json docs-site/data/distribution-manifest.json
+          git commit -m "chore(docs-site): sync release and distribution metadata"
           git push

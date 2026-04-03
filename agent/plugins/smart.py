@@ -17,6 +17,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+from ..native_contract import build_rust_smart_contract
 from . import linux_env
 
 logger = logging.getLogger("inspecta.smart")
@@ -430,19 +431,7 @@ def to_rust_contract_payload(parsed: Dict[str, Any]) -> Dict[str, Any]:
     The contract is versioned and intentionally small so Rust/Python boundary
     checks can be validated without requiring compiled Rust components.
     """
-    return {
-        "schema_version": "1.0.0",
-        "device": {
-            "name": parsed.get("name"),
-            "model": parsed.get("model"),
-            "serial": parsed.get("serial"),
-        },
-        "metrics": {
-            "nvme_percentage_used": parsed.get("nvme_percentage_used"),
-            "nvme_critical_warning": parsed.get("nvme_critical_warning"),
-            "attributes": parsed.get("attributes", {}),
-        },
-    }
+    return build_rust_smart_contract(parsed)
 
 
 def scan_all_devices(use_sample: bool = False) -> List[Dict[str, Any]]:

@@ -19,6 +19,8 @@ The project is in a strong development-ready state with:
 - Offline anomaly/confidence summary foundation added for report analytics
 - Bootable ISO profiles and export bundle metadata added to the staging backend
 - KPI snapshot pipeline can now surface probe reliability/parity/confidence metrics on the status page
+- Strict Rust SMART boundary contract validation is now enforced in Python payload generation
+- Machine-readable distribution manifest generation is now wired into release metadata sync
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -28,8 +30,8 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `232 passed`
-- ✅ **Coverage gate:** `73.12%` (required `35%`)
+- ✅ **Tests:** `235 passed`
+- ✅ **Coverage gate:** `73.22%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -97,6 +99,8 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Offline anomaly detector and confidence/explainability summary: `agent/anomaly.py`, `agent/report.py`
 - KPI snapshot data pipeline for docs-site status: `tools/generate_kpi_snapshot.py`, `docs-site/data/kpi.json`
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`
+- Strict Rust SMART boundary contract validation: `agent/native_contract.py`, `agent/plugins/smart.py`
+- Distribution manifest automation: `tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`
 - Quarterly architecture review published: `docs/ARCHITECTURE_REVIEW_2026_Q2.md`
 
 ---

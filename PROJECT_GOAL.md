@@ -17,6 +17,7 @@ Current implementation snapshot (2026-04-04)
 - Linux repository publication strategy scaffolding is implemented with index-generation automation for `.deb/.rpm` channels.
 - Offline anomaly detection is integrated into report summary with confidence scoring and explainability metadata.
 - Rust SMART integration contract boundary is defined and tested via stable payload shape checks.
+- Rust SMART integration contract now enforces strict schema validation at the Python/Rust boundary (`agent/native_contract.py`).
 - KPI snapshot generation pipeline is implemented for docs-site status metrics (`tools/generate_kpi_snapshot.py`, `kpi-dashboard.yml`).
 - KPI snapshot generation now accepts report-derived probe reliability, parity, and confidence metrics for the status site.
 - Enterprise policy-pack runtime evaluation is now integrated into report generation (`agent/policy_pack.py`, `--policy-pack`).
@@ -26,6 +27,7 @@ Current implementation snapshot (2026-04-04)
 - Signed evidence manifests now emit deterministic attestation metadata alongside detached signatures (`agent/evidence.py`).
 - Probe reliability and parity metrics are emitted in report summaries for degraded probe-set scoring (`agent/reliability.py`).
 - Bootable ISO staging now emits layered profile manifests and export bundle metadata (`tools/bootable_iso.py`).
+- Release metadata automation now emits machine-readable distribution manifests for channel/audit tooling (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
 
 Table of contents
 - Mission & vision

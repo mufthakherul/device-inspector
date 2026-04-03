@@ -81,5 +81,32 @@ async function loadKpiSnapshot() {
     }
 }
 
+async function loadDistributionManifest() {
+    const target = document.getElementById('distribution-meta');
+    if (!target) {
+        return;
+    }
+
+    const source = target.dataset.src || '../data/distribution-manifest.json';
+
+    try {
+        const response = await fetch(source, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const payload = await response.json();
+        const channels = Array.isArray(payload.channels) ? payload.channels : [];
+        const available = channels.filter((channel) => channel.status === 'available').length;
+
+        target.innerHTML = [
+            `<p><strong>Generated:</strong> ${payload.generated_at || 'N/A'}</p>`,
+            `<p><strong>Release Tag:</strong> ${payload.release?.tag_name ?? 'N/A'}</p>`,
+            `<p><strong>Channels Available:</strong> ${available}/${channels.length}</p>`,
+        ].join('');
+    } catch (error) {
+        target.textContent = `Failed to load distribution manifest: ${error}`;
+    }
+}
+
 loadReleaseData();
 loadKpiSnapshot();
+loadDistributionManifest();

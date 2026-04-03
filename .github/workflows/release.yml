@@ -182,15 +182,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python -m tools.sync_release_metadata --owner mufthakherul --repo device-inspector --output docs-site/data/releases.json
 
+      - name: Generate docs-site distribution manifest
+        run: python -m tools.generate_distribution_manifest --repo-root . --releases-json docs-site/data/releases.json --output docs-site/data/distribution-manifest.json
+
       - name: Commit metadata update (if changed)
         shell: bash
         run: |
-          if git diff --quiet -- docs-site/data/releases.json; then
+          if git diff --quiet -- docs-site/data/releases.json docs-site/data/distribution-manifest.json; then
             echo "No metadata changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs-site/data/releases.json
-          git commit -m "chore(release): refresh docs-site release metadata"
+          git add docs-site/data/releases.json docs-site/data/distribution-manifest.json
+          git commit -m "chore(release): refresh docs-site distribution metadata"
           git push

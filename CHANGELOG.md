@@ -34,6 +34,8 @@ All notable changes to this project will be documented in this file.
   - `docs-site/data/kpi.json` + status page KPI rendering
 - Added report-derived KPI surfacing for probe reliability, parity, and confidence on the docs-site status page.
 - Added bootable ISO layered profiles plus export-bundle metadata generation.
+- Added strict Rust SMART contract boundary validation for Python payload generation (`agent/native_contract.py`).
+- Added machine-readable distribution manifest generation and release workflow sync (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

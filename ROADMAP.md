@@ -108,6 +108,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Expose FFI boundary to Python orchestration with strict schema types.
 - Benchmark and target at least 30–50% speed-up on heavy parsing workloads.
 - Add WebAssembly build option for selected Rust modules used in docs/desktop/mobile viewers.
+- ✅ Strict Rust SMART contract validation is now enforced in Python boundary payload generation (`agent/native_contract.py`, `agent/plugins/smart.py`).
 
 ### Sprint 5 — Desktop modernization (dual strategy)
 - Keep Electron path stable.
@@ -132,6 +133,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add channel promotion workflow (nightly -> beta -> stable).
 - Add package notarization/signing automation where supported.
 - Publish machine-readable distribution manifest per release.
+- ✅ Machine-readable distribution manifest generation added and wired into release metadata workflows (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
 
 ### Sprint 9 — Smart analytics (offline)
 - Add local anomaly detection for thermal/storage trends (on-device inference only).
