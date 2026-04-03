@@ -67,6 +67,64 @@ def _now_iso() -> str:
     return datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat()
 
 
+def _infer_os_family(device: Dict[str, Any]) -> str:
+    for key in ("os_family", "platform", "os", "system"):
+        value = str(device.get(key, "")).lower()
+        if not value:
+            continue
+        if "win" in value:
+            return "windows"
+        if "darwin" in value or "mac" in value:
+            return "macos"
+        if "linux" in value:
+            return "linux"
+    return "linux"
+
+
+def _build_degraded_mode_recommendations(
+    failure_classification: List[str],
+    probe_health: Dict[str, Any],
+) -> List[str]:
+    recommendations: List[str] = []
+
+    calibration = probe_health.get("calibration_profile", {})
+    missing_critical = calibration.get("missing_critical", [])
+    missing_optional = calibration.get("missing_optional", [])
+
+    if missing_critical:
+        recommendations.append(
+            "Run missing critical probes for stronger parity: "
+            + ", ".join(missing_critical)
+            + "."
+        )
+
+    if missing_optional:
+        recommendations.append(
+            "Install optional probe dependencies to improve confidence: "
+            + ", ".join(missing_optional)
+            + "."
+        )
+
+    if "tooling_missing" in failure_classification:
+        recommendations.append(
+            "Tooling gaps detected. Re-run after installing required system tools."
+        )
+
+    if "environment_limited" in failure_classification:
+        recommendations.append(
+            "Environment-limited probes detected. Re-run with appropriate permissions "
+            "or on a less restricted host."
+        )
+
+    if "hardware_risk" in failure_classification:
+        recommendations.append(
+            "Hardware-risk signals present. Prefer full-mode diagnostics and retention "
+            "of evidence artifacts for review."
+        )
+
+    return recommendations
+
+
 def compose_report(
     agent_version: str,
     device: Dict[str, Any],
@@ -243,10 +301,17 @@ def compose_report(
             "triggered_rules": policy_result["triggered_rules"],
         }
 
-    probe_health = reliability.compute_probe_reliability(tests)
+    probe_health = reliability.compute_probe_reliability(
+        tests,
+        os_family=_infer_os_family(device),
+        mode=mode,
+    )
     report["summary"]["probe_reliability"] = probe_health["reliability_score"]
     report["summary"]["probe_parity_index"] = probe_health["parity_index"]
     report["summary"]["probe_health"] = probe_health
+    report["summary"]["degraded_mode_recommendations"] = (
+        _build_degraded_mode_recommendations(failure_classification, probe_health)
+    )
 
     anomaly_result = anomaly.analyze_offline_anomalies(
         tests=tests,

@@ -55,6 +55,10 @@ All notable changes to this project will be documented in this file.
   - `docs/RELEASE_EVIDENCE_CHECKLIST.md`
   - `tests/test_validate_doc_claims.py`
   - `tests/test_validate_kpi_snapshot.py`
+- Added P1 parity and reliability expansion baseline:
+  - OS-family probe contracts + calibration profile scoring in `agent/reliability.py`
+  - Structured degraded-mode recommendations in `agent/report.py`
+  - Expanded parity/reliability test coverage in `tests/test_reliability.py` and `tests/test_report_composition.py`
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

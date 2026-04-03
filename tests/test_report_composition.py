@@ -89,6 +89,7 @@ def test_compose_report_adds_failure_classification_for_tooling_missing():
     )
 
     assert "tooling_missing" in report["summary"]["failure_classification"]
+    assert report["summary"]["degraded_mode_recommendations"]
 
 
 def test_compose_report_adds_hardware_risk_for_critical_thermal():

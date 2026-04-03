@@ -34,6 +34,9 @@ Current implementation snapshot (2026-04-04)
 - Documentation claim consistency validation is now automated for roadmap/goal/readiness files (`tools/validate_doc_claims.py`, `.github/workflows/doc-claim-validator.yml`).
 - KPI snapshot quality gate validation is now enforced in KPI workflow runs (`tools/validate_kpi_snapshot.py`, `.github/workflows/kpi-dashboard.yml`).
 - Standardized release evidence checklist template is now published for each tagged release (`docs/RELEASE_EVIDENCE_CHECKLIST.md`).
+- OS-family probe parity contracts are now defined for reliability calibration (`agent/reliability.py`, `expected_probe_contract`).
+- Probe reliability scoring now includes calibration profiles for probe-availability context (`agent/reliability.py`, `compute_probe_reliability`).
+- Report summary now emits structured degraded-mode recommendations based on failure/probe health context (`agent/report.py`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 

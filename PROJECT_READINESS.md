@@ -29,6 +29,8 @@ The project is in a strong development-ready state with:
 - Documentation claim validation automation is now present for roadmap/goal/readiness consistency checks
 - KPI snapshot quality validation gate is now enforced during KPI dashboard workflow runs
 - Standardized release evidence checklist template is now available for release governance
+- OS-family probe parity contracts and reliability calibration profiles are now present in probe-health scoring
+- Structured degraded-mode recommendations are now emitted in report summaries
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -38,8 +40,8 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `247 passed`
-- ✅ **Coverage gate:** `73.33%` (required `35%`)
+- ✅ **Tests:** `253 passed`
+- ✅ **Coverage gate:** `73.79%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -115,6 +117,8 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Documentation claim consistency automation: `tools/validate_doc_claims.py`, `.github/workflows/doc-claim-validator.yml`
 - KPI snapshot quality gate automation: `tools/validate_kpi_snapshot.py`, `.github/workflows/kpi-dashboard.yml`
 - Release governance evidence checklist: `docs/RELEASE_EVIDENCE_CHECKLIST.md`
+- OS-family probe parity contracts + calibration profiles: `agent/reliability.py`, `tests/test_reliability.py`
+- Degraded-mode recommendation synthesis in reports: `agent/report.py`, `tests/test_report_composition.py`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`
@@ -153,7 +157,7 @@ Mobile/embedded OS families (Android/iOS/HarmonyOS/Amazon Fire OS, etc.) are han
 
 ## Recommended next priorities
 
-1. Expand OS parity contract tests and deepen probe reliability calibration.
+1. Publish measurable release signoff policy and promotion approvals for channel governance.
 2. Implement Rust hot-path acceleration with benchmark evidence reporting.
 3. Advance desktop dual-shell migration criteria and mobile offline pairing hardening.
 4. Keep readiness docs synchronized with CI and real-device validation outputs each sprint.

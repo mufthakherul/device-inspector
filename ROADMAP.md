@@ -39,6 +39,11 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
   - `tools/generate_distribution_manifest.py`, `tools/channel_promotion.py`, `tools/release_signing.py`
 - P0 governance automation baseline:
   - `tools/validate_doc_claims.py`, `tools/validate_kpi_snapshot.py`, `docs/RELEASE_EVIDENCE_CHECKLIST.md`, `.github/workflows/doc-claim-validator.yml`
+- P1 parity/reliability expansion baseline:
+  - OS-family probe contracts in `agent/reliability.py` (`expected_probe_contract`)
+  - Reliability calibration profile support in `compute_probe_reliability`
+  - Structured degraded-mode recommendations in `agent/report.py`
+  - Expanded contract/reliability tests in `tests/test_reliability.py`, `tests/test_report_composition.py`
 - Strong workflow matrix in `.github/workflows/` including:
   - `ci-core.yml`, `ci-integration-matrix.yml`, `release.yml`, `build-release.yml`, `release-channel-gates.yml`, `channel-promotion.yml`, `sbom-security.yml`, `performance-regression.yml`, `polyglot-build.yml`
 - Desktop/mobile scaffolds:
@@ -135,12 +140,23 @@ Non-negotiables:
 
 ## Phase P1 — Core parity and reliability expansion (2–6 weeks)
 
+**Status:** Implemented (2026-04-04)
+
 **Goal:** reduce platform-probe parity gaps and improve deterministic behavior.
 
 ### Deliverables
 - Expanded parity contract tests by OS family
 - Reliability score calibration by probe-availability profile
 - Structured degraded-mode recommendations in report output
+
+### Delivered evidence
+- OS-family probe contracts and calibration profile logic:
+  - `agent/reliability.py`
+- Degraded-mode recommendation synthesis in summary output:
+  - `agent/report.py`
+- Expanded parity and reliability test coverage:
+  - `tests/test_reliability.py`
+  - `tests/test_report_composition.py`
 
 ### Exit criteria
 - Probe parity index tracked per platform class
@@ -227,7 +243,6 @@ Non-negotiables:
 
 Priority legend: `P0` highest → `P3` lower.
 
-- `P0` Expand OS parity test suite for probe contracts
 - `P0` Publish measurable release signoff policy for channel promotions
 - `P1` Implement Rust hot-path runner + benchmark reporting
 - `P1` Add Tauri implementation spike with parity report against Electron shell
