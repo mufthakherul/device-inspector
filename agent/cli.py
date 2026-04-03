@@ -31,6 +31,7 @@ from .plugin_manifest import PluginManifestError, verify_plugin_manifest
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .policy_pack import PolicyPackError, load_policy_pack
 from .profiles import get_profile, is_valid_profile
+from .redaction import apply_redaction, apply_retention_policy
 from .report import compose_report
 from .report_formatter import (
     generate_html_report,
@@ -239,6 +240,21 @@ def inventory_cmd(use_sample: bool) -> None:
     help=("Plugin keyring JSON file used to verify --plugin-manifest signatures."),
 )
 @click.option(
+    "--redaction-preset",
+    type=click.Choice(["none", "basic", "strict"]),
+    default="none",
+    help=(
+        "Evidence redaction preset for generated report output. "
+        "Use 'basic' or 'strict' for enterprise-safe sharing."
+    ),
+)
+@click.option(
+    "--retention-days",
+    type=int,
+    default=None,
+    help=("Optional retention policy metadata (days) embedded in report evidence."),
+)
+@click.option(
     "--resume/--no-resume",
     default=True,
     help=(
@@ -267,6 +283,8 @@ def run(
     policy_pack: Path | None,
     plugin_manifest: Path | None,
     plugin_keyring: Path | None,
+    redaction_preset: str,
+    retention_days: int | None,
     resume: bool,
 ) -> None:
     """Run a complete device inspection and generate report.
@@ -343,6 +361,10 @@ def run(
 
     if upload and not token:
         logger.error("--upload requires --token")
+        raise SystemExit(20)
+
+    if retention_days is not None and retention_days <= 0:
+        logger.error("--retention-days must be a positive integer")
         raise SystemExit(20)
 
     loaded_policy_pack: dict[str, Any] | None = None
@@ -1218,6 +1240,9 @@ def run(
         plugin_manifest_verification=plugin_verification,
     )
 
+    apply_retention_policy(report, retention_days)
+    report = apply_redaction(report, redaction_preset)
+
     report_path = out_dir / "report.json"
     with open(report_path, "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2)
@@ -1705,6 +1730,57 @@ def plugin_verify_cmd(manifest_file: Path, keyring: Path, as_json: bool) -> None
         )
 
     raise SystemExit(0)
+
+
+@cli.command("policy-export")
+@click.argument("policy_file", type=click.Path(path_type=Path, exists=True))
+@click.option(
+    "--output",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Destination path for normalized policy-pack JSON.",
+)
+def policy_export_cmd(policy_file: Path, output: Path) -> None:
+    """Validate and export normalized policy-pack JSON."""
+    try:
+        payload = load_policy_pack(policy_file)
+    except PolicyPackError as exc:
+        raise click.ClickException(str(exc))
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    click.echo(f"Exported policy pack: {output}")
+
+
+@cli.command("policy-import")
+@click.argument("policy_file", type=click.Path(path_type=Path, exists=True))
+@click.option(
+    "--output-dir",
+    required=True,
+    type=click.Path(path_type=Path),
+    help="Directory where imported policy-pack file will be written.",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Overwrite existing target file if it already exists.",
+)
+def policy_import_cmd(policy_file: Path, output_dir: Path, force: bool) -> None:
+    """Import a validated policy-pack into a target directory."""
+    try:
+        payload = load_policy_pack(policy_file)
+    except PolicyPackError as exc:
+        raise click.ClickException(str(exc))
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    target = output_dir / f"{payload.get('pack_id', 'policy-pack')}.json"
+    if target.exists() and not force:
+        raise click.ClickException(
+            f"Target policy file already exists: {target}. Use --force to overwrite."
+        )
+
+    target.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    click.echo(f"Imported policy pack: {target}")
 
 
 # ============================================================================

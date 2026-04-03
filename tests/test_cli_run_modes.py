@@ -129,3 +129,55 @@ def test_run_require_hardware_rejects_sample_mode(tmp_path):
 
     assert result.exit_code == 20
     assert "cannot be combined" in result.output
+
+
+def test_run_applies_basic_redaction_and_retention_policy(tmp_path):
+    out_dir = tmp_path / "out"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--mode",
+            "quick",
+            "--output",
+            str(out_dir),
+            "--use-sample",
+            "--redaction-preset",
+            "basic",
+            "--retention-days",
+            "30",
+            "--no-auto-open",
+            "--format",
+            "txt",
+        ],
+    )
+
+    assert result.exit_code == 10
+    report = json.loads((out_dir / "report.json").read_text(encoding="utf-8"))
+    assert report["evidence"]["redaction"]["preset"] == "basic"
+    assert report["evidence"]["retention_policy"]["retention_days"] == 30
+    assert "*" in str(report["device"].get("serial", ""))
+
+
+def test_run_rejects_non_positive_retention_days(tmp_path):
+    out_dir = tmp_path / "out"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--mode",
+            "quick",
+            "--output",
+            str(out_dir),
+            "--use-sample",
+            "--retention-days",
+            "0",
+            "--no-auto-open",
+        ],
+    )
+
+    assert result.exit_code == 20

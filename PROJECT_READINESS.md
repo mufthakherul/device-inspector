@@ -26,8 +26,8 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `215 passed`
-- ✅ **Coverage gate:** `73.22%` (required `35%`)
+- ✅ **Tests:** `226 passed`
+- ✅ **Coverage gate:** `72.16%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -87,6 +87,8 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Plugin manifest/signing schema baseline: `schemas/plugin-manifest-schema-1.0.0.json`
 - Policy pack runtime evaluation pipeline: `agent/policy_pack.py`, `agent/report.py`, `agent/cli.py --policy-pack`
 - Signed plugin-manifest verification runtime: `agent/plugin_manifest.py`, `inspecta plugin-verify`, `agent/cli.py --plugin-manifest --plugin-keyring`
+- Evidence redaction + retention controls: `agent/redaction.py`, `agent/cli.py --redaction-preset --retention-days`
+- Policy pack import/export governance workflow: `inspecta policy-import`, `inspecta policy-export`
 - Offline anomaly detector and confidence/explainability summary: `agent/anomaly.py`, `agent/report.py`
 - KPI snapshot data pipeline for docs-site status: `tools/generate_kpi_snapshot.py`, `docs-site/data/kpi.json`
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`

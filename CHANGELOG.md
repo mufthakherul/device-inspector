@@ -40,6 +40,12 @@ All notable changes to this project will be documented in this file.
   - `agent/plugin_manifest.py`
   - `inspecta plugin-verify`
   - `agent/cli.py` (`--plugin-manifest`, `--plugin-keyring`)
+- Added evidence redaction + retention control flow:
+  - `agent/redaction.py`
+  - `agent/cli.py` (`--redaction-preset`, `--retention-days`)
+- Added policy-pack governance portability commands:
+  - `inspecta policy-export`
+  - `inspecta policy-import`
 
 ---
 
