@@ -1,0 +1,44 @@
+name: Doc Claim Validator
+
+on:
+    workflow_dispatch:
+    push:
+        branches: [main]
+        paths:
+            - "ROADMAP.md"
+            - "PROJECT_GOAL.md"
+            - "PROJECT_READINESS.md"
+            - "tools/validate_doc_claims.py"
+            - ".github/workflows/doc-claim-validator.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    validate-doc-claims:
+        name: Validate documentation file claims
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Validate document claims
+              run: |
+                  python -m tools.validate_doc_claims \
+                    --repo-root . \
+                    --docs ROADMAP.md PROJECT_GOAL.md PROJECT_READINESS.md \
+                    --report test-output/doc-claim-report.json \
+                    --fail-on-missing
+
+            - name: Upload doc claim report
+              uses: actions/upload-artifact@v4
+              with:
+                  name: doc-claim-report
+                  path: test-output/doc-claim-report.json
+                  retention-days: 30

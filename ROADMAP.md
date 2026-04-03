@@ -37,6 +37,8 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
   - `agent/native_contract.py`, `agent/native_bridge.py`, `tests/test_smart_rust_contract.py`
 - Release/distribution automation:
   - `tools/generate_distribution_manifest.py`, `tools/channel_promotion.py`, `tools/release_signing.py`
+- P0 governance automation baseline:
+  - `tools/validate_doc_claims.py`, `tools/validate_kpi_snapshot.py`, `docs/RELEASE_EVIDENCE_CHECKLIST.md`, `.github/workflows/doc-claim-validator.yml`
 - Strong workflow matrix in `.github/workflows/` including:
   - `ci-core.yml`, `ci-integration-matrix.yml`, `release.yml`, `build-release.yml`, `release-channel-gates.yml`, `channel-promotion.yml`, `sbom-security.yml`, `performance-regression.yml`, `polyglot-build.yml`
 - Desktop/mobile scaffolds:
@@ -106,12 +108,24 @@ Non-negotiables:
 
 ## Phase P0 — Truth, quality, and governance lock (0–2 weeks)
 
+**Status:** Implemented (2026-04-04)
+
 **Goal:** keep docs/claims synced with repository facts every sprint.
 
 ### Deliverables
 - Automated roadmap/readiness consistency check script
 - Release evidence checklist template used in every release PR
 - KPI snapshot quality gate baseline
+
+### Delivered evidence
+- Automated doc-claim validator implemented and workflow-gated:
+  - `tools/validate_doc_claims.py`
+  - `.github/workflows/doc-claim-validator.yml`
+- Release evidence checklist template published:
+  - `docs/RELEASE_EVIDENCE_CHECKLIST.md`
+- KPI quality gate baseline implemented:
+  - `tools/validate_kpi_snapshot.py`
+  - `.github/workflows/kpi-dashboard.yml` quality validation step
 
 ### Exit criteria
 - No top-level doc claim without direct file/workflow evidence
@@ -213,7 +227,6 @@ Non-negotiables:
 
 Priority legend: `P0` highest → `P3` lower.
 
-- `P0` Add automated docs-claim verifier for roadmap/readiness/goal consistency
 - `P0` Expand OS parity test suite for probe contracts
 - `P0` Publish measurable release signoff policy for channel promotions
 - `P1` Implement Rust hot-path runner + benchmark reporting

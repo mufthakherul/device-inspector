@@ -47,6 +47,14 @@ All notable changes to this project will be documented in this file.
   - `tools/release_signing.py`
   - `.github/workflows/build-release.yml` (GPG secret-gated signing path)
   - `tests/test_release_signing.py`
+- Added P0 governance automation baseline:
+  - `tools/validate_doc_claims.py`
+  - `.github/workflows/doc-claim-validator.yml`
+  - `tools/validate_kpi_snapshot.py`
+  - `.github/workflows/kpi-dashboard.yml` KPI quality gate step
+  - `docs/RELEASE_EVIDENCE_CHECKLIST.md`
+  - `tests/test_validate_doc_claims.py`
+  - `tests/test_validate_kpi_snapshot.py`
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

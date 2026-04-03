@@ -26,6 +26,9 @@ The project is in a strong development-ready state with:
 - Offline analytics runtime profile now supports ONNX CPU detection with rules-only fallback
 - Channel promotion planning automation is now present for nightly/alpha/beta/stable progression
 - Release artifact signing automation is now present for supported environments with configured GPG secrets
+- Documentation claim validation automation is now present for roadmap/goal/readiness consistency checks
+- KPI snapshot quality validation gate is now enforced during KPI dashboard workflow runs
+- Standardized release evidence checklist template is now available for release governance
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -35,7 +38,7 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `244 passed`
+- ✅ **Tests:** `247 passed`
 - ✅ **Coverage gate:** `73.33%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
@@ -88,6 +91,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - `validate-msix-lane.yml`
 - `linux-repo-index.yml`
 - `kpi-dashboard.yml`
+- `doc-claim-validator.yml`
 
 ---
 
@@ -108,6 +112,9 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Strict Rust SMART boundary contract validation: `agent/native_contract.py`, `agent/plugins/smart.py`
 - Distribution manifest automation: `tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`
 - Release artifact detached-signature automation: `tools/release_signing.py`, `.github/workflows/build-release.yml`
+- Documentation claim consistency automation: `tools/validate_doc_claims.py`, `.github/workflows/doc-claim-validator.yml`
+- KPI snapshot quality gate automation: `tools/validate_kpi_snapshot.py`, `.github/workflows/kpi-dashboard.yml`
+- Release governance evidence checklist: `docs/RELEASE_EVIDENCE_CHECKLIST.md`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`
@@ -146,9 +153,9 @@ Mobile/embedded OS families (Android/iOS/HarmonyOS/Amazon Fire OS, etc.) are han
 
 ## Recommended next priorities
 
-1. Continue roadmap execution for retention controls/evidence redaction presets and org policy import/export.
-2. Enrich docs-site route IA content depth and automate route metadata refresh.
-3. Add/track KPI dashboard artifacts for reliability/performance trends.
+1. Expand OS parity contract tests and deepen probe reliability calibration.
+2. Implement Rust hot-path acceleration with benchmark evidence reporting.
+3. Advance desktop dual-shell migration criteria and mobile offline pairing hardening.
 4. Keep readiness docs synchronized with CI and real-device validation outputs each sprint.
 
 ---

@@ -31,6 +31,9 @@ Current implementation snapshot (2026-04-04)
 - Release metadata automation now emits machine-readable distribution manifests for channel/audit tooling (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
 - Channel promotion planning automation is now implemented for nightly/alpha/beta/stable progression (`tools/channel_promotion.py`, `.github/workflows/channel-promotion.yml`).
 - Release artifact signing automation now emits detached signatures when signing secrets are configured (`tools/release_signing.py`, `.github/workflows/build-release.yml`).
+- Documentation claim consistency validation is now automated for roadmap/goal/readiness files (`tools/validate_doc_claims.py`, `.github/workflows/doc-claim-validator.yml`).
+- KPI snapshot quality gate validation is now enforced in KPI workflow runs (`tools/validate_kpi_snapshot.py`, `.github/workflows/kpi-dashboard.yml`).
+- Standardized release evidence checklist template is now published for each tagged release (`docs/RELEASE_EVIDENCE_CHECKLIST.md`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 
