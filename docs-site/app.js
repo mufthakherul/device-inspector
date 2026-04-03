@@ -2,6 +2,10 @@ async function loadReleaseData() {
     const metaEl = document.getElementById('release-meta');
     const grid = document.getElementById('download-grid');
 
+    if (!metaEl || !grid) {
+        return;
+    }
+
     try {
         const response = await fetch('./data/releases.json', { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -31,7 +35,7 @@ async function loadReleaseData() {
                 const item = document.createElement('li');
                 const link = document.createElement('a');
                 link.href = asset.browser_download_url;
-                link.textContent = `${asset.name} (${asset.size_bytes} bytes)`;
+                link.textContent = `${asset.name} (${Number(asset.size_bytes || 0).toLocaleString()} bytes)`;
                 link.target = '_blank';
                 link.rel = 'noreferrer noopener';
                 item.appendChild(link);

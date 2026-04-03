@@ -8,6 +8,13 @@ All notable changes to this project will be documented in this file.
 - Enhanced PDF report generation
 - Static web viewer for report.json
 - Finalized JSON schema with validation
+- Added route-based docs-site IA pages: `/download`, `/docs/user`, `/docs/technician`, `/docs/developer`, `/project`, `/community`, `/status`
+- Added release channel validation workflow: `.github/workflows/release-channel-gates.yml`
+- Updated release packaging semantics: alpha/beta tags now generate prereleases
+- Added enterprise/plugin groundwork schemas:
+  - `schemas/policy-pack-schema-1.0.0.json`
+  - `schemas/plugin-manifest-schema-1.0.0.json`
+- Published quarterly architecture review notes: `docs/ARCHITECTURE_REVIEW_2026_Q2.md`
 
 ---
 

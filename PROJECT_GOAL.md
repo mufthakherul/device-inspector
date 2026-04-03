@@ -10,6 +10,9 @@ Current implementation snapshot (2026-04-04)
 - Cross-platform build/test workflow family exists for core CI, integration matrix, desktop/mobile/ISO packaging, security/SBOM, performance guardrails, and polyglot/wasm scaffolding.
 - Setup automation exists for Windows/Linux/macOS and a launcher-first precheck flow is available (`scripts/launch_inspecta.py`, `launch_inspecta.ps1`, `launch_inspecta.sh`).
 - Real-device execution has been validated on Windows in current sprint with report/artifact generation.
+- Route-based docs-site IA is now scaffolded for `/download`, `/docs/*`, `/project`, `/community`, and `/status`.
+- Release channel gates are defined for stable/alpha/beta tag semantics.
+- Policy-pack and plugin-manifest schema foundations are added under `schemas/` for enterprise/plugin rollout tracks.
 
 Table of contents
 - Mission & vision

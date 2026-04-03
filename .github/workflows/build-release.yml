@@ -197,7 +197,7 @@ jobs:
             release-packages/**/*.tar.gz
             release-packages/**/SHA256SUMS
           draft: false
-          prerelease: false
+          prerelease: ${{ contains(github.ref_name, '-alpha.') || contains(github.ref_name, '-beta.') }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

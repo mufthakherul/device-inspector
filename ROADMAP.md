@@ -315,17 +315,17 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 3. ✅ Add deterministic bundle mode test suite (`tests/test_evidence.py` fixed-timestamp + canonical ordering assertions).
 4. ✅ Add `sbom-security.yml` workflow.
 5. ✅ Add performance regression benchmark workflow.
-6. Implement route-based docs-site IA (`/download`, `/docs/*`, etc.).
+6. ✅ Implement route-based docs-site IA (`/download`, `/docs/*`, etc.).
 7. Add `.msix` packaging lane validation.
 8. Add Linux repo publication workflow strategy (`deb/rpm index`).
-9. Add policy pack schema for enterprise modes.
+9. ✅ Add policy pack schema for enterprise modes (`schemas/policy-pack-schema-1.0.0.json`).
 10. Add local anomaly detector module (offline inference).
 11. Add Rust SMART parser integration contract tests.
-12. Add plugin signing manifest schema.
-13. Add release channel promotion gates.
+12. ✅ Add plugin signing manifest schema (`schemas/plugin-manifest-schema-1.0.0.json`).
+13. ✅ Add release channel promotion gates (`release-channel-gates.yml`, prerelease tag semantics).
 14. ✅ Add reproducibility audit command for bundles (`inspecta audit` in `agent/cli.py`).
 15. Refresh README/CHANGELOG/PROJECT_READINESS consistency.
-16. Publish quarterly architecture review notes.
+16. ✅ Publish quarterly architecture review notes (`docs/ARCHITECTURE_REVIEW_2026_Q2.md`).
 
 ---
 
@@ -374,10 +374,10 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 | 6 Workflows | Required CI/CD/security workflows green | In progress | GitHub Actions | DevOps | Sprint 2 |
 | 7 Packaging | Target channels produce usable artifacts | In progress | release artifacts | Release Eng | Sprint 8 |
 | 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test + deterministic evidence tests in `tests/test_evidence.py` | Core Eng | Sprint 2 |
-| 9 Docs IA | Route-based portal complete | Planned | docs-site routes | DX | Sprint 12 |
+| 9 Docs IA | Route-based portal complete | In progress | docs-site route pages (`/download`, `/docs/*`, `/project`, `/community`, `/status`) | DX | Sprint 12 |
 | 10 KPIs | Dashboard and metrics pipeline active | Planned | status dashboards | PM+Data | Sprint 3 |
 | 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates | Sec/QA | Rolling |
-| 12 Governance | Channelized release policy enforced | Planned | release workflows | Release Eng | Sprint 8 |
+| 12 Governance | Channelized release policy enforced | In progress | `release-channel-gates.yml` + release prerelease semantics in build workflow | Release Eng | Sprint 8 |
 | 13 Structure | Target repo layout adopted | In progress | repo tree | Maintainer | Sprint 4 |
 | 14 Milestones | M1/M2/M3 objective evidence available | Planned | milestone reports | PM | Rolling |
 | 15 Next actions | Action backlog actively executed | In progress | issue board | Team | Rolling |

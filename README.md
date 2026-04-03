@@ -19,7 +19,7 @@ Local-first automated diagnostics for laptops and PCs with verifiable evidence b
 
 **Status:** 🟢 **Active Modernization** — next-generation roadmap in execution  
 **Current Version:** 0.1.0  
-**Last Updated:** 2026-03-30
+**Last Updated:** 2026-04-04
 
 > **📊 Project Direction:** The project has moved beyond early MVP scope into a broader cross-platform and polyglot modernization path. See [ROADMAP.md](ROADMAP.md) for current strategic sections, compliance matrix, and execution priorities.
 
@@ -56,6 +56,8 @@ Local-first automated diagnostics for laptops and PCs with verifiable evidence b
 - 🌸 **[HarmonyOS Strategy (Sprint 10)](docs/HARMONYOS.md)** - HAP pipeline scope, workflow scaffold, and promotion path
 - 💿 **[Bootable ISO Guide (Sprint 11)](docs/BOOTABLE.md)** - Reproducible ISO backend, UEFI/Secure Boot guidance, forensic mode
 - 🌐 **[Docs Site Portal (Sprint 12)](docs-site/index.html)** - Product/developer portal with auto-synced release download cards
+- 🧭 **[Route-based Docs IA](docs-site/index.html)** - `/download`, `/docs/*`, `/project`, `/community`, `/status` static routes
+- 🧱 **[Quarterly Architecture Review (2026 Q2)](docs/ARCHITECTURE_REVIEW_2026_Q2.md)** - current architecture posture and next-quarter priorities
 - 🤖 **[AI & Developer Guide](docs/AI_AGENT_GUIDE.md)** - Guardrails for human and AI collaborators
 - 📋 **[Project Status](PROJECT_STATUS.md)** - Detailed implementation progress
 - 🚀 **[Next Steps](NEXT_STEPS.md)** - Prioritized action items for Sprint 2

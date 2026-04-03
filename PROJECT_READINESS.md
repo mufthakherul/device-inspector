@@ -14,6 +14,8 @@ The project is in a strong development-ready state with:
 - Working real-device execution path (Windows validated in this cycle)
 - Launcher-first precheck and setup orchestration implemented
 - Cross-platform CI workflow matrix significantly expanded
+- Route-based docs-site IA scaffold implemented
+- Release channel gating semantics added for stable/alpha/beta
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -71,6 +73,15 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - `performance-regression.yml`
 - `polyglot-build.yml`
 - `wasm-artifacts.yml`
+- `release-channel-gates.yml`
+
+---
+
+## ✅ Governance and extensibility foundations
+
+- Policy pack schema baseline: `schemas/policy-pack-schema-1.0.0.json`
+- Plugin manifest/signing schema baseline: `schemas/plugin-manifest-schema-1.0.0.json`
+- Quarterly architecture review published: `docs/ARCHITECTURE_REVIEW_2026_Q2.md`
 
 ---
 

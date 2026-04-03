@@ -299,10 +299,12 @@ def run(
     run_started_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
     if require_hardware and use_sample:
-        logger.error(
+        message = (
             "--require-hardware cannot be combined with --use-sample. "
             "Run without --use-sample for real-device diagnostics."
         )
+        logger.error(message)
+        click.echo(message, err=True)
         raise SystemExit(20)
 
     out_dir = Path(output)

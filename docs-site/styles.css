@@ -47,6 +47,20 @@ body {
     padding: 16px;
 }
 
+.container.narrow {
+    max-width: 860px;
+}
+
+.breadcrumbs {
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.breadcrumbs a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
 .card {
     background: #fff;
     border: 1px solid #e2e8f0;
@@ -77,4 +91,22 @@ body {
     text-align: center;
     padding: 20px;
     color: #64748b;
+}
+
+.pill {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.pill.ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pill.warn {
+    background: #fef3c7;
+    color: #92400e;
 }
