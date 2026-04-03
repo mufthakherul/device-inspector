@@ -28,6 +28,10 @@ All notable changes to this project will be documented in this file.
 - Added Rust SMART parser contract-boundary coverage:
   - `agent/plugins/smart.py` (`to_rust_contract_payload`)
   - `tests/test_smart_rust_contract.py`
+- Added KPI dashboard snapshot pipeline:
+  - `.github/workflows/kpi-dashboard.yml`
+  - `tools/generate_kpi_snapshot.py`
+  - `docs-site/data/kpi.json` + status page KPI rendering
 
 ---
 

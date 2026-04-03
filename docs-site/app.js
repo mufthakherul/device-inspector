@@ -51,4 +51,32 @@ async function loadReleaseData() {
     }
 }
 
+async function loadKpiSnapshot() {
+    const target = document.getElementById('kpi-meta');
+    if (!target) {
+        return;
+    }
+
+    const source = target.dataset.src || '../data/kpi.json';
+
+    try {
+        const response = await fetch(source, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const payload = await response.json();
+        const metrics = payload.metrics || {};
+
+        target.innerHTML = [
+            `<p><strong>Generated:</strong> ${payload.generated_at || 'N/A'}</p>`,
+            `<p><strong>Tests Passed:</strong> ${metrics.tests_passed ?? 'N/A'}</p>`,
+            `<p><strong>Coverage:</strong> ${metrics.coverage_percent ?? 'N/A'}%</p>`,
+            `<p><strong>Release Green Rate:</strong> ${metrics.release_green_rate ?? 'N/A'}%</p>`,
+            `<p><strong>Bundle Verify Rate:</strong> ${metrics.bundle_verify_rate ?? 'N/A'}%</p>`,
+        ].join('');
+    } catch (error) {
+        target.textContent = `Failed to load KPI snapshot: ${error}`;
+    }
+}
+
 loadReleaseData();
+loadKpiSnapshot();

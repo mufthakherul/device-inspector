@@ -17,6 +17,7 @@ Current implementation snapshot (2026-04-04)
 - Linux repository publication strategy scaffolding is implemented with index-generation automation for `.deb/.rpm` channels.
 - Offline anomaly detection is integrated into report summary with confidence scoring and explainability metadata.
 - Rust SMART integration contract boundary is defined and tested via stable payload shape checks.
+- KPI snapshot generation pipeline is implemented for docs-site status metrics (`tools/generate_kpi_snapshot.py`, `kpi-dashboard.yml`).
 
 Table of contents
 - Mission & vision

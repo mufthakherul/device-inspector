@@ -375,7 +375,7 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 | 7 Packaging | Target channels produce usable artifacts | In progress | release artifacts | Release Eng | Sprint 8 |
 | 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test + deterministic evidence tests in `tests/test_evidence.py` | Core Eng | Sprint 2 |
 | 9 Docs IA | Route-based portal complete | In progress | docs-site route pages (`/download`, `/docs/*`, `/project`, `/community`, `/status`) | DX | Sprint 12 |
-| 10 KPIs | Dashboard and metrics pipeline active | In progress | offline anomaly/confidence signals in report summary + status dashboards backlog | PM+Data | Sprint 3 |
+| 10 KPIs | Dashboard and metrics pipeline active | In progress | offline anomaly/confidence signals + `kpi-dashboard.yml` + `docs-site/data/kpi.json` snapshot artifacts | PM+Data | Sprint 3 |
 | 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates | Sec/QA | Rolling |
 | 12 Governance | Channelized release policy enforced | In progress | `release-channel-gates.yml` + release prerelease semantics in build workflow | Release Eng | Sprint 8 |
 | 13 Structure | Target repo layout adopted | In progress | repo tree | Maintainer | Sprint 4 |

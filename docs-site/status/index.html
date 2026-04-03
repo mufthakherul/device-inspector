@@ -24,6 +24,12 @@
         <p class="breadcrumbs"><a href="../">Home</a> / Status</p>
 
         <section class="card">
+            <h2>KPI snapshot</h2>
+            <p>Latest generated metrics from CI-derived artifacts.</p>
+            <div id="kpi-meta" class="meta" data-src="../data/kpi.json">Loading KPI snapshot…</div>
+        </section>
+
+        <section class="card">
             <h2>Workflow health</h2>
             <p><span class="pill ok">Active</span> Core CI, release orchestration, SBOM/security, performance, polyglot,
                 and WASM validation workflows are present.</p>
@@ -40,6 +46,8 @@
     <footer class="footer">
         <p>inspecta docs-site • /status</p>
     </footer>
+
+    <script src="../app.js"></script>
 </body>
 
 </html>

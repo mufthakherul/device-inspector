@@ -1,48 +1,48 @@
 name: Validate MSIX Lane
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    tags:
-      - "v*"
-  pull_request:
-    branches: [main]
+    workflow_dispatch:
+    push:
+        branches: [main]
+        tags:
+            - "v*"
+    pull_request:
+        branches: [main]
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  validate-msix-config:
-    name: Validate desktop AppX/MSIX packaging config
-    runs-on: windows-latest
+    validate-msix-config:
+        name: Validate desktop AppX/MSIX packaging config
+        runs-on: windows-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Validate AppX target in desktop config
-        shell: pwsh
-        run: |
-          $pkg = Get-Content "apps/desktop/package.json" -Raw | ConvertFrom-Json
-          $targets = @($pkg.build.win.target)
-          if (-not ($targets -contains "appx")) {
-            throw "Desktop Windows target must include 'appx' for MSIX lane validation."
-          }
-          Write-Host "AppX target present."
+            - name: Validate AppX target in desktop config
+              shell: pwsh
+              run: |
+                  $pkg = Get-Content "apps/desktop/package.json" -Raw | ConvertFrom-Json
+                  $targets = @($pkg.build.win.target)
+                  if (-not ($targets -contains "appx")) {
+                    throw "Desktop Windows target must include 'appx' for MSIX lane validation."
+                  }
+                  Write-Host "AppX target present."
 
-      - name: Validate Windows packaging tools
-        shell: pwsh
-        run: |
-          $makeAppx = Get-Command makeappx.exe -ErrorAction SilentlyContinue
-          if (-not $makeAppx) {
-            throw "makeappx.exe not found on runner; MSIX lane cannot be validated."
-          }
-          Write-Host "makeappx.exe available at: $($makeAppx.Source)"
+            - name: Validate Windows packaging tools
+              shell: pwsh
+              run: |
+                  $makeAppx = Get-Command makeappx.exe -ErrorAction SilentlyContinue
+                  if (-not $makeAppx) {
+                    throw "makeappx.exe not found on runner; MSIX lane cannot be validated."
+                  }
+                  Write-Host "makeappx.exe available at: $($makeAppx.Source)"
 
-      - name: Upload lane validation metadata
-        uses: actions/upload-artifact@v4
-        with:
-          name: msix-lane-validation
-          path: apps/desktop/package.json
-          retention-days: 14
+            - name: Upload lane validation metadata
+              uses: actions/upload-artifact@v4
+              with:
+                  name: msix-lane-validation
+                  path: apps/desktop/package.json
+                  retention-days: 14

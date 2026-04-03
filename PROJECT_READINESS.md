@@ -26,7 +26,7 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `212 passed`
+- ✅ **Tests:** `215 passed`
 - ✅ **Coverage gate:** `73.22%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
@@ -77,6 +77,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - `release-channel-gates.yml`
 - `validate-msix-lane.yml`
 - `linux-repo-index.yml`
+- `kpi-dashboard.yml`
 
 ---
 
@@ -85,6 +86,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Policy pack schema baseline: `schemas/policy-pack-schema-1.0.0.json`
 - Plugin manifest/signing schema baseline: `schemas/plugin-manifest-schema-1.0.0.json`
 - Offline anomaly detector and confidence/explainability summary: `agent/anomaly.py`, `agent/report.py`
+- KPI snapshot data pipeline for docs-site status: `tools/generate_kpi_snapshot.py`, `docs-site/data/kpi.json`
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`
 - Quarterly architecture review published: `docs/ARCHITECTURE_REVIEW_2026_Q2.md`
 
