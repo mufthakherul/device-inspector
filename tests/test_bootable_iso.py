@@ -13,6 +13,19 @@ def test_stage_iso_tree_writes_manifest_and_scripts(tmp_path: Path) -> None:
     assert (staging / "opt" / "inspecta" / "run-full.sh").exists()
     assert (staging / "opt" / "inspecta" / "forensic-write-minimization.sh").exists()
     assert (staging / "opt" / "inspecta" / "iso-build-manifest.json").exists()
+    assert (staging / "opt" / "inspecta" / "iso-profile-manifest.json").exists()
+    assert manifest["profile_tier"] == "baseline"
+    assert "secure-lab" in manifest["supported_profiles"]
+
+
+def test_stage_iso_tree_supports_profile_aliases(tmp_path: Path) -> None:
+    staging = tmp_path / "staging"
+
+    manifest = stage_iso_tree(staging_dir=staging, profile="quick", forensic_mode=False)
+
+    assert manifest["profile"] == "quick"
+    assert manifest["profile_tier"] == "tech-bench"
+    assert "offline-evidence" in manifest["profile_capabilities"]
 
 
 def test_build_bootable_iso_creates_iso_and_checksums(
@@ -31,7 +44,10 @@ def test_build_bootable_iso_creates_iso_and_checksums(
     assert result.iso_path.exists()
     assert result.manifest_path.exists()
     assert result.checksums_path.exists()
+    assert result.export_bundle_path.exists()
 
     checksums = result.checksums_path.read_text(encoding="utf-8")
     assert "test.iso" in checksums
     assert "iso-build-manifest.json" in checksums
+    assert (result.export_bundle_path / "export-summary.json").exists()
+    assert (result.export_bundle_path / "test.iso").exists()

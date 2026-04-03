@@ -5,6 +5,8 @@ This document defines the bootable ISO production backend and technician flow.
 ## Current status
 
 - `tools/bootable_iso.py` provides a reproducible ISO backend (staging + ISO + checksums).
+- Profile-aware staging is available with layered presets for `ubuntu-minimal`, `quick-tech-bench`, `forensic`, and `secure-lab`.
+- Export bundles are generated alongside the ISO output in `dist/bootable-iso/export-bundle/`.
 - `tools/build-live-iso.sh` is a shell entrypoint delegating to the Python backend.
 - CI workflow `.github/workflows/build-bootable-iso.yml` builds ISO artifacts nightly and on tag.
 
@@ -35,6 +37,7 @@ Artifacts are generated in `dist/bootable-iso/`:
 - `inspecta-live.iso`
 - `iso-build-manifest.json`
 - `SHA256SUMS`
+- `export-bundle/` (portable copy of ISO + checksums + export summary)
 
 ## Forensic write-minimization mode
 
@@ -43,6 +46,8 @@ The ISO payload includes `/opt/inspecta/forensic-write-minimization.sh` with gui
 - prefer read-only source mounts
 - use tmpfs output paths when feasible
 - minimize writes on target evidence media
+
+The export bundle also supports an optional encrypted metadata sidecar when the optional `cryptography` package is available.
 
 ## Secure Boot and UEFI guidance
 

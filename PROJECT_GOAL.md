@@ -18,12 +18,14 @@ Current implementation snapshot (2026-04-04)
 - Offline anomaly detection is integrated into report summary with confidence scoring and explainability metadata.
 - Rust SMART integration contract boundary is defined and tested via stable payload shape checks.
 - KPI snapshot generation pipeline is implemented for docs-site status metrics (`tools/generate_kpi_snapshot.py`, `kpi-dashboard.yml`).
+- KPI snapshot generation now accepts report-derived probe reliability, parity, and confidence metrics for the status site.
 - Enterprise policy-pack runtime evaluation is now integrated into report generation (`agent/policy_pack.py`, `--policy-pack`).
 - Signed plugin-manifest verification is implemented for CLI and pre-run enforcement (`agent/plugin_manifest.py`, `inspecta plugin-verify`, `--plugin-manifest`, `--plugin-keyring`).
 - Evidence redaction presets and retention policy metadata controls are implemented for report output (`agent/redaction.py`, `--redaction-preset`, `--retention-days`).
 - Policy-pack governance portability is supported via validated import/export commands (`inspecta policy-import`, `inspecta policy-export`).
 - Signed evidence manifests now emit deterministic attestation metadata alongside detached signatures (`agent/evidence.py`).
 - Probe reliability and parity metrics are emitted in report summaries for degraded probe-set scoring (`agent/reliability.py`).
+- Bootable ISO staging now emits layered profile manifests and export bundle metadata (`tools/bootable_iso.py`).
 
 Table of contents
 - Mission & vision

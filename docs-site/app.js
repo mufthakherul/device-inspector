@@ -72,6 +72,9 @@ async function loadKpiSnapshot() {
             `<p><strong>Coverage:</strong> ${metrics.coverage_percent ?? 'N/A'}%</p>`,
             `<p><strong>Release Green Rate:</strong> ${metrics.release_green_rate ?? 'N/A'}%</p>`,
             `<p><strong>Bundle Verify Rate:</strong> ${metrics.bundle_verify_rate ?? 'N/A'}%</p>`,
+            `<p><strong>Probe Reliability:</strong> ${metrics.probe_reliability ?? 'N/A'}</p>`,
+            `<p><strong>Probe Parity:</strong> ${metrics.probe_parity_index ?? 'N/A'}</p>`,
+            `<p><strong>Confidence Score:</strong> ${metrics.confidence_score ?? 'N/A'}</p>`,
         ].join('');
     } catch (error) {
         target.textContent = `Failed to load KPI snapshot: ${error}`;

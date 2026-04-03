@@ -17,6 +17,8 @@ The project is in a strong development-ready state with:
 - Route-based docs-site IA scaffold implemented
 - Release channel gating semantics added for stable/alpha/beta
 - Offline anomaly/confidence summary foundation added for report analytics
+- Bootable ISO profiles and export bundle metadata added to the staging backend
+- KPI snapshot pipeline can now surface probe reliability/parity/confidence metrics on the status page
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -26,8 +28,8 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `226 passed`
-- ✅ **Coverage gate:** `72.16%` (required `35%`)
+- ✅ **Tests:** `232 passed`
+- ✅ **Coverage gate:** `73.12%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -91,6 +93,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Policy pack import/export governance workflow: `inspecta policy-import`, `inspecta policy-export`
 - Signed evidence attestation metadata in manifests: `agent/evidence.py`
 - Probe reliability + parity metrics in report summaries: `agent/reliability.py`, `agent/report.py`
+- Bootable ISO profile catalog + export bundle path: `tools/bootable_iso.py`
 - Offline anomaly detector and confidence/explainability summary: `agent/anomaly.py`, `agent/report.py`
 - KPI snapshot data pipeline for docs-site status: `tools/generate_kpi_snapshot.py`, `docs-site/data/kpi.json`
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`

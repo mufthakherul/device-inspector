@@ -7,6 +7,7 @@ launch scripts, and runbook artifacts for technician workflows.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -19,14 +20,85 @@ from pathlib import Path
 from typing import Iterable
 
 DEFAULT_PROFILE = "ubuntu-minimal"
-DEFAULT_TOOLS = [
+DEFAULT_TOOLS = (
     "smartmontools",
     "fio",
     "stress-ng",
     "memtester",
     "memtest86-plus",
     "nvme-cli",
-]
+)
+
+
+class BootableIsoError(RuntimeError):
+    """Raised when ISO staging or export bundle generation fails."""
+
+
+@dataclass(frozen=True)
+class BootableProfile:
+    name: str
+    tier: str
+    description: str
+    required_tools: tuple[str, ...]
+    capabilities: tuple[str, ...]
+
+
+PROFILE_PRESETS: dict[str, BootableProfile] = {
+    "ubuntu-minimal": BootableProfile(
+        name="ubuntu-minimal",
+        tier="baseline",
+        description="Minimal Ubuntu-based live image for quick validation.",
+        required_tools=DEFAULT_TOOLS,
+        capabilities=(
+            "quick-diagnostics",
+            "bundle-verification",
+            "forensic-guidance",
+        ),
+    ),
+    "quick-tech-bench": BootableProfile(
+        name="quick-tech-bench",
+        tier="tech-bench",
+        description="Technician-first profile tuned for short, practical bench runs.",
+        required_tools=DEFAULT_TOOLS,
+        capabilities=(
+            "quick-diagnostics",
+            "benchmarks",
+            "offline-evidence",
+        ),
+    ),
+    "forensic": BootableProfile(
+        name="forensic",
+        tier="forensic",
+        description="Write-minimizing profile for evidence-preserving workflows.",
+        required_tools=DEFAULT_TOOLS + ("sleuthkit", "cryptsetup"),
+        capabilities=(
+            "read-only-guidance",
+            "offline-evidence",
+            "export-bundles",
+        ),
+    ),
+    "secure-lab": BootableProfile(
+        name="secure-lab",
+        tier="secure-lab",
+        description=(
+            "Hardened lab profile for sealed-off diagnostics and export controls."
+        ),
+        required_tools=DEFAULT_TOOLS + ("cryptsetup", "sbom-tool"),
+        capabilities=(
+            "offline-evidence",
+            "export-bundles",
+            "encrypted-metadata",
+        ),
+    ),
+}
+
+PROFILE_ALIASES = {
+    "baseline": "ubuntu-minimal",
+    "quick": "quick-tech-bench",
+    "tech-bench": "quick-tech-bench",
+    "forensics": "forensic",
+    "lab": "secure-lab",
+}
 
 
 @dataclass(frozen=True)
@@ -35,6 +107,7 @@ class BuildResult:
     manifest_path: Path
     checksums_path: Path
     backend_tool: str
+    export_bundle_path: Path
 
 
 def _utc_now_iso() -> str:
@@ -64,6 +137,48 @@ def _write_file(path: Path, content: str, executable: bool = False) -> None:
         path.chmod(mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def _resolve_profile(profile: str) -> BootableProfile:
+    normalized = profile.strip().lower()
+    normalized = PROFILE_ALIASES.get(normalized, normalized)
+    if normalized not in PROFILE_PRESETS:
+        raise BootableIsoError(f"Unknown bootable profile: {profile}")
+    return PROFILE_PRESETS[normalized]
+
+
+def _copy_file(src: Path, dst: Path) -> None:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+
+
+def _encrypt_summary_payload(summary_payload: dict, passphrase: str) -> dict[str, str]:
+    try:
+        from cryptography.fernet import Fernet
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    except Exception as exc:
+        raise BootableIsoError(
+            "Encrypted export bundles require the optional 'cryptography' package"
+        ) from exc
+
+    salt = os.urandom(16)
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=390000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(passphrase.encode("utf-8")))
+    token = Fernet(key).encrypt(
+        json.dumps(summary_payload, indent=2, sort_keys=True).encode("utf-8")
+    )
+
+    return {
+        "algorithm": "fernet",
+        "salt_b64": base64.b64encode(salt).decode("ascii"),
+        "payload_b64": base64.b64encode(token).decode("ascii"),
+    }
+
+
 def stage_iso_tree(
     staging_dir: Path,
     profile: str = DEFAULT_PROFILE,
@@ -75,7 +190,12 @@ def stage_iso_tree(
         shutil.rmtree(staging_dir)
     staging_dir.mkdir(parents=True, exist_ok=True)
 
-    tools_list = list(required_tools)
+    profile_config = _resolve_profile(profile)
+    tools_list = (
+        list(profile_config.required_tools)
+        if required_tools is DEFAULT_TOOLS
+        else list(required_tools)
+    )
     generated_at = _utc_now_iso()
 
     run_script = """#!/usr/bin/env bash
@@ -117,6 +237,32 @@ echo "Use tmpfs output paths when possible: /dev/shm/inspecta-run"
         staging_dir / "opt" / "inspecta" / "required-packages.txt", packages_txt
     )
 
+    profile_manifest = {
+        "manifest_version": "1.0.0",
+        "generated_at": generated_at,
+        "selected_profile": {
+            "name": profile_config.name,
+            "tier": profile_config.tier,
+            "description": profile_config.description,
+            "capabilities": list(profile_config.capabilities),
+            "required_tools": tools_list,
+        },
+        "supported_profiles": [
+            {
+                "name": item.name,
+                "tier": item.tier,
+                "description": item.description,
+                "capabilities": list(item.capabilities),
+                "required_tools": list(item.required_tools),
+            }
+            for item in PROFILE_PRESETS.values()
+        ],
+    }
+    _write_file(
+        staging_dir / "opt" / "inspecta" / "iso-profile-manifest.json",
+        json.dumps(profile_manifest, indent=2, sort_keys=True),
+    )
+
     readme = f"""Inspecta Live ISO
 =================
 
@@ -139,8 +285,11 @@ Forensic guidance:
         "manifest_version": "1.0.0",
         "generated_at": generated_at,
         "profile": profile,
+        "profile_tier": profile_config.tier,
+        "profile_capabilities": list(profile_config.capabilities),
         "forensic_write_minimization": forensic_mode,
         "required_tools": tools_list,
+        "supported_profiles": list(PROFILE_PRESETS.keys()),
         "secure_boot_uefi_guidance": (
             "See docs/BOOTABLE.md for Secure Boot + UEFI flow."
         ),
@@ -152,6 +301,69 @@ Forensic guidance:
         json.dumps(manifest, indent=2), encoding="utf-8", newline="\n"
     )
     return manifest
+
+
+def create_export_bundle(
+    output_dir: Path,
+    iso_path: Path,
+    manifest_path: Path,
+    checksums_path: Path,
+    profile: str,
+    encrypt_metadata: bool = False,
+    passphrase: str | None = None,
+) -> Path:
+    """Create a portable export bundle directory for the generated ISO."""
+    bundle_dir = output_dir / "export-bundle"
+    if bundle_dir.exists():
+        shutil.rmtree(bundle_dir)
+    bundle_dir.mkdir(parents=True, exist_ok=True)
+
+    _copy_file(iso_path, bundle_dir / iso_path.name)
+    _copy_file(manifest_path, bundle_dir / manifest_path.name)
+    _copy_file(checksums_path, bundle_dir / checksums_path.name)
+
+    summary = {
+        "manifest_version": "1.0.0",
+        "generated_at": _utc_now_iso(),
+        "profile": profile,
+        "bundle_files": [
+            iso_path.name,
+            manifest_path.name,
+            checksums_path.name,
+        ],
+        "encrypted_metadata": False,
+    }
+
+    final_summary = dict(summary)
+
+    if encrypt_metadata:
+        if not passphrase:
+            raise BootableIsoError(
+                "Encrypted export bundle requested without a passphrase"
+            )
+
+        final_summary["encrypted_metadata"] = True
+        encrypted_summary = _encrypt_summary_payload(final_summary, passphrase)
+        encrypted_path = bundle_dir / "export-summary.json.enc"
+        encrypted_path.write_text(
+            json.dumps(encrypted_summary, indent=2, sort_keys=True),
+            encoding="utf-8",
+            newline="\n",
+        )
+        final_summary["encryption"] = {
+            "algorithm": encrypted_summary["algorithm"],
+            "salt_b64": encrypted_summary["salt_b64"],
+            "payload_file": encrypted_path.name,
+        }
+
+    summary_path = bundle_dir / "export-summary.json"
+    summary_path.write_text(
+        json.dumps(final_summary, indent=2, sort_keys=True),
+        encoding="utf-8",
+        newline="\n",
+    )
+
+    return bundle_dir
 
 
 def _iso_commands(
@@ -203,6 +415,8 @@ def build_bootable_iso(
     forensic_mode: bool = True,
     iso_name: str = "inspecta-live.iso",
     volume_id: str = "INSPECTA_LIVE",
+    encrypt_export_metadata: bool = False,
+    export_bundle_passphrase: str | None = None,
 ) -> BuildResult:
     """Build ISO plus manifest and checksum outputs."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -235,11 +449,22 @@ def build_bootable_iso(
         newline="\n",
     )
 
+    export_bundle_path = create_export_bundle(
+        output_dir=output_dir,
+        iso_path=iso_path,
+        manifest_path=manifest_path,
+        checksums_path=checksums_path,
+        profile=profile,
+        encrypt_metadata=encrypt_export_metadata,
+        passphrase=export_bundle_passphrase,
+    )
+
     return BuildResult(
         iso_path=iso_path,
         manifest_path=manifest_path,
         checksums_path=checksums_path,
         backend_tool=backend,
+        export_bundle_path=export_bundle_path,
     )
 
 

@@ -125,6 +125,8 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add layered ISO profiles (quick tech bench / forensic / secure-lab).
 - Add reproducibility attestations and dependency SBOM embedding.
 - Add encrypted export bundle option.
+- ✅ Layered ISO profiles are now emitted by the bootable staging backend (`tools/bootable_iso.py`).
+- ✅ Export bundle directory generation is available with optional encrypted metadata sidecar support.
 
 ### Sprint 8 — Packaging channels full automation
 - Add channel promotion workflow (nightly -> beta -> stable).
@@ -136,6 +138,8 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add confidence score for each recommendation.
 - Add explainability payload in report.
 - Add ONNX-based local model runtime profile with CPU-only fallback for fully offline operation.
+- ✅ Offline anomaly/confidence/explainability summary is present in report composition.
+- ✅ KPI snapshot generation now accepts report-derived probe reliability, parity, and confidence metrics for the docs-site status page.
 
 ### Sprint 10 — Enterprise policy packs
 - Add policy profiles (refurbish shop, enterprise IT, field service, resale audit).
