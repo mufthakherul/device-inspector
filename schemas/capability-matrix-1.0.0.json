@@ -32,6 +32,29 @@
             ]
         }
     },
+    "plugin_capabilities": {
+        "cli": [
+            "smart.parse",
+            "battery.parse",
+            "disk.parse",
+            "cpu.parse",
+            "memory.parse",
+            "thermal.read",
+            "report.enrich",
+            "evidence.enrich",
+            "policy.evaluate"
+        ],
+        "desktop": [
+            "report.enrich",
+            "verify.enrich",
+            "offline.sync"
+        ],
+        "mobile": [
+            "report.enrich",
+            "verify.enrich",
+            "offline.sync"
+        ]
+    },
     "policy": {
         "compatibility": "major-version compatible",
         "source_of_truth": "schemas/capability-matrix-1.0.0.json"

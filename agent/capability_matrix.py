@@ -41,3 +41,31 @@ def get_surface_capabilities(surface: str) -> dict[str, Any]:
         "description": surfaces[surface].get("description", ""),
         "capabilities": list(surfaces[surface].get("capabilities", [])),
     }
+
+
+def get_surface_plugin_capabilities(surface: str) -> dict[str, Any]:
+    """Return plugin capability policy for a surface.
+
+    The capability matrix can include a `plugin_capabilities` object:
+    {
+      "cli": ["smart.parse", "battery.parse", "report.*"]
+    }
+    """
+    matrix = load_capability_matrix()
+    plugin_caps = matrix.get("plugin_capabilities", {})
+
+    if surface not in plugin_caps:
+        raise ValueError(f"Unknown plugin capability surface: {surface}")
+
+    allowed = plugin_caps.get(surface, [])
+    if not isinstance(allowed, list):
+        raise ValueError(
+            "Capability matrix plugin_capabilities entry must be a list "
+            f"for surface: {surface}"
+        )
+
+    return {
+        "matrix_version": matrix.get("matrix_version"),
+        "surface": surface,
+        "allowed_plugin_capabilities": [str(item) for item in allowed],
+    }

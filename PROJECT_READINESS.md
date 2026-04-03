@@ -33,6 +33,9 @@ The project is in a strong development-ready state with:
 - Structured degraded-mode recommendations are now emitted in report summaries
 - Measurable release signoff policy and automated signoff gate are now present for channel governance
 - Distribution manifest verification metadata vNext is now present for checksum/signature visibility
+- Plugin capability negotiation protocol and compatibility diagnostics are now present for extensibility governance
+- Signed plugin manifest runs now enforce surface capability negotiation policy before execution
+- Python and Rust plugin SDK skeleton tracks are now available for third-party adapter development
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -125,6 +128,9 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Measurable release signoff policy and records: `docs/RELEASE_SIGNOFF_POLICY.md`, `release-signoffs/README.md`
 - Automated release signoff validation and audit: `tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`
 - Distribution manifest verification metadata vNext: `tools/generate_distribution_manifest.py`, `tests/test_distribution_manifest.py`
+- Plugin capability negotiation engine + tests: `agent/plugin_negotiation.py`, `tests/test_plugin_negotiation.py`
+- Plugin negotiation CLI/runtime enforcement: `agent/cli.py` (`inspecta plugin-negotiate`, `--plugin-surface`), `tests/test_plugin_manifest.py`
+- Plugin SDK skeleton baselines: `sdk/python/*`, `sdk/rust/*`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`

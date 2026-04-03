@@ -48,6 +48,10 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
   - Measurable signoff policy document (`docs/RELEASE_SIGNOFF_POLICY.md`)
   - Release signoff validation and audit trail (`tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`)
   - Distribution manifest verification metadata vNext (`tools/generate_distribution_manifest.py`)
+- P5 plugin ecosystem baseline:
+  - Capability negotiation protocol and compatibility diagnostics (`agent/plugin_negotiation.py`, `inspecta plugin-negotiate`)
+  - Runtime capability matrix enforcement for signed plugin manifests (`agent/cli.py --plugin-manifest --plugin-keyring --plugin-surface`)
+  - Plugin SDK skeleton tracks (`sdk/python/*`, `sdk/rust/*`)
 - Strong workflow matrix in `.github/workflows/` including:
   - `ci-core.yml`, `ci-integration-matrix.yml`, `release.yml`, `build-release.yml`, `release-channel-gates.yml`, `channel-promotion.yml`, `sbom-security.yml`, `performance-regression.yml`, `polyglot-build.yml`
 - Desktop/mobile scaffolds:
@@ -69,7 +73,7 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
 4. Mobile advanced offline pairing modes (QR/file/LAN hardening completeness)
 5. Native mobile bridges (Kotlin/Swift) for secure storage/sensor specialization
 6. ISO reproducibility attestations + deeper SBOM embedding strategy
-7. Plugin SDK (Python/Rust) and capability negotiation protocol
+7. Plugin marketplace governance and lifecycle automation depth
 8. Strong release promotion governance (approval/signoff workflow depth)
 9. Formalized milestone evidence packs (M1/M2/M3 objective scorecards)
 10. Expanded device-class coverage for tablet/ARM/edge profiles
@@ -231,12 +235,28 @@ Non-negotiables:
 
 ## Phase P5 — Plugin ecosystem and enterprise extensibility (18–24 weeks)
 
+**Status:** Implemented (2026-04-04)
+
 **Goal:** deliver safe extensibility with compatibility and policy controls.
 
 ### Deliverables
 - Plugin SDK (Python first, Rust adapter track)
 - Capability negotiation protocol + compatibility matrix enforcement
 - Policy profile packs for enterprise/operator archetypes
+
+### Delivered evidence
+- Capability negotiation engine with deterministic diagnostics:
+  - `agent/plugin_negotiation.py`
+  - `tests/test_plugin_negotiation.py`
+- Runtime negotiation enforcement and operator CLI surface:
+  - `agent/cli.py` (`inspecta plugin-negotiate`, `--plugin-surface`)
+  - `tests/test_plugin_manifest.py`
+- SDK skeleton baselines for Python and Rust plugin tracks:
+  - `sdk/python/README.md`
+  - `sdk/python/inspecta_plugin_sdk/contracts.py`
+  - `sdk/python/examples/health_plugin.py`
+  - `sdk/rust/Cargo.toml`
+  - `sdk/rust/src/lib.rs`
 
 ### Exit criteria
 - Third-party plugin integration path documented and testable
@@ -267,8 +287,6 @@ Priority legend: `P0` highest → `P3` lower.
 - `P1` Add Tauri implementation spike with parity report against Electron shell
 - `P1` Formalize mobile pairing security model and offline transport constraints
 - `P1` Add distribution-manifest verification metadata (signature links/status)
-- `P2` Implement plugin SDK package skeleton and examples
-- `P2` Capability negotiation protocol spec + tests
 - `P2` Extend KPI dashboard with trend windows and release regression markers
 - `P3` Add Fire OS feasibility lane and compatibility matrix
 - `P3` Add tablet-specific UX acceptance criteria and device-class profiles
@@ -300,8 +318,8 @@ Required for each phase closeout:
 
 Active emphasis:
 
-1. P1 parity/reliability expansion
-2. P2 native acceleration proof
-3. P4 trust-channel governance hardening
+1. P2 native acceleration proof
+2. P3 desktop/mobile hardening
+3. P6 multi-device ecosystem expansion
 
 This keeps the project advanced, professional, and scalable while preserving truthful delivery reporting.

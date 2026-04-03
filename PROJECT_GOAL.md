@@ -40,6 +40,9 @@ Current implementation snapshot (2026-04-04)
 - Measurable release signoff policy and per-tag signoff record format are now published (`docs/RELEASE_SIGNOFF_POLICY.md`, `release-signoffs/README.md`).
 - Automated release signoff validation gate now enforces approval/check requirements and emits audit artifacts (`tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`).
 - Distribution manifest now includes verification metadata vNext for checksums/signatures (`tools/generate_distribution_manifest.py`).
+- Plugin capability negotiation protocol is now implemented with deterministic diagnostics (`agent/plugin_negotiation.py`, `inspecta plugin-negotiate`).
+- Signed plugin manifest runs now enforce capability policy negotiation at runtime (`agent/cli.py --plugin-manifest --plugin-keyring --plugin-surface`).
+- Plugin SDK skeleton baselines are now present for Python and Rust adapter tracks (`sdk/python/*`, `sdk/rust/*`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 

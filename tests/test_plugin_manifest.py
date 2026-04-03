@@ -89,6 +89,51 @@ def test_plugin_verify_command_success(tmp_path):
     assert "Plugin manifest verified" in result.output
 
 
+def test_plugin_negotiate_command_success(tmp_path):
+    manifest, _ = _build_signed_manifest()
+    manifest_path = tmp_path / "plugin-manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "plugin-negotiate",
+            str(manifest_path),
+            "--surface",
+            "cli",
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["status"] == "accepted"
+
+
+def test_plugin_negotiate_command_rejected_capability(tmp_path):
+    manifest, _ = _build_signed_manifest()
+    manifest["capabilities"] = ["smart.parse", "unsupported.feature"]
+    manifest_path = tmp_path / "plugin-manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "plugin-negotiate",
+            str(manifest_path),
+            "--surface",
+            "cli",
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 1
+    payload = json.loads(result.output)
+    assert payload["status"] == "rejected"
+
+
 def test_run_requires_keyring_when_plugin_manifest_set(tmp_path):
     manifest, _ = _build_signed_manifest()
     manifest_path = tmp_path / "plugin-manifest.json"
@@ -106,6 +151,61 @@ def test_run_requires_keyring_when_plugin_manifest_set(tmp_path):
             "--use-sample",
             "--plugin-manifest",
             str(manifest_path),
+            "--no-auto-open",
+        ],
+    )
+
+    assert result.exit_code == 20
+
+
+def test_run_rejects_plugin_with_unsupported_capability(tmp_path):
+    manifest, keyring = _build_signed_manifest()
+    manifest["capabilities"] = ["smart.parse", "unsupported.feature"]
+
+    # Re-sign manifest after capability mutation.
+    cryptography = pytest.importorskip("cryptography")
+    _ = cryptography
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    private_key = Ed25519PrivateKey.generate()
+    public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+
+    payload = {k: v for k, v in manifest.items() if k != "signing"}
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
+    signature = private_key.sign(canonical)
+
+    manifest["signing"] = {
+        "algorithm": "ed25519",
+        "signature": base64.b64encode(signature).decode("utf-8"),
+        "public_key_id": "sample-key-1",
+    }
+    keyring["sample-key-1"] = base64.b64encode(public_key).decode("utf-8")
+
+    manifest_path = tmp_path / "plugin-manifest.json"
+    keyring_path = tmp_path / "keyring.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    keyring_path.write_text(json.dumps(keyring, indent=2), encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--mode",
+            "quick",
+            "--output",
+            str(tmp_path / "out"),
+            "--use-sample",
+            "--plugin-manifest",
+            str(manifest_path),
+            "--plugin-keyring",
+            str(keyring_path),
             "--no-auto-open",
         ],
     )

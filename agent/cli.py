@@ -28,6 +28,7 @@ from .evidence import (
 )
 from .logging_utils import setup_logging
 from .plugin_manifest import PluginManifestError, verify_plugin_manifest
+from .plugin_negotiation import PluginNegotiationError, negotiate_plugin_capabilities
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
 from .policy_pack import PolicyPackError, load_policy_pack
 from .profiles import get_profile, is_valid_profile
@@ -240,6 +241,15 @@ def inventory_cmd(use_sample: bool) -> None:
     help=("Plugin keyring JSON file used to verify --plugin-manifest signatures."),
 )
 @click.option(
+    "--plugin-surface",
+    type=click.Choice(["cli", "desktop", "mobile"]),
+    default="cli",
+    help=(
+        "Capability-policy surface used for plugin negotiation. "
+        "Defaults to 'cli' for local runs."
+    ),
+)
+@click.option(
     "--redaction-preset",
     type=click.Choice(["none", "basic", "strict"]),
     default="none",
@@ -283,6 +293,7 @@ def run(
     policy_pack: Path | None,
     plugin_manifest: Path | None,
     plugin_keyring: Path | None,
+    plugin_surface: str,
     redaction_preset: str,
     retention_days: int | None,
     resume: bool,
@@ -377,6 +388,7 @@ def run(
             raise SystemExit(20)
 
     plugin_verification: dict[str, Any] | None = None
+    plugin_negotiation: dict[str, Any] | None = None
     if plugin_manifest is not None:
         if plugin_keyring is None:
             logger.error("--plugin-manifest requires --plugin-keyring")
@@ -391,8 +403,29 @@ def run(
                 plugin_verification.get("plugin_id"),
                 plugin_verification.get("version"),
             )
+
+            plugin_negotiation = negotiate_plugin_capabilities(
+                manifest={
+                    "capabilities": plugin_verification.get("capabilities", []),
+                    "compatibility": json.loads(
+                        plugin_manifest.read_text(encoding="utf-8")
+                    ).get("compatibility"),
+                },
+                surface=plugin_surface,
+                inspecta_version=__version__,
+            )
+
+            if plugin_negotiation["status"] != "accepted":
+                logger.error(
+                    "Plugin capability negotiation rejected: %s",
+                    "; ".join(plugin_negotiation.get("diagnostics", [])),
+                )
+                raise SystemExit(20)
         except PluginManifestError as exc:
             logger.error("Plugin manifest verification failed: %s", exc)
+            raise SystemExit(20)
+        except PluginNegotiationError as exc:
+            logger.error("Plugin capability negotiation failed: %s", exc)
             raise SystemExit(20)
 
     # Set up structured logging to file
@@ -1237,7 +1270,14 @@ def run(
         smart_status=smart_status,
         native=native_capabilities,
         policy_pack_payload=loaded_policy_pack,
-        plugin_manifest_verification=plugin_verification,
+        plugin_manifest_verification=(
+            {
+                **(plugin_verification or {}),
+                "negotiation": plugin_negotiation,
+            }
+            if plugin_verification is not None
+            else None
+        ),
     )
 
     apply_retention_policy(report, retention_days)
@@ -1730,6 +1770,73 @@ def plugin_verify_cmd(manifest_file: Path, keyring: Path, as_json: bool) -> None
         )
 
     raise SystemExit(0)
+
+
+@cli.command("plugin-negotiate")
+@click.argument("manifest_file", type=click.Path(path_type=Path, exists=True))
+@click.option(
+    "--surface",
+    type=click.Choice(["cli", "desktop", "mobile"]),
+    default="cli",
+    help="Capability-policy surface to negotiate against.",
+)
+@click.option(
+    "--inspecta-version",
+    default=__version__,
+    show_default=True,
+    help="Inspecta semantic version used for compatibility checks.",
+)
+@click.option(
+    "--json",
+    "as_json",
+    is_flag=True,
+    help="Output negotiation result as JSON.",
+)
+def plugin_negotiate_cmd(
+    manifest_file: Path,
+    surface: str,
+    inspecta_version: str,
+    as_json: bool,
+) -> None:
+    """Negotiate plugin compatibility and capability policy for a surface."""
+    try:
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise click.ClickException(f"Invalid plugin manifest JSON: {exc}")
+
+    try:
+        result = negotiate_plugin_capabilities(
+            manifest=manifest,
+            surface=surface,
+            inspecta_version=inspecta_version,
+        )
+    except PluginNegotiationError as exc:
+        if as_json:
+            click.echo(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "status": "rejected",
+                        "error": str(exc),
+                    },
+                    indent=2,
+                )
+            )
+            raise SystemExit(1)
+        raise click.ClickException(str(exc))
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2))
+    else:
+        click.echo(f"Surface: {result.get('surface')}")
+        click.echo(f"Matrix Version: {result.get('matrix_version')}")
+        click.echo(f"Status: {result.get('status')}")
+        if result.get("diagnostics"):
+            click.echo("Diagnostics:")
+            for item in result.get("diagnostics", []):
+                click.echo(f"  - {item}")
+
+    raise SystemExit(0 if result.get("status") == "accepted" else 1)
 
 
 @cli.command("policy-export")

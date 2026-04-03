@@ -66,6 +66,13 @@ All notable changes to this project will be documented in this file.
   - Release orchestration includes signoff gate (`.github/workflows/release.yml`)
   - Distribution manifest verification metadata vNext (`tools/generate_distribution_manifest.py`, `tests/test_distribution_manifest.py`)
   - Signoff validator tests (`tests/test_release_signoff.py`)
+- Added P5 plugin ecosystem baseline:
+  - Capability negotiation protocol with deterministic diagnostics (`agent/plugin_negotiation.py`)
+  - Runtime capability matrix enforcement for signed plugin runs (`agent/cli.py` with `--plugin-surface`)
+  - Operator-facing negotiation command (`inspecta plugin-negotiate`)
+  - Capability matrix plugin policy track (`schemas/capability-matrix-1.0.0.json`)
+  - Python/Rust plugin SDK skeleton tracks (`sdk/python/*`, `sdk/rust/*`)
+  - Negotiation and enforcement coverage (`tests/test_plugin_negotiation.py`, `tests/test_plugin_manifest.py`)
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

@@ -1,0 +1,8 @@
+[package]
+name = "inspecta_plugin_sdk"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "inspecta_plugin_sdk"
+path = "src/lib.rs"
