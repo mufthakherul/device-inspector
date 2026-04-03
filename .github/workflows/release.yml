@@ -28,6 +28,8 @@ jobs:
         run: |
           required=(
             ".github/workflows/release-channel-gates.yml"
+            ".github/workflows/validate-msix-lane.yml"
+            ".github/workflows/linux-repo-index.yml"
             ".github/workflows/build-cli-packages.yml"
             ".github/workflows/build-desktop-apps.yml"
             ".github/workflows/build-mobile-android.yml"
@@ -54,6 +56,8 @@ jobs:
             const ref = context.ref.replace("refs/heads/", "").replace("refs/tags/", "");
             const workflows = [
               "release-channel-gates.yml",
+              "validate-msix-lane.yml",
+              "linux-repo-index.yml",
               "build-cli-packages.yml",
               "build-desktop-apps.yml",
               "build-mobile-android.yml",
@@ -88,6 +92,8 @@ jobs:
 
             const workflows = [
               "release-channel-gates.yml",
+              "validate-msix-lane.yml",
+              "linux-repo-index.yml",
               "build-cli-packages.yml",
               "build-desktop-apps.yml",
               "build-mobile-android.yml",

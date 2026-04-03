@@ -1,0 +1,38 @@
+name: Linux Repo Index Strategy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  generate-repo-index-strategy:
+    name: Generate Debian/RPM index strategy artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run lightweight index generation
+        run: |
+          python scripts/generate_linux_repo_indexes.py --dist dist --output packaging/linux-repo/index
+
+      - name: Upload index strategy artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-repo-index-strategy
+          path: packaging/linux-repo/index/
+          retention-days: 30

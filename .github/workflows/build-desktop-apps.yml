@@ -46,6 +46,8 @@ jobs:
           path: |
             apps/desktop/dist/*.exe
             apps/desktop/dist/*.msi
+            apps/desktop/dist/*.appx
+            apps/desktop/dist/*.msix
             apps/desktop/dist/*.dmg
             apps/desktop/dist/*.pkg
             apps/desktop/dist/*.AppImage

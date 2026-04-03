@@ -11,7 +11,7 @@ from __future__ import annotations
 import datetime
 from typing import Any, Dict, List, Optional
 
-from . import scoring
+from . import anomaly, scoring
 from .schema_compat import REPORT_SCHEMA_VERSION
 
 
@@ -102,6 +102,9 @@ def compose_report(
             "grade": "unknown",
             "recommendation": "",
             "failure_classification": [],
+            "confidence_score": 0,
+            "anomalies": [],
+            "explainability": {},
         },
         "scores": {},
         "tests": tests,
@@ -190,5 +193,13 @@ def compose_report(
         overall, grade, profile, report["scores"]
     )
     report["summary"]["failure_classification"] = failure_classification
+
+    anomaly_result = anomaly.analyze_offline_anomalies(
+        tests=tests,
+        scores=report["scores"],
+    )
+    report["summary"]["confidence_score"] = anomaly_result["confidence_score"]
+    report["summary"]["anomalies"] = anomaly_result["anomalies"]
+    report["summary"]["explainability"] = anomaly_result["explainability"]
 
     return report

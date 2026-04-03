@@ -118,3 +118,24 @@ def test_compose_report_adds_hardware_risk_for_critical_thermal():
 
     assert "hardware_risk" in report["summary"]["failure_classification"]
     assert report["scores"]["cpu_thermal"] < 85
+
+
+def test_compose_report_includes_anomaly_summary_fields():
+    report = compose_report(
+        agent_version="0.1.0",
+        device={"vendor": "Test", "model": "Laptop"},
+        artifacts=[],
+        tests=[
+            {
+                "name": "disk_performance",
+                "status": "ok",
+                "data": {"read_mbps": 90, "write_mbps": 70},
+            }
+        ],
+        mode="quick",
+        profile="default",
+    )
+
+    assert isinstance(report["summary"].get("confidence_score"), int)
+    assert isinstance(report["summary"].get("anomalies"), list)
+    assert isinstance(report["summary"].get("explainability"), dict)

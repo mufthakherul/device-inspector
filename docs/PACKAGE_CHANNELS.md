@@ -25,6 +25,20 @@ The release workflow now attempts to produce:
 
 on Linux runners when required build tools are available.
 
+## Linux repository publication strategy (deb/rpm index)
+
+To support repository publishing readiness, the project now includes:
+
+- Workflow: `.github/workflows/linux-repo-index.yml`
+- Script: `scripts/generate_linux_repo_indexes.py`
+- Output path: `packaging/linux-repo/index/`
+
+Generated strategy artifacts include:
+
+- `Packages` and `Packages.gz` for Debian-style publishing metadata
+- `repodata/INDEX.txt` as a lightweight RPM publication index placeholder
+- `SUMMARY.txt` describing generated outputs or skip reason when no artifacts exist
+
 ## Verifying artifact checksums
 
 After downloading release artifacts, verify integrity with `SHA256SUMS`.

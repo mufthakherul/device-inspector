@@ -15,6 +15,19 @@ All notable changes to this project will be documented in this file.
   - `schemas/policy-pack-schema-1.0.0.json`
   - `schemas/plugin-manifest-schema-1.0.0.json`
 - Published quarterly architecture review notes: `docs/ARCHITECTURE_REVIEW_2026_Q2.md`
+- Added Windows MSIX validation lane and AppX packaging target checks:
+  - `.github/workflows/validate-msix-lane.yml`
+  - `apps/desktop/package.json` (`appx` target)
+- Added Linux repository index strategy automation:
+  - `.github/workflows/linux-repo-index.yml`
+  - `scripts/generate_linux_repo_indexes.py`
+  - docs update in `docs/PACKAGE_CHANNELS.md`
+- Added offline anomaly detector with confidence/explainability summary wiring:
+  - `agent/anomaly.py`
+  - report integration in `agent/report.py`
+- Added Rust SMART parser contract-boundary coverage:
+  - `agent/plugins/smart.py` (`to_rust_contract_payload`)
+  - `tests/test_smart_rust_contract.py`
 
 ---
 

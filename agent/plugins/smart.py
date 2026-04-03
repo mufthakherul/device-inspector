@@ -424,6 +424,27 @@ def parse_smart_json(data: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
+def to_rust_contract_payload(parsed: Dict[str, Any]) -> Dict[str, Any]:
+    """Map parsed SMART payload to a stable Rust integration contract.
+
+    The contract is versioned and intentionally small so Rust/Python boundary
+    checks can be validated without requiring compiled Rust components.
+    """
+    return {
+        "schema_version": "1.0.0",
+        "device": {
+            "name": parsed.get("name"),
+            "model": parsed.get("model"),
+            "serial": parsed.get("serial"),
+        },
+        "metrics": {
+            "nvme_percentage_used": parsed.get("nvme_percentage_used"),
+            "nvme_critical_warning": parsed.get("nvme_critical_warning"),
+            "attributes": parsed.get("attributes", {}),
+        },
+    }
+
+
 def scan_all_devices(use_sample: bool = False) -> List[Dict[str, Any]]:
     """Scan all storage devices and return SMART data for each.
 

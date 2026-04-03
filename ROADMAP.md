@@ -316,11 +316,11 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 4. ✅ Add `sbom-security.yml` workflow.
 5. ✅ Add performance regression benchmark workflow.
 6. ✅ Implement route-based docs-site IA (`/download`, `/docs/*`, etc.).
-7. Add `.msix` packaging lane validation.
-8. Add Linux repo publication workflow strategy (`deb/rpm index`).
+7. ✅ Add `.msix` packaging lane validation (`validate-msix-lane.yml`, desktop `appx` target validation).
+8. ✅ Add Linux repo publication workflow strategy (`linux-repo-index.yml`, `scripts/generate_linux_repo_indexes.py`).
 9. ✅ Add policy pack schema for enterprise modes (`schemas/policy-pack-schema-1.0.0.json`).
-10. Add local anomaly detector module (offline inference).
-11. Add Rust SMART parser integration contract tests.
+10. ✅ Add local anomaly detector module (offline inference) (`agent/anomaly.py`, summary confidence/explainability wiring).
+11. ✅ Add Rust SMART parser integration contract tests (`tests/test_smart_rust_contract.py`, `to_rust_contract_payload`).
 12. ✅ Add plugin signing manifest schema (`schemas/plugin-manifest-schema-1.0.0.json`).
 13. ✅ Add release channel promotion gates (`release-channel-gates.yml`, prerelease tag semantics).
 14. ✅ Add reproducibility audit command for bundles (`inspecta audit` in `agent/cli.py`).
@@ -375,7 +375,7 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 | 7 Packaging | Target channels produce usable artifacts | In progress | release artifacts | Release Eng | Sprint 8 |
 | 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test + deterministic evidence tests in `tests/test_evidence.py` | Core Eng | Sprint 2 |
 | 9 Docs IA | Route-based portal complete | In progress | docs-site route pages (`/download`, `/docs/*`, `/project`, `/community`, `/status`) | DX | Sprint 12 |
-| 10 KPIs | Dashboard and metrics pipeline active | Planned | status dashboards | PM+Data | Sprint 3 |
+| 10 KPIs | Dashboard and metrics pipeline active | In progress | offline anomaly/confidence signals in report summary + status dashboards backlog | PM+Data | Sprint 3 |
 | 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates | Sec/QA | Rolling |
 | 12 Governance | Channelized release policy enforced | In progress | `release-channel-gates.yml` + release prerelease semantics in build workflow | Release Eng | Sprint 8 |
 | 13 Structure | Target repo layout adopted | In progress | repo tree | Maintainer | Sprint 4 |

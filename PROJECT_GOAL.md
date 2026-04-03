@@ -13,6 +13,10 @@ Current implementation snapshot (2026-04-04)
 - Route-based docs-site IA is now scaffolded for `/download`, `/docs/*`, `/project`, `/community`, and `/status`.
 - Release channel gates are defined for stable/alpha/beta tag semantics.
 - Policy-pack and plugin-manifest schema foundations are added under `schemas/` for enterprise/plugin rollout tracks.
+- Windows desktop packaging now includes AppX/MSIX-capable validation lane and artifact capture.
+- Linux repository publication strategy scaffolding is implemented with index-generation automation for `.deb/.rpm` channels.
+- Offline anomaly detection is integrated into report summary with confidence scoring and explainability metadata.
+- Rust SMART integration contract boundary is defined and tested via stable payload shape checks.
 
 Table of contents
 - Mission & vision
