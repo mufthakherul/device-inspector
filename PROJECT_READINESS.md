@@ -25,6 +25,7 @@ The project is in a strong development-ready state with:
 - Mobile verification queue with integrity badges is now present in the companion app
 - Offline analytics runtime profile now supports ONNX CPU detection with rules-only fallback
 - Channel promotion planning automation is now present for nightly/alpha/beta/stable progression
+- Release artifact signing automation is now present for supported environments with configured GPG secrets
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -106,6 +107,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`
 - Strict Rust SMART boundary contract validation: `agent/native_contract.py`, `agent/plugins/smart.py`
 - Distribution manifest automation: `tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`
+- Release artifact detached-signature automation: `tools/release_signing.py`, `.github/workflows/build-release.yml`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`

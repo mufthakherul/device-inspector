@@ -43,6 +43,10 @@ All notable changes to this project will be documented in this file.
   - `tools/channel_promotion.py`
   - `.github/workflows/channel-promotion.yml`
   - `tests/test_channel_promotion.py`
+- Added optional release artifact detached-signature automation for tag builds:
+  - `tools/release_signing.py`
+  - `.github/workflows/build-release.yml` (GPG secret-gated signing path)
+  - `tests/test_release_signing.py`
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

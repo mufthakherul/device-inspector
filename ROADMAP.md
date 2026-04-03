@@ -136,6 +136,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add package notarization/signing automation where supported.
 - Publish machine-readable distribution manifest per release.
 - ✅ Channel promotion planning workflow added for nightly/alpha/beta/stable progression (`.github/workflows/channel-promotion.yml`, `tools/channel_promotion.py`).
+- ✅ Package signing automation (where supported) now signs release artifacts with detached signatures when release GPG secrets are configured (`.github/workflows/build-release.yml`, `tools/release_signing.py`).
 - ✅ Machine-readable distribution manifest generation added and wired into release metadata workflows (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
 
 ### Sprint 9 — Smart analytics (offline)
