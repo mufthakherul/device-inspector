@@ -20,6 +20,7 @@ Current implementation snapshot (2026-04-04)
 - Rust SMART integration contract now enforces strict schema validation at the Python/Rust boundary (`agent/native_contract.py`).
 - KPI snapshot generation pipeline is implemented for docs-site status metrics (`tools/generate_kpi_snapshot.py`, `kpi-dashboard.yml`).
 - KPI snapshot generation now accepts report-derived probe reliability, parity, and confidence metrics for the status site.
+- Offline analytics runtime profile now supports ONNX CPU detection with deterministic rules-only fallback (`agent/analytics_profile.py`).
 - Enterprise policy-pack runtime evaluation is now integrated into report generation (`agent/policy_pack.py`, `--policy-pack`).
 - Signed plugin-manifest verification is implemented for CLI and pre-run enforcement (`agent/plugin_manifest.py`, `inspecta plugin-verify`, `--plugin-manifest`, `--plugin-keyring`).
 - Evidence redaction presets and retention policy metadata controls are implemented for report output (`agent/redaction.py`, `--redaction-preset`, `--retention-days`).
@@ -28,6 +29,8 @@ Current implementation snapshot (2026-04-04)
 - Probe reliability and parity metrics are emitted in report summaries for degraded probe-set scoring (`agent/reliability.py`).
 - Bootable ISO staging now emits layered profile manifests and export bundle metadata (`tools/bootable_iso.py`).
 - Release metadata automation now emits machine-readable distribution manifests for channel/audit tooling (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
+- Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
+- Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 
 Table of contents
 - Mission & vision

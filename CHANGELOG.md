@@ -36,6 +36,9 @@ All notable changes to this project will be documented in this file.
 - Added bootable ISO layered profiles plus export-bundle metadata generation.
 - Added strict Rust SMART contract boundary validation for Python payload generation (`agent/native_contract.py`).
 - Added machine-readable distribution manifest generation and release workflow sync (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
+- Added offline analytics runtime profile with ONNX CPU detection and rules-only fallback (`agent/analytics_profile.py`, `agent/report.py`).
+- Added desktop dual-shell adapter contract scaffold for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
+- Added mobile verification queue with integrity badge history in companion app (`apps/mobile/lib/main.dart`).
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

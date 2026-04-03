@@ -21,6 +21,9 @@ The project is in a strong development-ready state with:
 - KPI snapshot pipeline can now surface probe reliability/parity/confidence metrics on the status page
 - Strict Rust SMART boundary contract validation is now enforced in Python payload generation
 - Machine-readable distribution manifest generation is now wired into release metadata sync
+- Desktop dual-shell adapter contract scaffold is now present for Electron/Tauri parity
+- Mobile verification queue with integrity badges is now present in the companion app
+- Offline analytics runtime profile now supports ONNX CPU detection with rules-only fallback
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -101,6 +104,9 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`
 - Strict Rust SMART boundary contract validation: `agent/native_contract.py`, `agent/plugins/smart.py`
 - Distribution manifest automation: `tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`
+- Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
+- Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
+- Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`
 - Quarterly architecture review published: `docs/ARCHITECTURE_REVIEW_2026_Q2.md`
 
 ---

@@ -12,6 +12,7 @@ import datetime
 from typing import Any, Dict, List, Optional
 
 from . import anomaly, policy_pack, reliability, scoring
+from .analytics_profile import get_offline_analytics_profile
 from .schema_compat import REPORT_SCHEMA_VERSION
 
 
@@ -251,8 +252,11 @@ def compose_report(
         tests=tests,
         scores=report["scores"],
     )
+    analytics_runtime = get_offline_analytics_profile(prefer_onnx=True)
     report["summary"]["confidence_score"] = anomaly_result["confidence_score"]
     report["summary"]["anomalies"] = anomaly_result["anomalies"]
     report["summary"]["explainability"] = anomaly_result["explainability"]
+    report["summary"]["analytics_runtime_profile"] = analytics_runtime
+    report["summary"]["explainability"]["analytics_runtime_profile"] = analytics_runtime
 
     return report

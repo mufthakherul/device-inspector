@@ -115,12 +115,14 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add **Tauri/Rust+TS** experimental desktop track for lightweight distribution.
 - Unified local engine adapter for both shells.
 - Define migration gate for optional Electron -> Tauri default switch after parity + stability targets.
+- ✅ Unified local engine adapter contract scaffold added for Electron/Tauri tracks (`apps/desktop/engine/adapter-contract.json`).
 
 ### Sprint 6 — Mobile offline specialist features
 - Flutter report viewer + advanced validation UX.
 - Offline pairing hardening (QR + file + LAN direct mode).
 - Background verification job queue with integrity badges.
 - Add optional native bridge modules (Kotlin/Swift) for platform-specific sensors or secure key storage.
+- ✅ Mobile verification queue with integrity badge history added in Flutter companion (`apps/mobile/lib/main.dart`).
 
 ### Sprint 7 — ISO deep diagnostics 2.0
 - Add layered ISO profiles (quick tech bench / forensic / secure-lab).
@@ -142,6 +144,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add ONNX-based local model runtime profile with CPU-only fallback for fully offline operation.
 - ✅ Offline anomaly/confidence/explainability summary is present in report composition.
 - ✅ KPI snapshot generation now accepts report-derived probe reliability, parity, and confidence metrics for the docs-site status page.
+- ✅ Offline analytics runtime profile now supports ONNX CPU detection with deterministic rules-only fallback (`agent/analytics_profile.py`, report summary wiring).
 
 ### Sprint 10 — Enterprise policy packs
 - Add policy profiles (refurbish shop, enterprise IT, field service, resale audit).

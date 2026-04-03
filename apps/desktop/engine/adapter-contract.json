@@ -1,0 +1,35 @@
+{
+  "contract_version": "1.0.0",
+  "purpose": "Unified local engine adapter contract shared by Electron and Tauri tracks",
+  "cli_entrypoint": "python -m agent.cli",
+  "commands": {
+    "runInspection": {
+      "args": [
+        "run",
+        "--mode",
+        "<quick|full>",
+        "--output",
+        "<path>",
+        "--no-auto-open"
+      ],
+      "result": [
+        "exit_code",
+        "stdout",
+        "stderr",
+        "report_path"
+      ]
+    },
+    "verifyBundle": {
+      "args": [
+        "verify",
+        "<bundle_dir>",
+        "--json"
+      ],
+      "result": [
+        "exit_code",
+        "json_payload"
+      ]
+    }
+  },
+  "offline_guarantee": true
+}

@@ -38,6 +38,7 @@ class _MobileHomePageState extends State<MobileHomePage> {
   Map<String, dynamic>? _capabilityInfo;
   String? _status;
   String _pairingToken = 'inspecta:pairing:offline';
+  final List<Map<String, dynamic>> _verificationJobs = [];
 
   @override
   void initState() {
@@ -137,6 +138,15 @@ class _MobileHomePageState extends State<MobileHomePage> {
         'exit_code': mismatches.isEmpty ? 0 : 1,
         'exit_reason': mismatches.isEmpty ? 'verified' : 'integrity_mismatch',
       };
+      _verificationJobs.insert(0, {
+        'createdAt': DateTime.now().toIso8601String(),
+        'manifest': manifestFile.path,
+        'status': mismatches.isEmpty ? 'verified' : 'integrity_mismatch',
+        'badge': mismatches.isEmpty ? 'INTEGRITY_OK' : 'INTEGRITY_FAIL',
+      });
+      if (_verificationJobs.length > 10) {
+        _verificationJobs.removeRange(10, _verificationJobs.length);
+      }
       _status = 'Manifest verification complete.';
     });
   }
@@ -194,6 +204,52 @@ class _MobileHomePageState extends State<MobileHomePage> {
                   Text('Serial: ${device?['serial'] ?? 'N/A'}'),
                   Text('Score: ${summary?['overall_score'] ?? 'N/A'}'),
                   Text('Grade: ${summary?['grade'] ?? 'N/A'}'),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Verification queue', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  if (_verificationJobs.isEmpty)
+                    const Text('No verification jobs queued yet.')
+                  else
+                    ..._verificationJobs.map(
+                      (job) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: job['status'] == 'verified' ? Colors.green.shade100 : Colors.red.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                job['badge'] as String,
+                                style: TextStyle(
+                                  color: job['status'] == 'verified' ? Colors.green.shade900 : Colors.red.shade900,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                '${job['manifest']}\n${job['createdAt']}',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

@@ -9,6 +9,13 @@ Cross-platform Electron desktop shell for local diagnostics and evidence workflo
 - Report viewer (summary from `report.json`)
 - Verification UI (`inspecta verify --json` integration)
 - Local-only mode toggle (network deny policy enabled by default)
+- Shared local engine adapter contract for dual-shell tracks (`engine/adapter-contract.json`)
+
+## Experimental Tauri track (Sprint 5)
+
+The repository now includes a dual-shell migration contract for Electron and
+Tauri to consume the same local engine semantics. This keeps optional
+Electron -> Tauri migration gated by parity and stability evidence.
 
 ## Local development
 
