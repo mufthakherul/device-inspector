@@ -1,12 +1,12 @@
 {
-  "manifest_version": "1.0.0",
-  "source": "distribution-manifest/bootstrap",
-  "generated_at": "2026-04-04T00:00:00+00:00",
-  "release": {
-    "tag_name": null,
-    "published_at": null,
-    "html_url": null
-  },
-  "artifact_groups": [],
-  "channels": []
+    "manifest_version": "1.0.0",
+    "source": "distribution-manifest/bootstrap",
+    "generated_at": "2026-04-04T00:00:00+00:00",
+    "release": {
+        "tag_name": null,
+        "published_at": null,
+        "html_url": null
+    },
+    "artifact_groups": [],
+    "channels": []
 }
