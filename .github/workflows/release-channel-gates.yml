@@ -1,68 +1,68 @@
 name: Release Channel Gates
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Tag to validate (optional for manual runs)"
-        required: false
-        default: ""
-  push:
-    tags:
-      - "v*"
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: "Tag to validate (optional for manual runs)"
+                required: false
+                default: ""
+    push:
+        tags:
+            - "v*"
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  validate-release-channel:
-    name: Validate release channel semantics
-    runs-on: ubuntu-latest
+    validate-release-channel:
+        name: Validate release channel semantics
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Resolve tag
-        id: tag
-        shell: bash
-        run: |
-          if [ -n "${{ github.event.inputs.tag }}" ]; then
-            tag="${{ github.event.inputs.tag }}"
-          else
-            tag="${GITHUB_REF_NAME}"
-          fi
+        steps:
+            - name: Resolve tag
+              id: tag
+              shell: bash
+              run: |
+                  if [ -n "${{ github.event.inputs.tag }}" ]; then
+                    tag="${{ github.event.inputs.tag }}"
+                  else
+                    tag="${GITHUB_REF_NAME}"
+                  fi
 
-          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
-          echo "Validating tag: ${tag}"
+                  echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+                  echo "Validating tag: ${tag}"
 
-      - name: Validate channel format
-        id: validate
-        shell: bash
-        run: |
-          tag="${{ steps.tag.outputs.tag }}"
+            - name: Validate channel format
+              id: validate
+              shell: bash
+              run: |
+                  tag="${{ steps.tag.outputs.tag }}"
 
-          stable='^v[0-9]+\.[0-9]+\.[0-9]+$'
-          alpha='^v[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$'
-          beta='^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$'
+                  stable='^v[0-9]+\.[0-9]+\.[0-9]+$'
+                  alpha='^v[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$'
+                  beta='^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$'
 
-          if [[ "$tag" =~ $stable ]]; then
-            channel="stable"
-            prerelease="false"
-          elif [[ "$tag" =~ $alpha ]]; then
-            channel="alpha"
-            prerelease="true"
-          elif [[ "$tag" =~ $beta ]]; then
-            channel="beta"
-            prerelease="true"
-          else
-            echo "Invalid tag format: $tag"
-            echo "Allowed patterns: vX.Y.Z, vX.Y.Z-alpha.N, vX.Y.Z-beta.N"
-            exit 1
-          fi
+                  if [[ "$tag" =~ $stable ]]; then
+                    channel="stable"
+                    prerelease="false"
+                  elif [[ "$tag" =~ $alpha ]]; then
+                    channel="alpha"
+                    prerelease="true"
+                  elif [[ "$tag" =~ $beta ]]; then
+                    channel="beta"
+                    prerelease="true"
+                  else
+                    echo "Invalid tag format: $tag"
+                    echo "Allowed patterns: vX.Y.Z, vX.Y.Z-alpha.N, vX.Y.Z-beta.N"
+                    exit 1
+                  fi
 
-          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
-          echo "prerelease=${prerelease}" >> "$GITHUB_OUTPUT"
+                  echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+                  echo "prerelease=${prerelease}" >> "$GITHUB_OUTPUT"
 
-      - name: Release channel summary
-        run: |
-          echo "Tag:        ${{ steps.tag.outputs.tag }}"
-          echo "Channel:    ${{ steps.validate.outputs.channel }}"
-          echo "Prerelease: ${{ steps.validate.outputs.prerelease }}"
+            - name: Release channel summary
+              run: |
+                  echo "Tag:        ${{ steps.tag.outputs.tag }}"
+                  echo "Channel:    ${{ steps.validate.outputs.channel }}"
+                  echo "Prerelease: ${{ steps.validate.outputs.prerelease }}"

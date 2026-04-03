@@ -26,7 +26,7 @@ This report intentionally reflects current repository reality rather than legacy
 ### 1) Quality and tests
 
 - ✅ **Tests:** `207 passed`
-- ✅ **Coverage gate:** `75.12%` (required `35%`)
+- ✅ **Coverage gate:** `72.84%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -117,7 +117,7 @@ Mobile/embedded OS families (Android/iOS/HarmonyOS/Amazon Fire OS, etc.) are han
 ## Recommended next priorities
 
 1. Continue roadmap item execution for diagnostics depth and parity contracts.
-2. Expand docs-site route IA and release governance docs.
+2. Enrich docs-site route IA content depth and automate route metadata refresh.
 3. Add/track KPI dashboard artifacts for reliability/performance trends.
 4. Keep readiness docs synchronized with CI and real-device validation outputs each sprint.
 

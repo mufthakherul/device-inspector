@@ -324,7 +324,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 12. ✅ Add plugin signing manifest schema (`schemas/plugin-manifest-schema-1.0.0.json`).
 13. ✅ Add release channel promotion gates (`release-channel-gates.yml`, prerelease tag semantics).
 14. ✅ Add reproducibility audit command for bundles (`inspecta audit` in `agent/cli.py`).
-15. Refresh README/CHANGELOG/PROJECT_READINESS consistency.
+15. ✅ Refresh README/CHANGELOG/PROJECT_READINESS consistency.
 16. ✅ Publish quarterly architecture review notes (`docs/ARCHITECTURE_REVIEW_2026_Q2.md`).
 
 ---
