@@ -179,13 +179,20 @@ class SetupManager:
                 else:
                     self.log(f"Skipping {req_file} (not found)", "WARN")
 
-            # Install project in editable mode
+            # Install project in editable mode (best-effort)
             self.log("Installing project in editable mode...", "INFO")
-            subprocess.run(
-                [venv_pip, "install", "-e", str(self.project_root)],
-                check=True,
-                capture_output=not self.verbose,
-            )
+            try:
+                subprocess.run(
+                    [venv_pip, "install", "-e", str(self.project_root)],
+                    check=True,
+                    capture_output=not self.verbose,
+                )
+            except subprocess.CalledProcessError:
+                self.log(
+                    "Editable install failed; continuing with module execution from "
+                    "repository root",
+                    "WARN",
+                )
 
             self.log("Dependencies installed ✓", "SUCCESS")
             return True
@@ -306,7 +313,10 @@ class SetupManager:
     def _install_tools_windows(self):
         """Windows tool installation (requires admin)."""
         self.log("Windows detected - optional tools:", "INFO")
-        self.log("SmartMonTools: winget install -e --id Argonaut.SmartMonTools", "INFO")
+        self.log(
+            "SmartMonTools: winget install -e --id smartmontools.smartmontools",
+            "INFO",
+        )
         url = "https://www.smartmontools.org/wiki/Download"
         self.log(f"Or download from: {url}", "INFO")
 
@@ -377,15 +387,19 @@ Next Steps:
 4. Check device inventory:
    {venv_python} -m agent.cli inventory --use-sample
 
-5. View documentation:
+5. Auto precheck launcher:
+    {venv_python} scripts/launch_inspecta.py --setup-only
+    {venv_python} scripts/launch_inspecta.py --require-hardware --install-tools
+
+6. View documentation:
    - Developer Guide: docs/DEV_SETUP.md
    - Architecture: docs/ARCHITECTURE.md
    - Contributing: CONTRIBUTING.md
 
-6. Running tests:
+7. Running tests:
    {venv_python} -m pytest -v
 
-7. Code formatting:
+8. Code formatting:
    {venv_python} -m black .
    {venv_python} -m ruff check --fix .
 

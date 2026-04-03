@@ -17,6 +17,12 @@ The project includes automated setup scripts for all platforms that handle:
 - ✅ Test suite execution
 - ✅ CLI smoke testing
 
+It also includes a launcher that can:
+- ✅ Detect host OS and coarse device type (desktop/laptop/tablet)
+- ✅ Run prechecks before inspection
+- ✅ Auto-run setup if requirements are missing
+- ✅ Launch inspecta after environment validation
+
 ---
 
 ## Quick Start by Platform
@@ -98,6 +104,42 @@ python -m agent.cli inventory --use-sample
 ---
 
 ## Detailed Setup Instructions
+
+## Launcher-First Workflow (Recommended)
+
+Use the precheck launcher to automatically validate environment readiness and run setup if needed.
+
+### Windows
+
+```powershell
+# Setup/precheck only
+.\launch_inspecta.ps1 --setup-only
+
+# Real hardware run (auto-installs tools when setup is needed)
+.\launch_inspecta.ps1 --require-hardware --install-tools
+```
+
+### Linux / macOS
+
+```bash
+# Setup/precheck only
+./launch_inspecta.sh --setup-only
+
+# Real hardware run (auto-installs tools when setup is needed)
+./launch_inspecta.sh --require-hardware --install-tools
+```
+
+### Direct Python (all supported hosts)
+
+```bash
+python scripts/launch_inspecta.py --setup-only
+python scripts/launch_inspecta.py --require-hardware --install-tools
+```
+
+### Platform scope note
+
+- Host auto-setup + launcher runtime are currently supported for: **Windows, Linux, macOS**.
+- Mobile/embedded platforms (Android, iOS, HarmonyOS, Amazon Fire OS, etc.) are handled through dedicated app/build pipelines and are not host-runtime setup targets for `agent.cli`.
 
 ### Prerequisites
 

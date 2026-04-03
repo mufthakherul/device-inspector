@@ -105,3 +105,27 @@ def test_run_full_mode_resumes_from_checkpoint_without_inventory_call(
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["device"]["vendor"] == "CheckpointVendor"
     assert not (artifacts_dir / "full_mode_checkpoint.json").exists()
+
+
+def test_run_require_hardware_rejects_sample_mode(tmp_path):
+    out_dir = tmp_path / "out"
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "run",
+            "--mode",
+            "quick",
+            "--output",
+            str(out_dir),
+            "--use-sample",
+            "--require-hardware",
+            "--no-auto-open",
+            "--format",
+            "txt",
+        ],
+    )
+
+    assert result.exit_code == 20
+    assert "cannot be combined" in result.output

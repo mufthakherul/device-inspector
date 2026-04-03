@@ -133,6 +133,14 @@ def inventory_cmd(use_sample: bool) -> None:
     help="Use sample data for testing (no root/hardware access required)",
 )
 @click.option(
+    "--require-hardware",
+    is_flag=True,
+    help=(
+        "Enforce real-device execution. Fails fast if sample mode is requested. "
+        "Useful for production/field runs."
+    ),
+)
+@click.option(
     "--verbose",
     "-v",
     is_flag=True,
@@ -218,6 +226,7 @@ def run(
     profile: str,
     no_prompt: bool,
     use_sample: bool,
+    require_hardware: bool,
     verbose: bool,
     auto_open: bool,
     no_auto_open: bool,
@@ -248,6 +257,7 @@ def run(
     Examples:
       sudo inspecta run --mode quick --output ./output
       inspecta run --mode quick --output ./test --use-sample
+            inspecta run --mode quick --output ./prod --require-hardware
       sudo inspecta run --mode quick --output ./out --profile gamer --verbose
       inspecta run --mode quick --output ./out --use-sample --format pdf
       inspecta run --mode quick --output ./out --use-sample --no-auto-open
@@ -287,6 +297,13 @@ def run(
     that builds on quick mode with thermal stress enabled by default.
     """
     run_started_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+    if require_hardware and use_sample:
+        logger.error(
+            "--require-hardware cannot be combined with --use-sample. "
+            "Run without --use-sample for real-device diagnostics."
+        )
+        raise SystemExit(20)
 
     out_dir = Path(output)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -1567,9 +1584,8 @@ def audit_cmd(
     else:
         click.echo(f"Bundle:                 {bundle_dir}")
         click.echo(f"Manifest:               {manifest}")
-        click.echo(
-            f"Integrity:              {'✓ OK' if result.get('integrity_ok') else '✗ FAILED'}"
-        )
+        integrity_status = "✓ OK" if result.get("integrity_ok") else "✗ FAILED"
+        click.echo(f"Integrity:              {integrity_status}")
         click.echo(
             "Deterministic entries:   "
             f"{'✓ OK' if result.get('deterministic_entries') else '✗ FAILED'}"
