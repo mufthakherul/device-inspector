@@ -43,6 +43,9 @@ Current implementation snapshot (2026-04-04)
 - Plugin capability negotiation protocol is now implemented with deterministic diagnostics (`agent/plugin_negotiation.py`, `inspecta plugin-negotiate`).
 - Signed plugin manifest runs now enforce capability policy negotiation at runtime (`agent/cli.py --plugin-manifest --plugin-keyring --plugin-surface`).
 - Plugin SDK skeleton baselines are now present for Python and Rust adapter tracks (`sdk/python/*`, `sdk/rust/*`).
+- Native-first SMART contract hot-path runner is now implemented with deterministic Python fallback (`agent/native_probe_runner.py`, `agent/native_bridge.py`).
+- CLI runs now emit native hot-path telemetry/artifact metadata for acceleration observability (`agent/cli.py`, `artifacts/native_probe_runner.json`).
+- Native acceleration benchmark harness is now available for baseline vs runner throughput snapshots (`tools/benchmark_native_probe_runner.py`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 

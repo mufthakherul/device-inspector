@@ -36,6 +36,8 @@ The project is in a strong development-ready state with:
 - Plugin capability negotiation protocol and compatibility diagnostics are now present for extensibility governance
 - Signed plugin manifest runs now enforce surface capability negotiation policy before execution
 - Python and Rust plugin SDK skeleton tracks are now available for third-party adapter development
+- Native-first SMART contract hot-path runner is now present with deterministic fallback semantics
+- Native acceleration benchmark harness is now present for reproducible throughput snapshots
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -45,8 +47,8 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `255 passed`
-- ✅ **Coverage gate:** `73.79%` (required `35%`)
+- ✅ **Tests:** `269 passed`
+- ✅ **Coverage gate:** `73.99%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -131,6 +133,9 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Plugin capability negotiation engine + tests: `agent/plugin_negotiation.py`, `tests/test_plugin_negotiation.py`
 - Plugin negotiation CLI/runtime enforcement: `agent/cli.py` (`inspecta plugin-negotiate`, `--plugin-surface`), `tests/test_plugin_manifest.py`
 - Plugin SDK skeleton baselines: `sdk/python/*`, `sdk/rust/*`
+- Native SMART hot-path runner + bridge contract: `agent/native_probe_runner.py`, `agent/native_bridge.py`
+- Native acceleration benchmark harness: `tools/benchmark_native_probe_runner.py`
+- Native runner coverage and pipeline assertion: `tests/test_native_probe_runner.py`, `tests/test_benchmark_native_probe_runner.py`, `tests/test_cli_run_modes.py`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`

@@ -44,6 +44,11 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
   - Reliability calibration profile support in `compute_probe_reliability`
   - Structured degraded-mode recommendations in `agent/report.py`
   - Expanded contract/reliability tests in `tests/test_reliability.py`, `tests/test_report_composition.py`
+- P2 native acceleration baseline:
+  - Native-first SMART contract hot-path runner with deterministic Python fallback (`agent/native_probe_runner.py`)
+  - Native batch bridge command contract (`agent/native_bridge.py`)
+  - Benchmark harness for baseline vs runner throughput artifact generation (`tools/benchmark_native_probe_runner.py`)
+  - CLI run artifact and telemetry integration (`artifacts/native_probe_runner.json`, `agent/cli.py`)
 - P4 trust-channel governance baseline:
   - Measurable signoff policy document (`docs/RELEASE_SIGNOFF_POLICY.md`)
   - Release signoff validation and audit trail (`tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`)
@@ -67,7 +72,7 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
 
 ## Planned / not fully implemented yet (key gaps)
 
-1. Full Rust acceleration runner for hot paths with benchmarked 30–50% gains
+1. Extend native acceleration beyond SMART contract hot path and validate 30–50% gains on real native-enabled environments
 2. OS-family parity contract tests across all supported host families
 3. Tauri production-ready lane (currently scaffold/contract level)
 4. Mobile advanced offline pairing modes (QR/file/LAN hardening completeness)
@@ -174,12 +179,30 @@ Non-negotiables:
 
 ## Phase P2 — Native acceleration and performance proof (6–10 weeks)
 
+**Status:** Implemented (2026-04-04)
+
 **Goal:** move hot-path operations to production-grade native modules.
 
 ### Deliverables
 - Rust probe runner for selected high-cost operations
 - Benchmark harness + baseline/after comparison artifacts
 - Optional WASM artifacts where practical for viewer/shared validation paths
+
+### Delivered evidence
+- Native-first SMART contract hot-path runner and fallback path:
+  - `agent/native_probe_runner.py`
+  - `agent/native_bridge.py`
+- CLI pipeline integration with artifact and telemetry emission:
+  - `agent/cli.py` (`native_probe_runner` test entry)
+  - `artifacts/native_probe_runner.json`
+- Benchmark harness for reproducible throughput snapshots:
+  - `tools/benchmark_native_probe_runner.py`
+  - Generated benchmark snapshot artifact via benchmark tool execution
+- Compatibility and runner coverage:
+  - `tests/test_native_probe_runner.py`
+  - `tests/test_benchmark_native_probe_runner.py`
+  - `tests/test_cli_run_modes.py`
+  - `tests/test_smart_rust_contract.py`
 
 ### Exit criteria
 - Measured speedup target achieved on selected workloads
@@ -318,8 +341,8 @@ Required for each phase closeout:
 
 Active emphasis:
 
-1. P2 native acceleration proof
-2. P3 desktop/mobile hardening
-3. P6 multi-device ecosystem expansion
+1. P3 desktop/mobile hardening
+2. P6 multi-device ecosystem expansion
+3. Native acceleration expansion to additional probes and native-enabled performance baselines
 
 This keeps the project advanced, professional, and scalable while preserving truthful delivery reporting.

@@ -46,6 +46,7 @@ def test_run_full_mode_executes_pipeline(tmp_path):
     assert "thermal_stress" in test_names
     assert "smart_timeline" in test_names
     assert "disk_stress_cycles" in test_names
+    assert "native_probe_runner" in test_names
     assert "failure_classification" in report["summary"]
 
 

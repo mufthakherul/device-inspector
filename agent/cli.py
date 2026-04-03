@@ -27,6 +27,7 @@ from .evidence import (
     write_evidence_manifest,
 )
 from .logging_utils import setup_logging
+from .native_probe_runner import run_smart_contract_hot_path
 from .plugin_manifest import PluginManifestError, verify_plugin_manifest
 from .plugin_negotiation import PluginNegotiationError, negotiate_plugin_capabilities
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
@@ -678,6 +679,52 @@ def run(
                 },
             )
             completed_steps.add("smart_scan")
+
+    # Native hot-path runner metadata for SMART contract generation.
+    inspector_logger.info("Step 2b: Running native SMART contract hot path...")
+    smart_contract_inputs = [
+        r.get("data", {})
+        for r in smart_results
+        if r.get("status") == "ok" and isinstance(r.get("data"), dict)
+    ]
+    if smart_contract_inputs:
+        native_hot_path = run_smart_contract_hot_path(
+            smart_contract_inputs,
+            prefer_native=True,
+        )
+        (artifacts_dir / "native_probe_runner.json").write_text(
+            json.dumps(native_hot_path, indent=2),
+            encoding="utf-8",
+        )
+        tests_list.append(
+            {
+                "name": "native_probe_runner",
+                "status": "ok",
+                "data": {
+                    "engine": native_hot_path.get("engine"),
+                    "item_count": native_hot_path.get("item_count"),
+                    "throughput_items_per_sec": native_hot_path.get(
+                        "throughput_items_per_sec"
+                    ),
+                    "fallback_reason": native_hot_path.get("fallback_reason"),
+                },
+                "status_detail": "sample" if use_sample else "executed",
+            }
+        )
+        inspector_logger.info(
+            "Native probe runner complete: engine=%s throughput=%s items/s",
+            native_hot_path.get("engine"),
+            native_hot_path.get("throughput_items_per_sec"),
+        )
+    else:
+        tests_list.append(
+            {
+                "name": "native_probe_runner",
+                "status": "skip",
+                "reason": "No SMART payloads available for hot-path runner",
+            }
+        )
+        inspector_logger.info("Native probe runner skipped: no SMART payloads")
 
     # Sprint 2: SMART timeline snapshots for full mode.
     if mode == "full" and runtime_profile and runtime_profile.enable_smart_timeline:

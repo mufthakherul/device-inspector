@@ -73,6 +73,12 @@ All notable changes to this project will be documented in this file.
   - Capability matrix plugin policy track (`schemas/capability-matrix-1.0.0.json`)
   - Python/Rust plugin SDK skeleton tracks (`sdk/python/*`, `sdk/rust/*`)
   - Negotiation and enforcement coverage (`tests/test_plugin_negotiation.py`, `tests/test_plugin_manifest.py`)
+- Added P2 native acceleration baseline:
+  - Native-first SMART contract hot-path runner with deterministic Python fallback (`agent/native_probe_runner.py`)
+  - Native batch bridge contract for SMART hot-path execution (`agent/native_bridge.py`)
+  - CLI pipeline telemetry/artifact integration for hot-path execution (`agent/cli.py`, `artifacts/native_probe_runner.json`)
+  - Throughput benchmark harness for baseline vs runner comparisons (`tools/benchmark_native_probe_runner.py`)
+  - Native acceleration coverage (`tests/test_native_probe_runner.py`, `tests/test_benchmark_native_probe_runner.py`, `tests/test_cli_run_modes.py`)
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)
