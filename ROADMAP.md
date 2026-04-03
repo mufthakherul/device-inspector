@@ -101,6 +101,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Close remaining native probe gaps with standardized adapter contracts.
 - Add parity contract tests per OS family.
 - Add reliability scoring for degraded probe sets.
+- ✅ Reliability/parity scoring now emitted in report summaries (`agent/reliability.py`, `probe_reliability`, `probe_parity_index`).
 
 ### Sprint 4 — Rust acceleration layer
 - Implement Rust probe runner for hot paths (SMART parse, sensor normalization, crypto ops).
@@ -372,7 +373,7 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 | Section | Compliance Criteria | Current Status | Evidence Source | Gap Owner | Target Sprint |
 |---|---|---|---|---|---|
 | 1 Vision | Core outcomes measurable and shipped | In progress | product + release outputs | PM | Rolling |
-| 2 Principles | Offline, parity, integrity, degradation validated | In progress | tests + real-device runs | Eng Lead | Rolling |
+| 2 Principles | Offline, parity, integrity, degradation validated | In progress | tests + real-device runs + probe reliability/parity metrics in `agent/reliability.py` | Eng Lead | Rolling |
 | 3 Baseline | Claims match repository reality | In progress | `ROADMAP.md` + schema/capability/migration guard implementation | Maintainer | Sprint 1 |
 | 4 Phases | Milestones mapped to delivery | In progress | planning board | PM | Rolling |
 | 5 Sprints | DoD satisfied for each sprint | In progress | sprint reports | Team | Rolling |

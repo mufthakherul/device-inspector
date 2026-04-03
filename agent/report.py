@@ -11,7 +11,7 @@ from __future__ import annotations
 import datetime
 from typing import Any, Dict, List, Optional
 
-from . import anomaly, policy_pack, scoring
+from . import anomaly, policy_pack, reliability, scoring
 from .schema_compat import REPORT_SCHEMA_VERSION
 
 
@@ -241,6 +241,11 @@ def compose_report(
             "score_delta": policy_result["score_delta"],
             "triggered_rules": policy_result["triggered_rules"],
         }
+
+    probe_health = reliability.compute_probe_reliability(tests)
+    report["summary"]["probe_reliability"] = probe_health["reliability_score"]
+    report["summary"]["probe_parity_index"] = probe_health["parity_index"]
+    report["summary"]["probe_health"] = probe_health
 
     anomaly_result = anomaly.analyze_offline_anomalies(
         tests=tests,

@@ -23,6 +23,7 @@ Current implementation snapshot (2026-04-04)
 - Evidence redaction presets and retention policy metadata controls are implemented for report output (`agent/redaction.py`, `--redaction-preset`, `--retention-days`).
 - Policy-pack governance portability is supported via validated import/export commands (`inspecta policy-import`, `inspecta policy-export`).
 - Signed evidence manifests now emit deterministic attestation metadata alongside detached signatures (`agent/evidence.py`).
+- Probe reliability and parity metrics are emitted in report summaries for degraded probe-set scoring (`agent/reliability.py`).
 
 Table of contents
 - Mission & vision

@@ -48,6 +48,9 @@ All notable changes to this project will be documented in this file.
   - `inspecta policy-import`
 - Added signed evidence attestation metadata:
   - `agent/evidence.py`
+- Added probe reliability and parity scoring:
+  - `agent/reliability.py`
+  - `agent/report.py`
 
 ---
 
