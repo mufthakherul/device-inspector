@@ -44,6 +44,10 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
   - Reliability calibration profile support in `compute_probe_reliability`
   - Structured degraded-mode recommendations in `agent/report.py`
   - Expanded contract/reliability tests in `tests/test_reliability.py`, `tests/test_report_composition.py`
+- P4 trust-channel governance baseline:
+  - Measurable signoff policy document (`docs/RELEASE_SIGNOFF_POLICY.md`)
+  - Release signoff validation and audit trail (`tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`)
+  - Distribution manifest verification metadata vNext (`tools/generate_distribution_manifest.py`)
 - Strong workflow matrix in `.github/workflows/` including:
   - `ci-core.yml`, `ci-integration-matrix.yml`, `release.yml`, `build-release.yml`, `release-channel-gates.yml`, `channel-promotion.yml`, `sbom-security.yml`, `performance-regression.yml`, `polyglot-build.yml`
 - Desktop/mobile scaffolds:
@@ -196,12 +200,28 @@ Non-negotiables:
 
 ## Phase P4 — Release engineering and trust channel maturity (14–18 weeks)
 
+**Status:** Implemented (2026-04-04)
+
 **Goal:** production-grade release operations with strong trust signals.
 
 ### Deliverables
 - Promotion governance extensions (approval rules + audit trail)
 - Signing/notarization lane coverage matrix per platform
 - Distribution manifest vNext with verification metadata enrichments
+
+### Delivered evidence
+- Measurable release signoff policy and record format:
+  - `docs/RELEASE_SIGNOFF_POLICY.md`
+  - `release-signoffs/README.md`
+- Automated signoff gate + audit trail generation:
+  - `.github/workflows/release-signoff-gate.yml`
+  - `tools/validate_release_signoff.py`
+  - `test-output/release-signoff-audit.json` artifact output
+- Release orchestration includes signoff gate in required workflow set:
+  - `.github/workflows/release.yml`
+- Distribution manifest vNext verification metadata:
+  - `tools/generate_distribution_manifest.py`
+  - `tests/test_distribution_manifest.py`
 
 ### Exit criteria
 - Channel flow (nightly→alpha/beta→stable) fully governed
@@ -243,7 +263,6 @@ Non-negotiables:
 
 Priority legend: `P0` highest → `P3` lower.
 
-- `P0` Publish measurable release signoff policy for channel promotions
 - `P1` Implement Rust hot-path runner + benchmark reporting
 - `P1` Add Tauri implementation spike with parity report against Electron shell
 - `P1` Formalize mobile pairing security model and offline transport constraints

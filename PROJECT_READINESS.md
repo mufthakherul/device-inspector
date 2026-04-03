@@ -31,6 +31,8 @@ The project is in a strong development-ready state with:
 - Standardized release evidence checklist template is now available for release governance
 - OS-family probe parity contracts and reliability calibration profiles are now present in probe-health scoring
 - Structured degraded-mode recommendations are now emitted in report summaries
+- Measurable release signoff policy and automated signoff gate are now present for channel governance
+- Distribution manifest verification metadata vNext is now present for checksum/signature visibility
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -40,7 +42,7 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `253 passed`
+- ✅ **Tests:** `255 passed`
 - ✅ **Coverage gate:** `73.79%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
@@ -94,6 +96,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - `linux-repo-index.yml`
 - `kpi-dashboard.yml`
 - `doc-claim-validator.yml`
+- `release-signoff-gate.yml`
 
 ---
 
@@ -119,6 +122,9 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Release governance evidence checklist: `docs/RELEASE_EVIDENCE_CHECKLIST.md`
 - OS-family probe parity contracts + calibration profiles: `agent/reliability.py`, `tests/test_reliability.py`
 - Degraded-mode recommendation synthesis in reports: `agent/report.py`, `tests/test_report_composition.py`
+- Measurable release signoff policy and records: `docs/RELEASE_SIGNOFF_POLICY.md`, `release-signoffs/README.md`
+- Automated release signoff validation and audit: `tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`
+- Distribution manifest verification metadata vNext: `tools/generate_distribution_manifest.py`, `tests/test_distribution_manifest.py`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`
@@ -157,9 +163,9 @@ Mobile/embedded OS families (Android/iOS/HarmonyOS/Amazon Fire OS, etc.) are han
 
 ## Recommended next priorities
 
-1. Publish measurable release signoff policy and promotion approvals for channel governance.
-2. Implement Rust hot-path acceleration with benchmark evidence reporting.
-3. Advance desktop dual-shell migration criteria and mobile offline pairing hardening.
+1. Implement Rust hot-path acceleration with benchmark evidence reporting.
+2. Advance desktop dual-shell migration criteria and mobile offline pairing hardening.
+3. Add distribution-manifest signature verification linkage into docs-site download UX.
 4. Keep readiness docs synchronized with CI and real-device validation outputs each sprint.
 
 ---

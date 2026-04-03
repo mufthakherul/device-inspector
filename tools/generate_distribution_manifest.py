@@ -53,6 +53,21 @@ def _group_summary(release_payload: dict[str, Any]) -> list[dict[str, Any]]:
     summary: list[dict[str, Any]] = []
     for group_name, assets in sorted(groups.items()):
         assets = assets if isinstance(assets, list) else []
+        asset_names = [
+            str(asset.get("name", "")) for asset in assets if isinstance(asset, dict)
+        ]
+        signature_assets = sorted(name for name in asset_names if name.endswith(".asc"))
+        has_checksums = any(name == "SHA256SUMS" for name in asset_names)
+
+        signed_asset_bases = {
+            name[: -len(".asc")] for name in signature_assets if len(name) > 4
+        }
+        signed_assets = sorted(
+            name
+            for name in asset_names
+            if name in signed_asset_bases and not name.endswith(".asc")
+        )
+
         summary.append(
             {
                 "group": group_name,
@@ -66,9 +81,39 @@ def _group_summary(release_payload: dict[str, Any]) -> list[dict[str, Any]]:
                     for asset in assets
                     if isinstance(asset, dict)
                 ],
+                "verification": {
+                    "has_checksums": has_checksums,
+                    "detached_signature_assets": signature_assets,
+                    "signed_assets_inferred": signed_assets,
+                },
             }
         )
     return summary
+
+
+def _verification_summary(artifact_groups: list[dict[str, Any]]) -> dict[str, Any]:
+    total_groups = len(artifact_groups)
+    groups_with_checksums = 0
+    groups_with_signatures = 0
+    total_signed_assets = 0
+
+    for group in artifact_groups:
+        verification = group.get("verification", {})
+        if verification.get("has_checksums") is True:
+            groups_with_checksums += 1
+        signature_assets = verification.get("detached_signature_assets", [])
+        if isinstance(signature_assets, list) and signature_assets:
+            groups_with_signatures += 1
+        signed_assets = verification.get("signed_assets_inferred", [])
+        if isinstance(signed_assets, list):
+            total_signed_assets += len(signed_assets)
+
+    return {
+        "groups_total": total_groups,
+        "groups_with_checksums": groups_with_checksums,
+        "groups_with_signatures": groups_with_signatures,
+        "signed_assets_inferred_total": total_signed_assets,
+    }
 
 
 def build_distribution_manifest(
@@ -78,8 +123,10 @@ def build_distribution_manifest(
     if not isinstance(latest, dict):
         latest = {}
 
+    artifact_groups = _group_summary(release_payload)
+
     return {
-        "manifest_version": "1.0.0",
+        "manifest_version": "1.1.0",
         "source": "distribution-manifest/release-sync",
         "generated_at": _now_iso(),
         "release": {
@@ -87,7 +134,8 @@ def build_distribution_manifest(
             "published_at": latest.get("published_at"),
             "html_url": latest.get("html_url"),
         },
-        "artifact_groups": _group_summary(release_payload),
+        "artifact_groups": artifact_groups,
+        "verification_summary": _verification_summary(artifact_groups),
         "channels": _collect_channels(repo_root),
     }
 

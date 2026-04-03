@@ -37,6 +37,9 @@ Current implementation snapshot (2026-04-04)
 - OS-family probe parity contracts are now defined for reliability calibration (`agent/reliability.py`, `expected_probe_contract`).
 - Probe reliability scoring now includes calibration profiles for probe-availability context (`agent/reliability.py`, `compute_probe_reliability`).
 - Report summary now emits structured degraded-mode recommendations based on failure/probe health context (`agent/report.py`).
+- Measurable release signoff policy and per-tag signoff record format are now published (`docs/RELEASE_SIGNOFF_POLICY.md`, `release-signoffs/README.md`).
+- Automated release signoff validation gate now enforces approval/check requirements and emits audit artifacts (`tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`).
+- Distribution manifest now includes verification metadata vNext for checksums/signatures (`tools/generate_distribution_manifest.py`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 

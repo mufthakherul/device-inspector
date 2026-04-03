@@ -59,6 +59,13 @@ All notable changes to this project will be documented in this file.
   - OS-family probe contracts + calibration profile scoring in `agent/reliability.py`
   - Structured degraded-mode recommendations in `agent/report.py`
   - Expanded parity/reliability test coverage in `tests/test_reliability.py` and `tests/test_report_composition.py`
+- Added P4 trust-channel governance hardening baseline:
+  - Measurable release signoff policy (`docs/RELEASE_SIGNOFF_POLICY.md`)
+  - Release signoff record format docs (`release-signoffs/README.md`)
+  - Automated signoff validation + audit workflow (`tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`)
+  - Release orchestration includes signoff gate (`.github/workflows/release.yml`)
+  - Distribution manifest verification metadata vNext (`tools/generate_distribution_manifest.py`, `tests/test_distribution_manifest.py`)
+  - Signoff validator tests (`tests/test_release_signoff.py`)
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

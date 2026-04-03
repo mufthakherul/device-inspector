@@ -1,0 +1,62 @@
+name: Release Signoff Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to validate (example: v1.2.3 or v1.2.3-beta.1)"
+        required: true
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-signoff:
+    name: Validate release signoff policy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Resolve release tag
+        id: tag
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            tag="${{ github.event.inputs.tag }}"
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate signoff record
+        shell: bash
+        run: |
+          tag="${{ steps.tag.outputs.tag }}"
+          signoff_file="release-signoffs/${tag}.json"
+
+          if [ ! -f "$signoff_file" ]; then
+            echo "Missing signoff file: $signoff_file"
+            exit 1
+          fi
+
+          python -m tools.validate_release_signoff \
+            --tag "$tag" \
+            --signoff-json "$signoff_file" \
+            --audit-output test-output/release-signoff-audit.json
+
+      - name: Upload signoff audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-signoff-audit
+          path: test-output/release-signoff-audit.json
+          retention-days: 30

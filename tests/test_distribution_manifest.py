@@ -29,7 +29,17 @@ def test_build_distribution_manifest_includes_channels_and_groups(tmp_path: Path
                     "name": "inspecta-1.2.3-windows.zip",
                     "size_bytes": 123,
                     "browser_download_url": "https://example.invalid/windows.zip",
-                }
+                },
+                {
+                    "name": "inspecta-1.2.3-windows.zip.asc",
+                    "size_bytes": 88,
+                    "browser_download_url": "https://example.invalid/windows.zip.asc",
+                },
+                {
+                    "name": "SHA256SUMS",
+                    "size_bytes": 222,
+                    "browser_download_url": "https://example.invalid/SHA256SUMS",
+                },
             ],
             "Linux": [],
         },
@@ -37,9 +47,27 @@ def test_build_distribution_manifest_includes_channels_and_groups(tmp_path: Path
 
     manifest = build_distribution_manifest(repo_root=tmp_path, release_payload=payload)
 
-    assert manifest["manifest_version"] == "1.0.0"
+    assert manifest["manifest_version"] == "1.1.0"
     assert manifest["release"]["tag_name"] == "v1.2.3"
     assert any(group["group"] == "Windows" for group in manifest["artifact_groups"])
+
+    windows_group = next(
+        group for group in manifest["artifact_groups"] if group["group"] == "Windows"
+    )
+    assert windows_group["verification"]["has_checksums"] is True
+    assert (
+        "inspecta-1.2.3-windows.zip.asc"
+        in windows_group["verification"]["detached_signature_assets"]
+    )
+    assert (
+        "inspecta-1.2.3-windows.zip"
+        in windows_group["verification"]["signed_assets_inferred"]
+    )
+
+    verification = manifest["verification_summary"]
+    assert verification["groups_total"] == 2
+    assert verification["groups_with_checksums"] == 1
+    assert verification["groups_with_signatures"] == 1
 
     channels = {entry["channel"]: entry for entry in manifest["channels"]}
     assert channels["winget"]["status"] == "available"
