@@ -1,407 +1,260 @@
-# ROADMAP — device-inspector (inspecta) Next-Generation Master Plan
+# ROADMAP — inspecta (Redesigned Execution Plan)
 
 **Last updated:** 2026-04-04  
-**Document type:** Strategic + execution roadmap (polyglot modernization)  
-**Scope:** Product, architecture, diagnostics depth, distribution, security, governance, ecosystem scale
+**Status model:** `Implemented` / `In Progress` / `Planned` / `Deferred`  
+**Scope:** product execution plan aligned to current repository reality
 
 ---
 
-## 1) Vision and outcome
+## 1) Why this roadmap exists
 
-Build `inspecta` into a **professional, modern, cross-platform, offline-first, smart, portable, all-round diagnostics platform** that supports:
+This roadmap replaces the previous long-form strategic document with a delivery-focused plan:
 
-- Fast and reliable **Quick Mode** and robust **Full Mode**
-- Verifiable, tamper-aware evidence bundles with strong trust signals
-- Rich experiences for technicians, refurbishers, enterprises, field support, and power users
-- Multi-channel distribution:
-  - CLI packages and standalone binaries
-  - Desktop apps (Windows/macOS/Linux)
-  - Mobile apps (Android/iOS)
-  - Bootable ISO for deep diagnostics
-- Public docs + release portal with transparent operational status
-- **Polyglot architecture** for performance, maintainability, and long-term scalability
+- grounded in current code/workflow evidence,
+- explicit about what is already implemented,
+- clear about what is not yet implemented,
+- structured by phases with measurable outcomes.
+
+Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
 
 ---
 
-## 2) Product principles
+## 2) Reality baseline (repo-verified)
 
-1. **Offline-first always:** zero-cloud required for core diagnostics and verification.
-2. **Cross-platform parity:** no platform is second-class for core capabilities.
-3. **Evidence integrity by default:** every run must be auditable and reproducible.
-4. **Graceful degradation:** missing probes/tools produce actionable warnings, not crashes.
-5. **Professional distribution:** checksums, signatures, release notes, and reproducible builds.
-6. **Developer ergonomics:** clear architecture, contribution paths, CI visibility, testability.
-7. **Performance-conscious engineering:** use the right language for each subsystem.
-8. **Privacy-preserving by design:** local processing first, explicit opt-in for network actions.
+## Implemented (high confidence)
 
----
+- Core CLI execution paths and reporting:
+  - `agent/cli.py`, `agent/report.py`, `agent/report_formatter.py`
+- Evidence integrity and verification/audit flows:
+  - `agent/evidence.py`, `tools/verify_bundle.py`, CLI verify/audit tests
+- Schema compatibility + capability matrix:
+  - `agent/schema_compat.py`, `agent/capability_matrix.py`, `schemas/capability-matrix-1.0.0.json`
+- Reliability and analytics foundation:
+  - `agent/reliability.py`, `agent/anomaly.py`, `agent/analytics_profile.py`
+- Governance controls:
+  - `agent/policy_pack.py`, `agent/plugin_manifest.py`, `agent/redaction.py`
+- Rust boundary hardening:
+  - `agent/native_contract.py`, `agent/native_bridge.py`, `tests/test_smart_rust_contract.py`
+- Release/distribution automation:
+  - `tools/generate_distribution_manifest.py`, `tools/channel_promotion.py`, `tools/release_signing.py`
+- Strong workflow matrix in `.github/workflows/` including:
+  - `ci-core.yml`, `ci-integration-matrix.yml`, `release.yml`, `build-release.yml`, `release-channel-gates.yml`, `channel-promotion.yml`, `sbom-security.yml`, `performance-regression.yml`, `polyglot-build.yml`
+- Desktop/mobile scaffolds:
+  - Desktop: `apps/desktop/*` + adapter contract
+  - Mobile: `apps/mobile/lib/main.dart` with verification queue and integrity badges
 
-## 3) Current baseline and modernization direction
+## In Progress (partially implemented)
 
-### Current strengths (validated)
-- Working CLI with quick/full execution paths.
-- Evidence manifest generation + verification flows.
-- Cross-platform workflows for build and smoke validation.
-- Desktop/mobile/ISO scaffolding and pipelines in place.
-- Docs-site deployment + release metadata synchronization.
+- Cross-platform deep-probe parity (beyond graceful degradation)
+- Desktop dual-shell migration (Electron stable, Tauri migration gate scaffolded)
+- Smart analytics expansion (foundations present; model maturity limited)
+- Docs/site depth and automation maturity
 
-### Strategic modernization direction (new)
-- Move from mostly single-language orchestration to a **polyglot, capability-first stack**:
-  - **Python**: orchestration, plugin API, report composition.
-  - **Rust**: high-performance collectors, secure crypto/evidence operations, privileged probe modules.
-  - **TypeScript**: web UX, docs portal, desktop UI surfaces.
-  - **Dart (Flutter)**: mobile companion apps.
-  - **Go**: lightweight background daemons/remote probe helpers where static binaries are ideal.
-  - **Bash/PowerShell**: platform setup and operator automation scripts.
+## Planned / not fully implemented yet (key gaps)
 
-### Polyglot language-by-capability blueprint (expanded)
-
-| Capability | Primary Language | Secondary Language(s) | Why this split |
-|---|---|---|---|
-| Core orchestration engine | Python | Rust (FFI), Go | Python keeps iteration speed high; Rust/Go accelerate critical paths. |
-| High-risk native probe logic | Rust | C/C++ interop (where needed) | Memory safety + performance for low-level device interactions. |
-| CLI UX and scripting surface | Python | Rust (optional compiled CLI core) | Fast delivery now, optional ultra-fast compiled path later. |
-| Desktop UI | TypeScript | Rust (Tauri backend), Python bridge | Modern UI/UX + lighter binaries in Tauri mode. |
-| Mobile apps | Dart (Flutter) | Kotlin/Swift bridges if needed | Strong cross-platform offline app delivery. |
-| Web/docs portal | TypeScript | Astro/Next static generation | Fast static docs, strong DX, modern component workflow. |
-| Offline AI/analytics | Rust + Python | ONNX Runtime / WebAssembly | Efficient local inference without mandatory cloud services. |
-| Cryptography/evidence trust | Rust | Python bindings | Strong safety and deterministic signing/verification routines. |
-| Build and release automation | YAML + Bash + PowerShell | Python task runners | Cross-platform CI and reproducible packaging control. |
-| ISO runtime scripts | Bash | Rust utilities | Portable boot-time automation + high-performance helpers. |
+1. Full Rust acceleration runner for hot paths with benchmarked 30–50% gains
+2. OS-family parity contract tests across all supported host families
+3. Tauri production-ready lane (currently scaffold/contract level)
+4. Mobile advanced offline pairing modes (QR/file/LAN hardening completeness)
+5. Native mobile bridges (Kotlin/Swift) for secure storage/sensor specialization
+6. ISO reproducibility attestations + deeper SBOM embedding strategy
+7. Plugin SDK (Python/Rust) and capability negotiation protocol
+8. Strong release promotion governance (approval/signoff workflow depth)
+9. Formalized milestone evidence packs (M1/M2/M3 objective scorecards)
+10. Expanded device-class coverage for tablet/ARM/edge profiles
 
 ---
 
-## 4) Delivery phases (high-level)
+## 3) Platform and device strategy (professional cross-platform model)
 
-- **Phase A — Core hardening & truth alignment** (Weeks 1–4)
-- **Phase B — Polyglot architecture transition** (Weeks 5–10)
-- **Phase C — Distribution and offline trust expansion** (Weeks 11–16)
-- **Phase D — Enterprise reliability and observability** (Weeks 17–22)
-- **Phase E — Ecosystem scale and SDK platform** (Weeks 23+)
+## Host runtime (where `agent.cli` runs directly)
 
----
+- **Tier A (primary):** Windows, Linux, macOS
+- **Tier B (targeted variants):** Raspberry Pi OS / ARM Linux profiles
+- **Tier C (specialized):** bootable ISO environments
 
-## 5) Detailed execution plan (sprints)
+## App surfaces and companion lanes
 
-> Sprint cadence: 2 weeks.  
-> Definition of done: code + tests + docs + changelog + rollback notes + risk updates.
+- Desktop: Windows/macOS/Linux
+- Mobile: Android, iOS, HarmonyOS
+- Additional mobile/tablet ecosystems (planned lanes):
+  - Amazon Fire OS
+  - KaiOS / Tizen class lanes (feasibility-driven)
 
-### Sprint 1 — Baseline integrity and compatibility freeze
-- ✅ Lock report schema compatibility policy (`agent/schema_compat.py` + guarded `report` command).
-- ✅ Add versioned capability matrix consumed by CLI/desktop/mobile (`schemas/capability-matrix-1.0.0.json`, `inspecta capabilities`, desktop/mobile consumers).
-- ✅ Add migration guards for legacy artifacts (`migrate_legacy_report`, legacy manifest normalization in evidence verification).
-
-### Sprint 2 — Offline evidence v2
-- Add deterministic bundle mode with canonical ordering.
-- Introduce signed attestations (detached + in-manifest metadata).
-- Add forensic provenance metadata profile.
-- ✅ Signed attestation metadata now emitted with signed manifests (`agent/evidence.py` attestation record).
-
-### Sprint 3 — Windows/macOS/Linux parity completion
-- Close remaining native probe gaps with standardized adapter contracts.
-- Add parity contract tests per OS family.
-- Add reliability scoring for degraded probe sets.
-- ✅ Reliability/parity scoring now emitted in report summaries (`agent/reliability.py`, `probe_reliability`, `probe_parity_index`).
-
-### Sprint 4 — Rust acceleration layer
-- Implement Rust probe runner for hot paths (SMART parse, sensor normalization, crypto ops).
-- Expose FFI boundary to Python orchestration with strict schema types.
-- Benchmark and target at least 30–50% speed-up on heavy parsing workloads.
-- Add WebAssembly build option for selected Rust modules used in docs/desktop/mobile viewers.
-- ✅ Strict Rust SMART contract validation is now enforced in Python boundary payload generation (`agent/native_contract.py`, `agent/plugins/smart.py`).
-
-### Sprint 5 — Desktop modernization (dual strategy)
-- Keep Electron path stable.
-- Add **Tauri/Rust+TS** experimental desktop track for lightweight distribution.
-- Unified local engine adapter for both shells.
-- Define migration gate for optional Electron -> Tauri default switch after parity + stability targets.
-- ✅ Unified local engine adapter contract scaffold added for Electron/Tauri tracks (`apps/desktop/engine/adapter-contract.json`).
-
-### Sprint 6 — Mobile offline specialist features
-- Flutter report viewer + advanced validation UX.
-- Offline pairing hardening (QR + file + LAN direct mode).
-- Background verification job queue with integrity badges.
-- Add optional native bridge modules (Kotlin/Swift) for platform-specific sensors or secure key storage.
-- ✅ Mobile verification queue with integrity badge history added in Flutter companion (`apps/mobile/lib/main.dart`).
-
-### Sprint 7 — ISO deep diagnostics 2.0
-- Add layered ISO profiles (quick tech bench / forensic / secure-lab).
-- Add reproducibility attestations and dependency SBOM embedding.
-- Add encrypted export bundle option.
-- ✅ Layered ISO profiles are now emitted by the bootable staging backend (`tools/bootable_iso.py`).
-- ✅ Export bundle directory generation is available with optional encrypted metadata sidecar support.
-
-### Sprint 8 — Packaging channels full automation
-- Add channel promotion workflow (nightly -> beta -> stable).
-- Add package notarization/signing automation where supported.
-- Publish machine-readable distribution manifest per release.
-- ✅ Channel promotion planning workflow added for nightly/alpha/beta/stable progression (`.github/workflows/channel-promotion.yml`, `tools/channel_promotion.py`).
-- ✅ Package signing automation (where supported) now signs release artifacts with detached signatures when release GPG secrets are configured (`.github/workflows/build-release.yml`, `tools/release_signing.py`).
-- ✅ Machine-readable distribution manifest generation added and wired into release metadata workflows (`tools/generate_distribution_manifest.py`, `docs-site/data/distribution-manifest.json`).
-
-### Sprint 9 — Smart analytics (offline)
-- Add local anomaly detection for thermal/storage trends (on-device inference only).
-- Add confidence score for each recommendation.
-- Add explainability payload in report.
-- Add ONNX-based local model runtime profile with CPU-only fallback for fully offline operation.
-- ✅ Offline anomaly/confidence/explainability summary is present in report composition.
-- ✅ KPI snapshot generation now accepts report-derived probe reliability, parity, and confidence metrics for the docs-site status page.
-- ✅ Offline analytics runtime profile now supports ONNX CPU detection with deterministic rules-only fallback (`agent/analytics_profile.py`, report summary wiring).
-
-### Sprint 10 — Enterprise policy packs
-- Add policy profiles (refurbish shop, enterprise IT, field service, resale audit).
-- Add retention policy controls and evidence redaction presets.
-- Add organization policy export/import.
-- ✅ Runtime policy-pack evaluation foundation implemented (`agent/policy_pack.py`, `--policy-pack` in `agent/cli.py`, summary wiring in `agent/report.py`).
-- ✅ Retention controls + evidence redaction presets implemented (`--retention-days`, `--redaction-preset`, `agent/redaction.py`).
-- ✅ Policy-pack import/export workflow implemented (`inspecta policy-import`, `inspecta policy-export`).
-
-### Sprint 11 — SDK and plugin platform
-- Plugin SDK for Python + Rust adapters.
-- Capability negotiation protocol.
-- Signed plugin manifests and compatibility checks.
-- ✅ Signed plugin-manifest verification foundation implemented (`agent/plugin_manifest.py`, `inspecta plugin-verify`, `--plugin-manifest` + `--plugin-keyring`).
-
-### Sprint 12 — Governance, docs IA v2, release readiness
-- Align all top-level docs with actual implementation state.
-- Expand docs-site to route-based IA (`/download`, `/docs/*`, `/project`, `/community`).
-- Release readiness review gates for each platform lane.
+> Note: mobile OS families are delivery/app lanes, not direct host runtime targets for the Python CLI core.
 
 ---
 
-## 6) Mandatory GitHub Actions workflow matrix (target state)
+## 4) Target architecture (execution-oriented)
 
-1. `ci-core.yml` — lint, tests, schema, security baseline.
-2. `ci-integration-matrix.yml` — OS smoke + container matrix.
-3. `build-cli-packages.yml` — wheel/sdist/native binaries/checksums.
-4. `build-desktop-apps.yml` — desktop installers across OSes.
-5. `build-mobile-android.yml` — Android APK/AAB.
-6. `build-mobile-ios.yml` — iOS IPA lanes.
-7. `build-harmonyos.yml` — HarmonyOS scaffold/production path.
-8. `build-bootable-iso.yml` — reproducible ISO + checksums.
-9. `release.yml` — orchestration + gating of release-critical workflows.
-10. `deploy-pages.yml` — docs portal deployment.
-11. `nightly-health.yml` — nightly health, drift, and stability checks.
-12. `sbom-security.yml` — SBOM generation + vulnerability/license policy checks.
-13. `performance-regression.yml` — benchmark guardrails for core probes.
-14. `polyglot-build.yml` — validates Python/Rust/TypeScript/Flutter/Go build integrity.
-15. `wasm-artifacts.yml` — builds and validates WebAssembly modules used by UI/analytics components.
-16. `channel-promotion.yml` — generates release channel promotion plans for nightly/alpha/beta/stable transitions.
+- **Python core:** orchestration, policy, scoring, report composition
+- **Rust modules:** high-risk/high-throughput probe and trust operations
+- **TypeScript desktop/web:** UX surfaces and integration shells
+- **Flutter mobile:** offline companion and verification UX
+- **Workflow-driven release engineering:** channel gates, signing, manifests, KPI pipelines
+
+Non-negotiables:
+
+1. Offline-first diagnostics
+2. Deterministic evidence semantics
+3. Cross-platform graceful degradation (no hard crashes for missing probes)
+4. Security and integrity first (checksums, signatures, policy controls)
 
 ---
 
-## 7) Packaging and distribution targets
+## 5) Redesigned phased implementation plan
 
-### CLI targets
-- `pip`, `pipx`
-- Homebrew (macOS/Linux)
-- Winget/Chocolatey/Scoop (Windows)
-- Linux package lanes (`.deb`, `.rpm`, `.AppImage`) + repository automation roadmap
+## Phase P0 — Truth, quality, and governance lock (0–2 weeks)
 
-### Desktop targets
-- Windows: `.exe`, `.msix`
-- macOS: `.dmg`, `.pkg`
-- Linux: `.AppImage`, `.deb`, `.rpm`, optional Snap/Flatpak
-- Experimental lightweight desktop builds via Tauri
+**Goal:** keep docs/claims synced with repository facts every sprint.
 
-### Mobile targets
-- Android: `.apk`, `.aab`
-- iOS: `.ipa`
-- HarmonyOS: `.hap` (scaffold -> beta -> stable progression)
+### Deliverables
+- Automated roadmap/readiness consistency check script
+- Release evidence checklist template used in every release PR
+- KPI snapshot quality gate baseline
 
-### Bootable target
-- UEFI-capable `.iso` profiles with offline diagnostics and verified export workflows
+### Exit criteria
+- No top-level doc claim without direct file/workflow evidence
+- CI quality gates stable across Python matrix
 
 ---
 
-## 8) Full mode completion definition (strict)
+## Phase P1 — Core parity and reliability expansion (2–6 weeks)
 
-`full` mode is complete only when all are true:
+**Goal:** reduce platform-probe parity gaps and improve deterministic behavior.
 
-1. Runs without scaffold errors on Windows/macOS/Linux.
-2. Executes deep diagnostics pipeline with progress tracking.
-3. Produces extended artifacts and full-mode report sections.
-4. Supports retry plus interrupted-run recovery checkpoints.
-5. Supports offline evidence generation and verification.
-6. Has automated tests + CI integration runs.
-7. Has user docs + troubleshooting flow.
-8. Has deterministic output mode for reproducibility.
+### Deliverables
+- Expanded parity contract tests by OS family
+- Reliability score calibration by probe-availability profile
+- Structured degraded-mode recommendations in report output
 
----
-
-## 9) GitHub Pages information architecture (target)
-
-- `/` Home
-- `/download` platform installers, checksums, signatures, release notes
-- `/docs/user` CLI usage, quick/full interpretation
-- `/docs/technician` bootable and forensic workflows
-- `/docs/developer` architecture, modules, plugin SDK, coding standards
-- `/project` roadmap, changelog, governance, security policy, release policy
-- `/community` discussions, issue templates, support and contribution map
-- `/status` live build/release health summary
+### Exit criteria
+- Probe parity index tracked per platform class
+- Fewer degraded-but-unexplained outcomes in real-device runs
 
 ---
 
-## 10) KPI dashboard and success metrics
+## Phase P2 — Native acceleration and performance proof (6–10 weeks)
 
-- Quick-mode success rate by OS/device class
-- Full-mode success rate by OS/device class
-- False-warning and false-failure rates
-- Mean runtime (quick/full)
-- Installer success rate by platform
-- Crash-free desktop/mobile sessions
-- Report verification success rate
-- Release workflow green rate + MTTR
-- Docs time-to-first-success
-- Probe parity index by platform
-- Bundle reproducibility pass rate
+**Goal:** move hot-path operations to production-grade native modules.
 
----
+### Deliverables
+- Rust probe runner for selected high-cost operations
+- Benchmark harness + baseline/after comparison artifacts
+- Optional WASM artifacts where practical for viewer/shared validation paths
 
-## 11) Risk register (expanded)
-
-1. Platform probe fragility  
-   Mitigation: adapter contracts + fallback stacks + contract tests.
-2. Signing/certificate complexity  
-   Mitigation: staged signing policy + env-scoped secrets + dry-run checks.
-3. Mobile/iOS CI constraints  
-   Mitigation: signed/unsigned lane split + deterministic fallback artifacts.
-4. ISO/legal dependency risks  
-   Mitigation: SBOM + license gate + dependency inventory checks.
-5. Trust and tamper resistance  
-   Mitigation: signatures, timestamp policy, optional transparency records.
-6. Polyglot integration complexity  
-   Mitigation: strict schema contracts and compatibility test suites.
+### Exit criteria
+- Measured speedup target achieved on selected workloads
+- Compatibility tests passing for Python↔Rust schema contracts
 
 ---
 
-## 12) Governance and release policy
+## Phase P3 — Desktop and mobile product hardening (10–14 weeks)
 
-- Semantic versioning channels: `alpha`, `beta`, `stable`.
-- Security response SLA and coordinated disclosure process.
-- Mandatory release checklist:
-  - test matrix green
-  - build matrix green
-  - checksums/signatures published
-  - docs synchronized
-  - rollback notes prepared
-  - SBOM and policy checks passed
+**Goal:** mature companion surfaces beyond scaffold state.
 
----
+### Deliverables
+- Desktop migration gate criteria (Electron↔Tauri) with objective pass/fail rules
+- Mobile offline pairing hardening (QR/file/LAN modes)
+- Secure key/material handling plan for mobile-native bridges
 
-## 13) Repository structure (target evolution)
-
-- `agent/` Python orchestration + plugin contracts
-- `native/rust/` Rust probe and crypto acceleration modules
-- `native/go/` Go-based lightweight probe daemons and remote helpers
-- `native/wasm/` WebAssembly-ready modules for shared offline validation/inference
-- `apps/desktop/` Desktop shells (Electron/Tauri tracks)
-- `apps/mobile/` Flutter clients
-- `apps/web/` TypeScript-based user/dev portal surfaces
-- `bootable/iso/` ISO build profiles and runtime payloads
-- `docs-site/` route-based docs portal
-- `.github/workflows/` expanded CI/CD/security/perf matrix
-- `packaging/` manifests, channel metadata, signing scripts
-- `sdk/` plugin SDKs and examples
-- `benchmarks/` performance baselines and regression harness
+### Exit criteria
+- Desktop shell parity checklist published and validated
+- Mobile verification UX reliability baseline met on Android/iOS
 
 ---
 
-## 14) 90-day execution milestones
+## Phase P4 — Release engineering and trust channel maturity (14–18 weeks)
 
-### Milestone M1 (Day 30)
-- Baseline truth alignment complete (docs/claims/state).
-- Core parity and reliability scoring validated.
-- KPI collection framework initialized.
+**Goal:** production-grade release operations with strong trust signals.
 
-### Milestone M2 (Day 60)
-- Rust acceleration path in production for selected probes.
-- Desktop dual-shell strategy validated.
-- Route-based docs portal deployed.
+### Deliverables
+- Promotion governance extensions (approval rules + audit trail)
+- Signing/notarization lane coverage matrix per platform
+- Distribution manifest vNext with verification metadata enrichments
 
-### Milestone M3 (Day 90)
-- Channelized release automation (`alpha`/`beta`/`stable`) live.
-- Offline smart analytics in full mode available.
-- SDK + plugin signing baseline published.
+### Exit criteria
+- Channel flow (nightly→alpha/beta→stable) fully governed
+- Release artifacts consistently include checksums + signature/report metadata
 
 ---
 
-## 15) Immediate next actions (first 16 issues to open)
+## Phase P5 — Plugin ecosystem and enterprise extensibility (18–24 weeks)
 
-1. Reconcile roadmap claims vs current implementation artifacts.
-2. ✅ Implement interrupted-run recovery checkpoints for full mode (CLI checkpoint + resume path).
-3. ✅ Add deterministic bundle mode test suite (`tests/test_evidence.py` fixed-timestamp + canonical ordering assertions).
-4. ✅ Add `sbom-security.yml` workflow.
-5. ✅ Add performance regression benchmark workflow.
-6. ✅ Implement route-based docs-site IA (`/download`, `/docs/*`, etc.).
-7. ✅ Add `.msix` packaging lane validation (`validate-msix-lane.yml`, desktop `appx` target validation).
-8. ✅ Add Linux repo publication workflow strategy (`linux-repo-index.yml`, `scripts/generate_linux_repo_indexes.py`).
-9. ✅ Add policy pack schema for enterprise modes (`schemas/policy-pack-schema-1.0.0.json`).
-10. ✅ Add local anomaly detector module (offline inference) (`agent/anomaly.py`, summary confidence/explainability wiring).
-11. ✅ Add Rust SMART parser integration contract tests (`tests/test_smart_rust_contract.py`, `to_rust_contract_payload`).
-12. ✅ Add plugin signing manifest schema (`schemas/plugin-manifest-schema-1.0.0.json`).
-13. ✅ Add release channel promotion gates (`release-channel-gates.yml`, prerelease tag semantics).
-14. ✅ Add reproducibility audit command for bundles (`inspecta audit` in `agent/cli.py`).
-15. ✅ Refresh README/CHANGELOG/PROJECT_READINESS consistency.
-16. ✅ Publish quarterly architecture review notes (`docs/ARCHITECTURE_REVIEW_2026_Q2.md`).
-17. ✅ Add channel promotion planning automation (`channel-promotion.yml`, `tools/channel_promotion.py`, `tests/test_channel_promotion.py`).
+**Goal:** deliver safe extensibility with compatibility and policy controls.
+
+### Deliverables
+- Plugin SDK (Python first, Rust adapter track)
+- Capability negotiation protocol + compatibility matrix enforcement
+- Policy profile packs for enterprise/operator archetypes
+
+### Exit criteria
+- Third-party plugin integration path documented and testable
+- Compatibility failures produce deterministic, actionable diagnostics
 
 ---
 
-## Polyglot implementation guardrails (must-follow)
+## Phase P6 — Multi-device and ecosystem expansion (24+ weeks)
 
-1. **No forced rewrite policy:** retain working Python logic; migrate only where performance/safety/portability gains are measurable.
-2. **Contract-first integration:** all cross-language boundaries must use versioned schemas and compatibility tests.
-3. **Offline guarantee:** every new feature must provide a cloud-free execution path.
-4. **Deterministic outputs:** multi-language modules must preserve stable report/evidence semantics.
-5. **Security-first native code:** Rust preferred for sensitive operations over unsafe C extensions.
-6. **Cross-platform CI gate:** merge blocked unless affected language lanes pass on target platforms.
-7. **Operator simplicity:** user-facing install/run experience must remain one-command/simple launcher.
-8. **Performance accountability:** migrations require benchmark evidence before and after.
+**Goal:** broaden practical support across mobile/tablet/edge classes.
 
----
+### Deliverables
+- Amazon Fire OS companion lane feasibility and MVP
+- ARM/tablet/edge profile packs (including Raspberry Pi OS class)
+- Hardware class certification matrix (laptop/desktop/tablet/mini-PC)
 
-## 16) Status tracking template (required in every sprint)
-
-- Planned
-- In progress
-- Done
-- Deferred
-- Blocked (with owner + unblock date)
-
-Each sprint must update:
-- delivery percentage
-- test pass/fail
-- release risk level
-- cross-platform parity score
-- KPI delta summary
-- known regressions and rollback notes
+### Exit criteria
+- Documented support tiers per OS and device class
+- Repeatable validation packs for each supported lane
 
 ---
 
-## Section-by-section compliance matrix (1–16)
+## 6) Prioritized improvement backlog (from current gap analysis)
 
-Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
+Priority legend: `P0` highest → `P3` lower.
 
-| Section | Compliance Criteria | Current Status | Evidence Source | Gap Owner | Target Sprint |
-|---|---|---|---|---|---|
-| 1 Vision | Core outcomes measurable and shipped | In progress | product + release outputs | PM | Rolling |
-| 2 Principles | Offline, parity, integrity, degradation validated | In progress | tests + real-device runs + probe reliability/parity metrics in `agent/reliability.py` | Eng Lead | Rolling |
-| 3 Baseline | Claims match repository reality | In progress | `ROADMAP.md` + schema/capability/migration guard implementation | Maintainer | Sprint 1 |
-| 4 Phases | Milestones mapped to delivery | In progress | planning board | PM | Rolling |
-| 5 Sprints | DoD satisfied for each sprint | In progress | sprint reports | Team | Rolling |
-| 6 Workflows | Required CI/CD/security workflows green | In progress | GitHub Actions | DevOps | Sprint 2 |
-| 7 Packaging | Target channels produce usable artifacts | In progress | release artifacts | Release Eng | Sprint 8 |
-| 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test + deterministic evidence/attestation tests in `tests/test_evidence.py` | Core Eng | Sprint 2 |
-| 9 Docs IA | Route-based portal complete | In progress | docs-site route pages (`/download`, `/docs/*`, `/project`, `/community`, `/status`) | DX | Sprint 12 |
-| 10 KPIs | Dashboard and metrics pipeline active | In progress | offline anomaly/confidence signals + `kpi-dashboard.yml` + `docs-site/data/kpi.json` snapshot artifacts | PM+Data | Sprint 3 |
-| 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates + plugin signature verification + report redaction/retention controls | Sec/QA | Rolling |
-| 12 Governance | Channelized release policy enforced | In progress | `release-channel-gates.yml` + release prerelease semantics in build workflow | Release Eng | Sprint 8 |
-| 13 Structure | Target repo layout adopted | In progress | repo tree | Maintainer | Sprint 4 |
-| 14 Milestones | M1/M2/M3 objective evidence available | Planned | milestone reports | PM | Rolling |
-| 15 Next actions | Action backlog actively executed | In progress | issue board + policy/plugin runtime implementation evidence in `agent/policy_pack.py`, `agent/plugin_manifest.py` + redaction/import/export controls in `agent/redaction.py` and `agent/cli.py` | Team | Rolling |
-| 16 Tracking | Sprint template fully maintained | Planned | sprint logs | PMO | Sprint 1 |
+- `P0` Add automated docs-claim verifier for roadmap/readiness/goal consistency
+- `P0` Expand OS parity test suite for probe contracts
+- `P0` Publish measurable release signoff policy for channel promotions
+- `P1` Implement Rust hot-path runner + benchmark reporting
+- `P1` Add Tauri implementation spike with parity report against Electron shell
+- `P1` Formalize mobile pairing security model and offline transport constraints
+- `P1` Add distribution-manifest verification metadata (signature links/status)
+- `P2` Implement plugin SDK package skeleton and examples
+- `P2` Capability negotiation protocol spec + tests
+- `P2` Extend KPI dashboard with trend windows and release regression markers
+- `P3` Add Fire OS feasibility lane and compatibility matrix
+- `P3` Add tablet-specific UX acceptance criteria and device-class profiles
 
 ---
 
-This roadmap intentionally balances ambition with verifiable delivery. The non-negotiable priorities remain: **offline trustworthiness, cross-platform reliability, and transparent evidence integrity**.
+## 7) KPI and quality gates
+
+Required for each phase closeout:
+
+- Test suite green (`pytest`) with coverage gate pass
+- Lint/format pass (`ruff`, `black --check`)
+- Release workflow health green for required matrix lanes
+- Updated readiness summary with objective metrics
+- Rollback and risk notes captured
+
+---
+
+## 8) Governance model for roadmap updates
+
+- Update cadence: every sprint close
+- Owner: maintainers + release engineering lead
+- Change rule: every roadmap status change must reference concrete repo evidence
+- Archive rule: replaced roadmap versions are stored under `archives/historical/`
+
+---
+
+## 9) Current phase focus (as of 2026-04-04)
+
+Active emphasis:
+
+1. P1 parity/reliability expansion
+2. P2 native acceleration proof
+3. P4 trust-channel governance hardening
+
+This keeps the project advanced, professional, and scalable while preserving truthful delivery reporting.
