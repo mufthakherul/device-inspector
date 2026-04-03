@@ -41,7 +41,7 @@ jobs:
                   Write-Host "makeappx.exe available at: $($makeAppx.Source)"
 
             - name: Upload lane validation metadata
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: msix-lane-validation
                   path: apps/desktop/package.json
