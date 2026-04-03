@@ -53,6 +53,24 @@ def _public_key_fingerprint(public_key_bytes: bytes) -> str:
     return _sha256_bytes(public_key_bytes)
 
 
+def create_attestation_metadata(
+    *,
+    signer_id: str,
+    canonical_hash: str,
+    generated_at: str | None = None,
+) -> Dict[str, Any]:
+    """Create deterministic attestation metadata for evidence bundles."""
+    generated_at = generated_at or (
+        datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat()
+    )
+    return {
+        "created_at": generated_at,
+        "signer_id": signer_id,
+        "canonical_hash_sha256": canonical_hash,
+        "signature_model": "detached-ed25519",
+    }
+
+
 def _sign_manifest_ed25519(
     manifest: Dict[str, Any],
     private_key_path: Path,
@@ -219,6 +237,12 @@ def write_evidence_manifest(
             private_key_path=sign_key_path,
             signature_path=sig_path,
         )
+        attestation = create_attestation_metadata(
+            signer_id=signature_info["public_key_fingerprint_sha256"],
+            canonical_hash=manifest_sha,
+            generated_at=generated_at,
+        )
+        manifest["attestation"] = attestation
         manifest["signature"] = {
             "algorithm": signature_info["algorithm"],
             "detached": True,

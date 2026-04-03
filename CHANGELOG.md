@@ -46,6 +46,8 @@ All notable changes to this project will be documented in this file.
 - Added policy-pack governance portability commands:
   - `inspecta policy-export`
   - `inspecta policy-import`
+- Added signed evidence attestation metadata:
+  - `agent/evidence.py`
 
 ---
 

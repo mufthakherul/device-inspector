@@ -95,6 +95,7 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add deterministic bundle mode with canonical ordering.
 - Introduce signed attestations (detached + in-manifest metadata).
 - Add forensic provenance metadata profile.
+- ✅ Signed attestation metadata now emitted with signed manifests (`agent/evidence.py` attestation record).
 
 ### Sprint 3 — Windows/macOS/Linux parity completion
 - Close remaining native probe gaps with standardized adapter contracts.
@@ -377,7 +378,7 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 | 5 Sprints | DoD satisfied for each sprint | In progress | sprint reports | Team | Rolling |
 | 6 Workflows | Required CI/CD/security workflows green | In progress | GitHub Actions | DevOps | Sprint 2 |
 | 7 Packaging | Target channels produce usable artifacts | In progress | release artifacts | Release Eng | Sprint 8 |
-| 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test + deterministic evidence tests in `tests/test_evidence.py` | Core Eng | Sprint 2 |
+| 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test + deterministic evidence/attestation tests in `tests/test_evidence.py` | Core Eng | Sprint 2 |
 | 9 Docs IA | Route-based portal complete | In progress | docs-site route pages (`/download`, `/docs/*`, `/project`, `/community`, `/status`) | DX | Sprint 12 |
 | 10 KPIs | Dashboard and metrics pipeline active | In progress | offline anomaly/confidence signals + `kpi-dashboard.yml` + `docs-site/data/kpi.json` snapshot artifacts | PM+Data | Sprint 3 |
 | 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates + plugin signature verification + report redaction/retention controls | Sec/QA | Rolling |

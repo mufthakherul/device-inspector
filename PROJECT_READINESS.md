@@ -89,6 +89,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Signed plugin-manifest verification runtime: `agent/plugin_manifest.py`, `inspecta plugin-verify`, `agent/cli.py --plugin-manifest --plugin-keyring`
 - Evidence redaction + retention controls: `agent/redaction.py`, `agent/cli.py --redaction-preset --retention-days`
 - Policy pack import/export governance workflow: `inspecta policy-import`, `inspecta policy-export`
+- Signed evidence attestation metadata in manifests: `agent/evidence.py`
 - Offline anomaly detector and confidence/explainability summary: `agent/anomaly.py`, `agent/report.py`
 - KPI snapshot data pipeline for docs-site status: `tools/generate_kpi_snapshot.py`, `docs-site/data/kpi.json`
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`

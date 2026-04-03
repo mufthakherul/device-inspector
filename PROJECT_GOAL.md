@@ -22,6 +22,7 @@ Current implementation snapshot (2026-04-04)
 - Signed plugin-manifest verification is implemented for CLI and pre-run enforcement (`agent/plugin_manifest.py`, `inspecta plugin-verify`, `--plugin-manifest`, `--plugin-keyring`).
 - Evidence redaction presets and retention policy metadata controls are implemented for report output (`agent/redaction.py`, `--redaction-preset`, `--retention-days`).
 - Policy-pack governance portability is supported via validated import/export commands (`inspecta policy-import`, `inspecta policy-export`).
+- Signed evidence manifests now emit deterministic attestation metadata alongside detached signatures (`agent/evidence.py`).
 
 Table of contents
 - Mission & vision

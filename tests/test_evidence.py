@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from agent.evidence import (
     audit_evidence_bundle,
     build_evidence_manifest,
@@ -151,3 +153,42 @@ def test_verify_manifest_accepts_legacy_hash_and_dot_slash_path(tmp_path: Path):
     result = verify_evidence_manifest(out, rel)
     assert result["ok"] is True
     assert result["exit_reason"] == "verified"
+
+
+def test_signed_manifest_includes_attestation_metadata(tmp_path: Path):
+    cryptography = pytest.importorskip("cryptography")
+    _ = cryptography
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    out = tmp_path
+    artifacts = out / "artifacts"
+    artifacts.mkdir()
+
+    (artifacts / "agent.log").write_text("ok", encoding="utf-8")
+
+    private_key = Ed25519PrivateKey.generate()
+    private_key_path = out / "attestor.pem"
+    private_key_path.write_bytes(
+        private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+    )
+
+    rel, sha = write_evidence_manifest(
+        output_dir=out,
+        relative_paths=["artifacts/agent.log"],
+        agent_version="0.1.0",
+        sign_key_path=private_key_path,
+    )
+
+    manifest_path = out / rel
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    assert len(sha) == 64
+    assert manifest["signature"]["detached"] is True
+    assert manifest["attestation"]["signature_model"] == "detached-ed25519"
+    assert len(manifest["attestation"]["canonical_hash_sha256"]) == 64
+    assert len(manifest["attestation"]["signer_id"]) == 64
