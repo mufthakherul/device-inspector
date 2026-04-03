@@ -11,7 +11,7 @@ from __future__ import annotations
 import datetime
 from typing import Any, Dict, List, Optional
 
-from . import anomaly, scoring
+from . import anomaly, policy_pack, scoring
 from .schema_compat import REPORT_SCHEMA_VERSION
 
 
@@ -75,6 +75,8 @@ def compose_report(
     profile: str = "default",
     smart_status: Optional[str] = None,
     native: Optional[Dict[str, Any]] = None,
+    policy_pack_payload: Optional[Dict[str, Any]] = None,
+    plugin_manifest_verification: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Compose a minimal report dict.
 
@@ -114,6 +116,11 @@ def compose_report(
 
     if native is not None:
         report["native"] = native
+
+    if plugin_manifest_verification is not None:
+        report.setdefault("evidence", {})[
+            "plugin_manifest"
+        ] = plugin_manifest_verification
 
     # Simple scoring heuristics based on tests
     storage_score = 50  # Default
@@ -193,6 +200,47 @@ def compose_report(
         overall, grade, profile, report["scores"]
     )
     report["summary"]["failure_classification"] = failure_classification
+
+    if policy_pack_payload is not None:
+        context = {
+            "scores": report["scores"],
+            "summary": report["summary"],
+            "mode": mode,
+            "profile": profile,
+            "tests": tests,
+        }
+        policy_result = policy_pack.evaluate_policy_pack(policy_pack_payload, context)
+        adjusted_score = max(0, min(100, overall + int(policy_result["score_delta"])))
+        adjusted_grade = scoring.grade_from_score(adjusted_score)
+
+        report["summary"]["overall_score"] = adjusted_score
+        report["summary"]["grade"] = adjusted_grade
+
+        base_recommendation = report["summary"].get("recommendation", "")
+        if policy_result["status"] == "fail":
+            report["summary"]["recommendation"] = (
+                f"{base_recommendation}. Policy pack marked this "
+                "device as non-compliant "
+                f"for target profile '{policy_result['target_profile']}'."
+            )
+            if "policy_violation" not in report["summary"]["failure_classification"]:
+                report["summary"]["failure_classification"].append("policy_violation")
+        elif policy_result["status"] in {"warn", "recommend"}:
+            report["summary"]["recommendation"] = (
+                f"{base_recommendation}. Policy pack produced additional "
+                f"{policy_result['status']} guidance."
+            )
+
+        report["summary"]["policy_pack"] = {
+            "pack_id": policy_result["pack_id"],
+            "display_name": policy_result["display_name"],
+            "target_profile": policy_result["target_profile"],
+            "status": policy_result["status"],
+            "rules_evaluated": policy_result["rules_evaluated"],
+            "rules_triggered": policy_result["rules_triggered"],
+            "score_delta": policy_result["score_delta"],
+            "triggered_rules": policy_result["triggered_rules"],
+        }
 
     anomaly_result = anomaly.analyze_offline_anomalies(
         tests=tests,

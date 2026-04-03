@@ -139,11 +139,13 @@ Build `inspecta` into a **professional, modern, cross-platform, offline-first, s
 - Add policy profiles (refurbish shop, enterprise IT, field service, resale audit).
 - Add retention policy controls and evidence redaction presets.
 - Add organization policy export/import.
+- ✅ Runtime policy-pack evaluation foundation implemented (`agent/policy_pack.py`, `--policy-pack` in `agent/cli.py`, summary wiring in `agent/report.py`).
 
 ### Sprint 11 — SDK and plugin platform
 - Plugin SDK for Python + Rust adapters.
 - Capability negotiation protocol.
 - Signed plugin manifests and compatibility checks.
+- ✅ Signed plugin-manifest verification foundation implemented (`agent/plugin_manifest.py`, `inspecta plugin-verify`, `--plugin-manifest` + `--plugin-keyring`).
 
 ### Sprint 12 — Governance, docs IA v2, release readiness
 - Align all top-level docs with actual implementation state.
@@ -376,11 +378,11 @@ Use this matrix each sprint to ensure roadmap integrity and avoid over-claiming.
 | 8 Full mode | Strict completion criteria passed | In progress | `agent/cli.py` checkpoint state + `tests/test_cli_run_modes.py` resume test + deterministic evidence tests in `tests/test_evidence.py` | Core Eng | Sprint 2 |
 | 9 Docs IA | Route-based portal complete | In progress | docs-site route pages (`/download`, `/docs/*`, `/project`, `/community`, `/status`) | DX | Sprint 12 |
 | 10 KPIs | Dashboard and metrics pipeline active | In progress | offline anomaly/confidence signals + `kpi-dashboard.yml` + `docs-site/data/kpi.json` snapshot artifacts | PM+Data | Sprint 3 |
-| 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates | Sec/QA | Rolling |
+| 11 Risks | Mitigations enforced by policy/tests | In progress | risk + CI gates + plugin signature verification command (`inspecta plugin-verify`) | Sec/QA | Rolling |
 | 12 Governance | Channelized release policy enforced | In progress | `release-channel-gates.yml` + release prerelease semantics in build workflow | Release Eng | Sprint 8 |
 | 13 Structure | Target repo layout adopted | In progress | repo tree | Maintainer | Sprint 4 |
 | 14 Milestones | M1/M2/M3 objective evidence available | Planned | milestone reports | PM | Rolling |
-| 15 Next actions | Action backlog actively executed | In progress | issue board | Team | Rolling |
+| 15 Next actions | Action backlog actively executed | In progress | issue board + policy/plugin runtime implementation evidence in `agent/policy_pack.py`, `agent/plugin_manifest.py` | Team | Rolling |
 | 16 Tracking | Sprint template fully maintained | Planned | sprint logs | PMO | Sprint 1 |
 
 ---

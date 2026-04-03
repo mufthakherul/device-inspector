@@ -27,7 +27,9 @@ from .evidence import (
     write_evidence_manifest,
 )
 from .logging_utils import setup_logging
+from .plugin_manifest import PluginManifestError, verify_plugin_manifest
 from .plugins import battery, cpu_bench, disk_perf, inventory, memtest, sensors, smart
+from .policy_pack import PolicyPackError, load_policy_pack
 from .profiles import get_profile, is_valid_profile
 from .report import compose_report
 from .report_formatter import (
@@ -213,6 +215,30 @@ def inventory_cmd(use_sample: bool) -> None:
     help=("Optional path to Ed25519 private key (PEM) for detached manifest signing."),
 )
 @click.option(
+    "--policy-pack",
+    default=None,
+    type=click.Path(path_type=Path),
+    help=(
+        "Optional policy-pack JSON path. Applies enterprise policy evaluation "
+        "to report summary and recommendation."
+    ),
+)
+@click.option(
+    "--plugin-manifest",
+    default=None,
+    type=click.Path(path_type=Path),
+    help=(
+        "Optional signed plugin manifest JSON path to verify before run "
+        "and include in evidence metadata."
+    ),
+)
+@click.option(
+    "--plugin-keyring",
+    default=None,
+    type=click.Path(path_type=Path),
+    help=("Plugin keyring JSON file used to verify --plugin-manifest signatures."),
+)
+@click.option(
     "--resume/--no-resume",
     default=True,
     help=(
@@ -238,6 +264,9 @@ def run(
     timeout: int | None,
     dry_run: bool,
     sign_key: str | None,
+    policy_pack: Path | None,
+    plugin_manifest: Path | None,
+    plugin_keyring: Path | None,
     resume: bool,
 ) -> None:
     """Run a complete device inspection and generate report.
@@ -315,6 +344,34 @@ def run(
     if upload and not token:
         logger.error("--upload requires --token")
         raise SystemExit(20)
+
+    loaded_policy_pack: dict[str, Any] | None = None
+    if policy_pack is not None:
+        try:
+            loaded_policy_pack = load_policy_pack(policy_pack)
+            logger.info("Loaded policy pack: %s", loaded_policy_pack.get("pack_id"))
+        except PolicyPackError as exc:
+            logger.error("Policy pack validation failed: %s", exc)
+            raise SystemExit(20)
+
+    plugin_verification: dict[str, Any] | None = None
+    if plugin_manifest is not None:
+        if plugin_keyring is None:
+            logger.error("--plugin-manifest requires --plugin-keyring")
+            raise SystemExit(20)
+        try:
+            plugin_verification = verify_plugin_manifest(
+                manifest_path=plugin_manifest,
+                keyring_path=plugin_keyring,
+            )
+            logger.info(
+                "Plugin manifest verified: %s@%s",
+                plugin_verification.get("plugin_id"),
+                plugin_verification.get("version"),
+            )
+        except PluginManifestError as exc:
+            logger.error("Plugin manifest verification failed: %s", exc)
+            raise SystemExit(20)
 
     # Set up structured logging to file
     log_file = artifacts_dir / "agent.log"
@@ -1157,6 +1214,8 @@ def run(
         profile=profile,
         smart_status=smart_status,
         native=native_capabilities,
+        policy_pack_payload=loaded_policy_pack,
+        plugin_manifest_verification=plugin_verification,
     )
 
     report_path = out_dir / "report.json"
@@ -1606,6 +1665,46 @@ def audit_cmd(
         )
 
     raise SystemExit(int(result.get("exit_code", 1)))
+
+
+@cli.command("plugin-verify")
+@click.argument("manifest_file", type=click.Path(path_type=Path, exists=True))
+@click.option(
+    "--keyring",
+    required=True,
+    type=click.Path(path_type=Path, exists=True),
+    help="Path to plugin keyring JSON used for signature verification.",
+)
+@click.option(
+    "--json",
+    "as_json",
+    is_flag=True,
+    help="Output verification result as JSON.",
+)
+def plugin_verify_cmd(manifest_file: Path, keyring: Path, as_json: bool) -> None:
+    """Verify signed plugin manifest against schema + keyring."""
+    try:
+        result = verify_plugin_manifest(
+            manifest_path=manifest_file,
+            keyring_path=keyring,
+        )
+    except PluginManifestError as exc:
+        if as_json:
+            click.echo(json.dumps({"ok": False, "error": str(exc)}, indent=2))
+        else:
+            click.echo(f"Plugin manifest verification failed: {exc}")
+        raise SystemExit(1)
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2))
+    else:
+        click.echo(
+            "Plugin manifest verified: "
+            f"{result.get('plugin_id')}@{result.get('version')} "
+            f"(key_id={result.get('public_key_id')})"
+        )
+
+    raise SystemExit(0)
 
 
 # ============================================================================

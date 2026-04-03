@@ -233,17 +233,18 @@ def compute_overall_score(
 
     overall = int(total_weighted / total_weight) if total_weight > 0 else 50
 
-    # Determine grade
-    if overall >= 90:
-        grade = "Excellent"
-    elif overall >= 75:
-        grade = "Good"
-    elif overall >= 50:
-        grade = "Fair"
-    else:
-        grade = "Poor"
+    return overall, grade_from_score(overall)
 
-    return overall, grade
+
+def grade_from_score(overall_score: int) -> str:
+    """Map numeric score to canonical grade label."""
+    if overall_score >= 90:
+        return "Excellent"
+    if overall_score >= 75:
+        return "Good"
+    if overall_score >= 50:
+        return "Fair"
+    return "Poor"
 
 
 def get_profile_weights(profile: str) -> Dict[str, float]:

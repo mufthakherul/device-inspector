@@ -32,6 +32,14 @@ All notable changes to this project will be documented in this file.
   - `.github/workflows/kpi-dashboard.yml`
   - `tools/generate_kpi_snapshot.py`
   - `docs-site/data/kpi.json` + status page KPI rendering
+- Added enterprise policy-pack runtime evaluation flow:
+  - `agent/policy_pack.py`
+  - `agent/cli.py` (`--policy-pack`)
+  - `agent/report.py` policy summary integration
+- Added signed plugin-manifest verification flow:
+  - `agent/plugin_manifest.py`
+  - `inspecta plugin-verify`
+  - `agent/cli.py` (`--plugin-manifest`, `--plugin-keyring`)
 
 ---
 

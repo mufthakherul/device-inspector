@@ -18,6 +18,8 @@ Current implementation snapshot (2026-04-04)
 - Offline anomaly detection is integrated into report summary with confidence scoring and explainability metadata.
 - Rust SMART integration contract boundary is defined and tested via stable payload shape checks.
 - KPI snapshot generation pipeline is implemented for docs-site status metrics (`tools/generate_kpi_snapshot.py`, `kpi-dashboard.yml`).
+- Enterprise policy-pack runtime evaluation is now integrated into report generation (`agent/policy_pack.py`, `--policy-pack`).
+- Signed plugin-manifest verification is implemented for CLI and pre-run enforcement (`agent/plugin_manifest.py`, `inspecta plugin-verify`, `--plugin-manifest`, `--plugin-keyring`).
 
 Table of contents
 - Mission & vision

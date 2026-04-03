@@ -85,6 +85,8 @@ The repository now includes the roadmap workflow family for core delivery and mo
 
 - Policy pack schema baseline: `schemas/policy-pack-schema-1.0.0.json`
 - Plugin manifest/signing schema baseline: `schemas/plugin-manifest-schema-1.0.0.json`
+- Policy pack runtime evaluation pipeline: `agent/policy_pack.py`, `agent/report.py`, `agent/cli.py --policy-pack`
+- Signed plugin-manifest verification runtime: `agent/plugin_manifest.py`, `inspecta plugin-verify`, `agent/cli.py --plugin-manifest --plugin-keyring`
 - Offline anomaly detector and confidence/explainability summary: `agent/anomaly.py`, `agent/report.py`
 - KPI snapshot data pipeline for docs-site status: `tools/generate_kpi_snapshot.py`, `docs-site/data/kpi.json`
 - Rust SMART integration contract boundary tests: `tests/test_smart_rust_contract.py`
@@ -123,7 +125,7 @@ Mobile/embedded OS families (Android/iOS/HarmonyOS/Amazon Fire OS, etc.) are han
 
 ## Recommended next priorities
 
-1. Continue roadmap item execution for diagnostics depth and parity contracts.
+1. Continue roadmap execution for retention controls/evidence redaction presets and org policy import/export.
 2. Enrich docs-site route IA content depth and automate route metadata refresh.
 3. Add/track KPI dashboard artifacts for reliability/performance trends.
 4. Keep readiness docs synchronized with CI and real-device validation outputs each sprint.
