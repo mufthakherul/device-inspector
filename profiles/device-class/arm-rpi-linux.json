@@ -1,7 +1,7 @@
 {
-  "profile_version": "1.0.0",
-  "class_id": "arm-rpi-linux",
-  "support_level": "beta",
-  "recommended_mode": "quick",
-  "validation_pack": "arm-rpi-linux-baseline"
+    "profile_version": "1.0.0",
+    "class_id": "arm-rpi-linux",
+    "support_level": "beta",
+    "recommended_mode": "quick",
+    "validation_pack": "arm-rpi-linux-baseline"
 }

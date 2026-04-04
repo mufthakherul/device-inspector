@@ -1,18 +1,18 @@
 {
-  "policy_version": "1.0.0",
-  "phase": "P3",
-  "pairing": {
-    "token_prefix": "inspecta:pairing:offline",
-    "modes": [
-      "qr",
-      "file",
-      "lan"
-    ],
-    "max_ttl_minutes": 10,
-    "security": {
-      "require_integrity_hash": true,
-      "disallow_cloud_dependency": true,
-      "rotation_required": true
+    "policy_version": "1.0.0",
+    "phase": "P3",
+    "pairing": {
+        "token_prefix": "inspecta:pairing:offline",
+        "modes": [
+            "qr",
+            "file",
+            "lan"
+        ],
+        "max_ttl_minutes": 10,
+        "security": {
+            "require_integrity_hash": true,
+            "disallow_cloud_dependency": true,
+            "rotation_required": true
+        }
     }
-  }
 }

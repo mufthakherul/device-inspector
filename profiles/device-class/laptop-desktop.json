@@ -1,7 +1,7 @@
 {
-  "profile_version": "1.0.0",
-  "class_id": "laptop-desktop",
-  "support_level": "stable",
-  "recommended_mode": "full",
-  "validation_pack": "core-laptop-desktop"
+    "profile_version": "1.0.0",
+    "class_id": "laptop-desktop",
+    "support_level": "stable",
+    "recommended_mode": "full",
+    "validation_pack": "core-laptop-desktop"
 }
