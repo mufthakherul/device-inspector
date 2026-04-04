@@ -9,7 +9,9 @@ _Last updated: 2026-03-29_
 | Linux | `.AppImage`, `.deb`, `.rpm` | `build-desktop-apps.yml`, `build-release.yml` | stable | CLI + desktop packaging active |
 | Android | `.apk`, `.aab` | `build-mobile-android.yml` | stable | Unsigned build guaranteed; signed lane optional with secrets |
 | iOS | `.ipa` | `build-mobile-ios.yml` | stable | Unsigned build guaranteed; signed lane optional with secrets |
+| Fire OS (companion lane) | `.apk` (Android-compatible) | `device-class-expansion-gate.yml` | scaffold | Feasibility/MVP lane with offline-only validation focus |
 | HarmonyOS | `.hap` | `build-harmonyos.yml` | scaffold | Toolchain probe + scaffold artifacts until CI toolchain is provisioned |
+| Tablet/mobile class profiles | Profile packs + matrix docs | `device-class-expansion-gate.yml` | beta | Tablet/ARM/edge coverage managed by device-class validation packs |
 
 ## Support policy
 

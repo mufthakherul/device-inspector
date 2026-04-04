@@ -86,6 +86,13 @@ All notable changes to this project will be documented in this file.
   - Secure key/material handling plan for Kotlin/Swift bridge tracks (`docs/MOBILE_SECURE_KEY_PLAN.md`)
   - Desktop/mobile hardening CI gate workflow (`.github/workflows/desktop-mobile-hardening-gate.yml`)
   - Hardening validation coverage (`tests/test_validate_desktop_migration_gate.py`, `tests/test_validate_mobile_pairing_policy.py`)
+- Added P6 multi-device ecosystem expansion baseline:
+  - Device-class profile packs for laptop/tablet/ARM/edge/Fire OS companion lanes (`profiles/device-class/*.json`)
+  - Device-class runtime assessment in report composition (`agent/device_class_profiles.py`, `agent/report.py`)
+  - Fire OS feasibility MVP lane documentation (`docs/FIRE_OS_FEASIBILITY_MVP.md`)
+  - Hardware class certification matrix (`docs/HARDWARE_CLASS_CERTIFICATION_MATRIX.md`)
+  - P6 multi-device expansion validation + CI gate (`tools/validate_p6_device_class_expansion.py`, `.github/workflows/device-class-expansion-gate.yml`)
+  - P6 validation coverage (`tests/test_device_class_profiles.py`, `tests/test_validate_p6_device_class_expansion.py`)
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

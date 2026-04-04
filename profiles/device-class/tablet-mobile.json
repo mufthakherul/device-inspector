@@ -1,0 +1,7 @@
+{
+  "profile_version": "1.0.0",
+  "class_id": "tablet-mobile",
+  "support_level": "beta",
+  "recommended_mode": "quick",
+  "validation_pack": "tablet-mobile-baseline"
+}

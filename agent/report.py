@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from . import anomaly, policy_pack, reliability, scoring
 from .analytics_profile import get_offline_analytics_profile
+from .device_class_profiles import get_device_class_assessment
 from .schema_compat import REPORT_SCHEMA_VERSION
 
 
@@ -317,6 +318,7 @@ def compose_report(
         tests=tests,
         scores=report["scores"],
     )
+    report["summary"]["device_class_assessment"] = get_device_class_assessment(device)
     analytics_runtime = get_offline_analytics_profile(prefer_onnx=True)
     report["summary"]["confidence_score"] = anomaly_result["confidence_score"]
     report["summary"]["anomalies"] = anomaly_result["anomalies"]

@@ -50,6 +50,10 @@ Current implementation snapshot (2026-04-04)
 - Mobile offline pairing hardening policy and validator are now implemented (`apps/mobile/pairing-policy-1.0.0.json`, `tools/validate_mobile_pairing_policy.py`).
 - Mobile companion pairing now supports hardened QR/file/LAN mode flows with token freshness state (`apps/mobile/lib/main.dart`).
 - Secure key/material handling plan for Kotlin/Swift mobile bridge tracks is now published (`docs/MOBILE_SECURE_KEY_PLAN.md`).
+- P6 multi-device expansion baseline is now implemented with device-class profile packs for laptop/tablet/ARM/edge/Fire OS companion lanes (`profiles/device-class/*.json`).
+- Report summary now includes device-class assessment output for support tier and validation pack context (`agent/device_class_profiles.py`, `agent/report.py`).
+- Fire OS feasibility/MVP lane and hardware class certification matrix are now published (`docs/FIRE_OS_FEASIBILITY_MVP.md`, `docs/HARDWARE_CLASS_CERTIFICATION_MATRIX.md`).
+- P6 asset validation automation is now implemented and CI-gated (`tools/validate_p6_device_class_expansion.py`, `.github/workflows/device-class-expansion-gate.yml`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 

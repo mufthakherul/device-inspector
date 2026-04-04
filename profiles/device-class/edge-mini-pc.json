@@ -1,0 +1,7 @@
+{
+  "profile_version": "1.0.0",
+  "class_id": "edge-mini-pc",
+  "support_level": "beta",
+  "recommended_mode": "full",
+  "validation_pack": "edge-mini-pc-baseline"
+}

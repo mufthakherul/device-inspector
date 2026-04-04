@@ -1,0 +1,7 @@
+{
+    "profile_version": "1.0.0",
+    "class_id": "fireos-companion",
+    "support_level": "scaffold",
+    "recommended_mode": "quick",
+    "validation_pack": "fireos-companion-mvp"
+}

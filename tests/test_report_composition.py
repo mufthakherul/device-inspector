@@ -140,6 +140,7 @@ def test_compose_report_includes_anomaly_summary_fields():
     assert isinstance(report["summary"].get("confidence_score"), int)
     assert isinstance(report["summary"].get("anomalies"), list)
     assert isinstance(report["summary"].get("explainability"), dict)
+    assert isinstance(report["summary"].get("device_class_assessment"), dict)
     assert isinstance(report["summary"].get("analytics_runtime_profile"), dict)
     assert (
         report["summary"]["explainability"]["analytics_runtime_profile"]["offline"]

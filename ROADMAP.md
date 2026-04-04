@@ -62,6 +62,11 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
   - Capability negotiation protocol and compatibility diagnostics (`agent/plugin_negotiation.py`, `inspecta plugin-negotiate`)
   - Runtime capability matrix enforcement for signed plugin manifests (`agent/cli.py --plugin-manifest --plugin-keyring --plugin-surface`)
   - Plugin SDK skeleton tracks (`sdk/python/*`, `sdk/rust/*`)
+- P6 multi-device expansion baseline:
+  - Device-class profile packs for laptop/tablet/ARM/edge/Fire OS companion (`profiles/device-class/*.json`)
+  - Report-level device class assessment output (`agent/device_class_profiles.py`, `agent/report.py`)
+  - Multi-device expansion validation tooling and CI gate (`tools/validate_p6_device_class_expansion.py`, `.github/workflows/device-class-expansion-gate.yml`)
+  - Fire OS feasibility lane and hardware certification matrix docs (`docs/FIRE_OS_FEASIBILITY_MVP.md`, `docs/HARDWARE_CLASS_CERTIFICATION_MATRIX.md`)
 - Strong workflow matrix in `.github/workflows/` including:
   - `ci-core.yml`, `ci-integration-matrix.yml`, `release.yml`, `build-release.yml`, `release-channel-gates.yml`, `channel-promotion.yml`, `sbom-security.yml`, `performance-regression.yml`, `polyglot-build.yml`
 - Desktop/mobile scaffolds:
@@ -81,11 +86,10 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
 2. OS-family parity contract tests across all supported host families
 3. Tauri production-ready lane (currently scaffold/contract level)
 4. Native mobile bridges (Kotlin/Swift) execution implementation for secure storage/sensor specialization
-6. ISO reproducibility attestations + deeper SBOM embedding strategy
-7. Plugin marketplace governance and lifecycle automation depth
-8. Strong release promotion governance (approval/signoff workflow depth)
-9. Formalized milestone evidence packs (M1/M2/M3 objective scorecards)
-10. Expanded device-class coverage for tablet/ARM/edge profiles
+5. ISO reproducibility attestations + deeper SBOM embedding strategy
+6. Plugin marketplace governance and lifecycle automation depth
+7. Strong release promotion governance (approval/signoff workflow depth)
+8. Formalized milestone evidence packs (M1/M2/M3 objective scorecards)
 
 ---
 
@@ -311,12 +315,34 @@ Non-negotiables:
 
 ## Phase P6 — Multi-device and ecosystem expansion (24+ weeks)
 
+**Status:** Implemented (2026-04-04)
+
 **Goal:** broaden practical support across mobile/tablet/edge classes.
 
 ### Deliverables
 - Amazon Fire OS companion lane feasibility and MVP
 - ARM/tablet/edge profile packs (including Raspberry Pi OS class)
 - Hardware class certification matrix (laptop/desktop/tablet/mini-PC)
+
+### Delivered evidence
+- Fire OS companion lane feasibility and MVP scope artifacts:
+  - `docs/FIRE_OS_FEASIBILITY_MVP.md`
+  - `profiles/device-class/fireos-companion.json`
+- Device-class profile packs for tablet/ARM/edge/laptop:
+  - `profiles/device-class/tablet-mobile.json`
+  - `profiles/device-class/arm-rpi-linux.json`
+  - `profiles/device-class/edge-mini-pc.json`
+  - `profiles/device-class/laptop-desktop.json`
+- Hardware class certification matrix and support policy:
+  - `docs/HARDWARE_CLASS_CERTIFICATION_MATRIX.md`
+  - `docs/PLATFORM_CAPABILITY_MATRIX.md`
+- Runtime and validation integration:
+  - `agent/device_class_profiles.py`
+  - `agent/report.py` (summary device class assessment)
+  - `tools/validate_p6_device_class_expansion.py`
+  - `.github/workflows/device-class-expansion-gate.yml`
+  - `tests/test_device_class_profiles.py`
+  - `tests/test_validate_p6_device_class_expansion.py`
 
 ### Exit criteria
 - Documented support tiers per OS and device class
@@ -363,8 +389,8 @@ Required for each phase closeout:
 
 Active emphasis:
 
-1. P6 multi-device ecosystem expansion
-2. Native acceleration expansion to additional probes and native-enabled performance baselines
-3. Tauri production-readiness and mobile native bridge implementation execution
+1. Native acceleration expansion to additional probes and native-enabled performance baselines
+2. Tauri production-readiness and mobile native bridge implementation execution
+3. ISO reproducibility attestations and milestone evidence pack automation
 
 This keeps the project advanced, professional, and scalable while preserving truthful delivery reporting.

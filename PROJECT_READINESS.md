@@ -41,6 +41,9 @@ The project is in a strong development-ready state with:
 - Desktop migration gate criteria and deterministic validation tooling are now present for Electron↔Tauri readiness checks
 - Mobile offline pairing hardening policy and validation tooling are now present for QR/file/LAN mode governance
 - Mobile secure key/material handling plan is now published for Kotlin/Swift bridge execution tracks
+- P6 multi-device expansion profile packs are now present for laptop/tablet/ARM/edge/Fire OS companion lanes
+- Report summary now emits device-class assessment metadata for support tier and validation-pack context
+- Fire OS feasibility and hardware certification matrix documentation are now present and CI-validated
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -50,8 +53,8 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `273 passed`
-- ✅ **Coverage gate:** `73.99%` (required `35%`)
+- ✅ **Tests:** `278 passed`
+- ✅ **Coverage gate:** `74.18%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
 
@@ -106,6 +109,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - `doc-claim-validator.yml`
 - `release-signoff-gate.yml`
 - `desktop-mobile-hardening-gate.yml`
+- `device-class-expansion-gate.yml`
 
 ---
 
@@ -143,6 +147,10 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Desktop migration gate criteria + validator + tests: `apps/desktop/engine/migration-gate-criteria-1.0.0.json`, `tools/validate_desktop_migration_gate.py`, `tests/test_validate_desktop_migration_gate.py`
 - Mobile pairing hardening policy + validator + tests: `apps/mobile/pairing-policy-1.0.0.json`, `tools/validate_mobile_pairing_policy.py`, `tests/test_validate_mobile_pairing_policy.py`
 - Mobile secure key/material handling plan: `docs/MOBILE_SECURE_KEY_PLAN.md`
+- P6 device-class profile packs: `profiles/device-class/*.json`
+- Device-class runtime assessment integration: `agent/device_class_profiles.py`, `agent/report.py`
+- P6 expansion validator + tests: `tools/validate_p6_device_class_expansion.py`, `tests/test_validate_p6_device_class_expansion.py`, `tests/test_device_class_profiles.py`
+- Fire OS feasibility + hardware class certification docs: `docs/FIRE_OS_FEASIBILITY_MVP.md`, `docs/HARDWARE_CLASS_CERTIFICATION_MATRIX.md`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`
@@ -184,7 +192,7 @@ Mobile/embedded OS families (Android/iOS/HarmonyOS/Amazon Fire OS, etc.) are han
 1. Extend native acceleration to additional high-cost probes with native-enabled benchmark baselines.
 2. Implement execution-ready Kotlin/Swift mobile secure-storage bridges from published plan.
 3. Add distribution-manifest signature verification linkage into docs-site download UX.
-4. Keep readiness docs synchronized with CI and real-device validation outputs each sprint.
+4. Add ISO reproducibility attestation and milestone evidence-pack automation.
 
 ---
 
