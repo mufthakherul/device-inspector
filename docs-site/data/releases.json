@@ -1,32 +1,10 @@
 {
   "source": "github-releases/latest",
-  "generated_at": "2026-04-03T19:05:45+00:00",
+  "generated_at": "2026-04-04T03:15:42+00:00",
   "latest": {
-    "tag_name": "v0.1.0",
-    "published_at": "2025-10-30T20:09:13Z",
-    "html_url": "https://github.com/mufthakherul/inspecta-nexus/releases/tag/v0.1.0"
+    "tag_name": "v0.1.1",
+    "published_at": "2026-04-03T19:11:42Z",
+    "html_url": "https://github.com/mufthakherul/inspecta-nexus/releases/tag/v0.1.1"
   },
-  "groups": {
-    "Linux": [
-      {
-        "name": "inspecta-0.1.0-linux.zip",
-        "size_bytes": 27377650,
-        "browser_download_url": "https://github.com/mufthakherul/inspecta-nexus/releases/download/v0.1.0/inspecta-0.1.0-linux.zip"
-      }
-    ],
-    "macOS": [
-      {
-        "name": "inspecta-0.1.0-macos.zip",
-        "size_bytes": 13899947,
-        "browser_download_url": "https://github.com/mufthakherul/inspecta-nexus/releases/download/v0.1.0/inspecta-0.1.0-macos.zip"
-      }
-    ],
-    "Windows": [
-      {
-        "name": "inspecta-0.1.0-windows.zip",
-        "size_bytes": 14483350,
-        "browser_download_url": "https://github.com/mufthakherul/inspecta-nexus/releases/download/v0.1.0/inspecta-0.1.0-windows.zip"
-      }
-    ]
-  }
+  "groups": {}
 }

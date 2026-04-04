@@ -1,12 +1,59 @@
 {
-    "manifest_version": "1.0.0",
-    "source": "distribution-manifest/bootstrap",
-    "generated_at": "2026-04-04T00:00:00+00:00",
-    "release": {
-        "tag_name": null,
-        "published_at": null,
-        "html_url": null
+  "manifest_version": "1.1.0",
+  "source": "distribution-manifest/release-sync",
+  "generated_at": "2026-04-04T03:15:42+00:00",
+  "release": {
+    "tag_name": "v0.1.1",
+    "published_at": "2026-04-03T19:11:42Z",
+    "html_url": "https://github.com/mufthakherul/inspecta-nexus/releases/tag/v0.1.1"
+  },
+  "artifact_groups": [],
+  "verification_summary": {
+    "groups_total": 0,
+    "groups_with_checksums": 0,
+    "groups_with_signatures": 0,
+    "signed_assets_inferred_total": 0
+  },
+  "channels": [
+    {
+      "channel": "chocolatey",
+      "platform": "windows",
+      "root": "packaging/chocolatey",
+      "status": "available",
+      "files": [
+        "packaging/chocolatey/inspecta-agent.nuspec",
+        "packaging/chocolatey/tools/chocolateyinstall.ps1",
+        "packaging/chocolatey/tools/chocolateyuninstall.ps1"
+      ]
     },
-    "artifact_groups": [],
-    "channels": []
+    {
+      "channel": "homebrew",
+      "platform": "macos-linux",
+      "root": "packaging/homebrew",
+      "status": "available",
+      "files": [
+        "packaging/homebrew/inspecta.rb"
+      ]
+    },
+    {
+      "channel": "scoop",
+      "platform": "windows",
+      "root": "packaging/scoop",
+      "status": "available",
+      "files": [
+        "packaging/scoop/inspecta-agent.json"
+      ]
+    },
+    {
+      "channel": "winget",
+      "platform": "windows",
+      "root": "packaging/winget",
+      "status": "available",
+      "files": [
+        "packaging/winget/inspecta-agent.installer.yaml",
+        "packaging/winget/inspecta-agent.locale.en-US.yaml",
+        "packaging/winget/inspecta-agent.yaml"
+      ]
+    }
+  ]
 }
