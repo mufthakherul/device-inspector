@@ -49,6 +49,11 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
   - Native batch bridge command contract (`agent/native_bridge.py`)
   - Benchmark harness for baseline vs runner throughput artifact generation (`tools/benchmark_native_probe_runner.py`)
   - CLI run artifact and telemetry integration (`artifacts/native_probe_runner.json`, `agent/cli.py`)
+- P3 desktop/mobile hardening baseline:
+  - Desktop migration gate criteria with deterministic validator (`apps/desktop/engine/migration-gate-criteria-1.0.0.json`, `tools/validate_desktop_migration_gate.py`)
+  - Mobile offline pairing policy and validator (`apps/mobile/pairing-policy-1.0.0.json`, `tools/validate_mobile_pairing_policy.py`)
+  - Mobile pairing mode hardening for QR/file/LAN and token freshness controls (`apps/mobile/lib/main.dart`)
+  - Secure key/material handling plan for Kotlin/Swift bridge tracks (`docs/MOBILE_SECURE_KEY_PLAN.md`)
 - P4 trust-channel governance baseline:
   - Measurable signoff policy document (`docs/RELEASE_SIGNOFF_POLICY.md`)
   - Release signoff validation and audit trail (`tools/validate_release_signoff.py`, `.github/workflows/release-signoff-gate.yml`)
@@ -75,8 +80,7 @@ Legacy roadmap archived at: `archives/historical/ROADMAP_legacy_2026-04-04.md`.
 1. Extend native acceleration beyond SMART contract hot path and validate 30–50% gains on real native-enabled environments
 2. OS-family parity contract tests across all supported host families
 3. Tauri production-ready lane (currently scaffold/contract level)
-4. Mobile advanced offline pairing modes (QR/file/LAN hardening completeness)
-5. Native mobile bridges (Kotlin/Swift) for secure storage/sensor specialization
+4. Native mobile bridges (Kotlin/Swift) execution implementation for secure storage/sensor specialization
 6. ISO reproducibility attestations + deeper SBOM embedding strategy
 7. Plugin marketplace governance and lifecycle automation depth
 8. Strong release promotion governance (approval/signoff workflow depth)
@@ -212,12 +216,30 @@ Non-negotiables:
 
 ## Phase P3 — Desktop and mobile product hardening (10–14 weeks)
 
+**Status:** Implemented (2026-04-04)
+
 **Goal:** mature companion surfaces beyond scaffold state.
 
 ### Deliverables
 - Desktop migration gate criteria (Electron↔Tauri) with objective pass/fail rules
 - Mobile offline pairing hardening (QR/file/LAN modes)
 - Secure key/material handling plan for mobile-native bridges
+
+### Delivered evidence
+- Desktop migration gate criteria + validation automation:
+  - `apps/desktop/engine/migration-gate-criteria-1.0.0.json`
+  - `tools/validate_desktop_migration_gate.py`
+  - `tests/test_validate_desktop_migration_gate.py`
+- Mobile offline pairing hardening policy + validation:
+  - `apps/mobile/pairing-policy-1.0.0.json`
+  - `tools/validate_mobile_pairing_policy.py`
+  - `tests/test_validate_mobile_pairing_policy.py`
+- Mobile app pairing mode implementation baseline:
+  - `apps/mobile/lib/main.dart` (QR/file/LAN mode flows, token freshness state)
+- Secure key/material handling plan:
+  - `docs/MOBILE_SECURE_KEY_PLAN.md`
+- CI hardening gate workflow:
+  - `.github/workflows/desktop-mobile-hardening-gate.yml`
 
 ### Exit criteria
 - Desktop shell parity checklist published and validated
@@ -341,8 +363,8 @@ Required for each phase closeout:
 
 Active emphasis:
 
-1. P3 desktop/mobile hardening
-2. P6 multi-device ecosystem expansion
-3. Native acceleration expansion to additional probes and native-enabled performance baselines
+1. P6 multi-device ecosystem expansion
+2. Native acceleration expansion to additional probes and native-enabled performance baselines
+3. Tauri production-readiness and mobile native bridge implementation execution
 
 This keeps the project advanced, professional, and scalable while preserving truthful delivery reporting.

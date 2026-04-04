@@ -1,0 +1,40 @@
+name: Desktop/Mobile Hardening Gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  hardening-gate:
+    name: Validate desktop/mobile P3 hardening rules
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate desktop migration gate
+        run: |
+          python tools/validate_desktop_migration_gate.py --report test-output/desktop-migration-gate-report.json
+
+      - name: Validate mobile pairing policy
+        run: |
+          python tools/validate_mobile_pairing_policy.py --report test-output/mobile-pairing-policy-report.json
+
+      - name: Upload hardening gate artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: p3-hardening-gate-artifacts
+          path: |
+            test-output/desktop-migration-gate-report.json
+            test-output/mobile-pairing-policy-report.json
+          retention-days: 30

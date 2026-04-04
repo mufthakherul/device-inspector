@@ -17,6 +17,11 @@ The repository now includes a dual-shell migration contract for Electron and
 Tauri to consume the same local engine semantics. This keeps optional
 Electron -> Tauri migration gated by parity and stability evidence.
 
+Migration gate criteria and validation tooling:
+
+- Criteria spec: `engine/migration-gate-criteria-1.0.0.json`
+- Validator: `python tools/validate_desktop_migration_gate.py`
+
 ## Local development
 
 ```bash

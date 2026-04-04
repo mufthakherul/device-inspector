@@ -46,6 +46,10 @@ Current implementation snapshot (2026-04-04)
 - Native-first SMART contract hot-path runner is now implemented with deterministic Python fallback (`agent/native_probe_runner.py`, `agent/native_bridge.py`).
 - CLI runs now emit native hot-path telemetry/artifact metadata for acceleration observability (`agent/cli.py`, `artifacts/native_probe_runner.json`).
 - Native acceleration benchmark harness is now available for baseline vs runner throughput snapshots (`tools/benchmark_native_probe_runner.py`).
+- Desktop migration gate criteria and deterministic validation tooling are now implemented (`apps/desktop/engine/migration-gate-criteria-1.0.0.json`, `tools/validate_desktop_migration_gate.py`).
+- Mobile offline pairing hardening policy and validator are now implemented (`apps/mobile/pairing-policy-1.0.0.json`, `tools/validate_mobile_pairing_policy.py`).
+- Mobile companion pairing now supports hardened QR/file/LAN mode flows with token freshness state (`apps/mobile/lib/main.dart`).
+- Secure key/material handling plan for Kotlin/Swift mobile bridge tracks is now published (`docs/MOBILE_SECURE_KEY_PLAN.md`).
 - Desktop dual-shell adapter contract scaffold is added for Electron/Tauri migration gating (`apps/desktop/engine/adapter-contract.json`).
 - Mobile companion now includes a verification queue with integrity badges for recent verification jobs (`apps/mobile/lib/main.dart`).
 

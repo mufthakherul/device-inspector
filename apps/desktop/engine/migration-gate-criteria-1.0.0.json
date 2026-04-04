@@ -1,0 +1,21 @@
+{
+  "criteria_version": "1.0.0",
+  "phase": "P3",
+  "objective": "Desktop shell migration gate with deterministic parity checks",
+  "requirements": {
+    "offline_guarantee": true,
+    "required_commands": [
+      "runInspection",
+      "verifyBundle"
+    ],
+    "required_cli_entrypoint_prefix": "python -m agent.cli",
+    "required_desktop_scripts": [
+      "start",
+      "dist"
+    ],
+    "required_windows_targets": [
+      "nsis",
+      "appx"
+    ]
+  }
+}

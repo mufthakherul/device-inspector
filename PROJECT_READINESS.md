@@ -38,6 +38,9 @@ The project is in a strong development-ready state with:
 - Python and Rust plugin SDK skeleton tracks are now available for third-party adapter development
 - Native-first SMART contract hot-path runner is now present with deterministic fallback semantics
 - Native acceleration benchmark harness is now present for reproducible throughput snapshots
+- Desktop migration gate criteria and deterministic validation tooling are now present for Electron↔Tauri readiness checks
+- Mobile offline pairing hardening policy and validation tooling are now present for QR/file/LAN mode governance
+- Mobile secure key/material handling plan is now published for Kotlin/Swift bridge execution tracks
 
 This report intentionally reflects current repository reality rather than legacy snapshots.
 
@@ -47,7 +50,7 @@ This report intentionally reflects current repository reality rather than legacy
 
 ### 1) Quality and tests
 
-- ✅ **Tests:** `269 passed`
+- ✅ **Tests:** `273 passed`
 - ✅ **Coverage gate:** `73.99%` (required `35%`)
 - ✅ **Black:** pass (`--check .`)
 - ✅ **Ruff:** pass (`check .`)
@@ -102,6 +105,7 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - `kpi-dashboard.yml`
 - `doc-claim-validator.yml`
 - `release-signoff-gate.yml`
+- `desktop-mobile-hardening-gate.yml`
 
 ---
 
@@ -136,6 +140,9 @@ The repository now includes the roadmap workflow family for core delivery and mo
 - Native SMART hot-path runner + bridge contract: `agent/native_probe_runner.py`, `agent/native_bridge.py`
 - Native acceleration benchmark harness: `tools/benchmark_native_probe_runner.py`
 - Native runner coverage and pipeline assertion: `tests/test_native_probe_runner.py`, `tests/test_benchmark_native_probe_runner.py`, `tests/test_cli_run_modes.py`
+- Desktop migration gate criteria + validator + tests: `apps/desktop/engine/migration-gate-criteria-1.0.0.json`, `tools/validate_desktop_migration_gate.py`, `tests/test_validate_desktop_migration_gate.py`
+- Mobile pairing hardening policy + validator + tests: `apps/mobile/pairing-policy-1.0.0.json`, `tools/validate_mobile_pairing_policy.py`, `tests/test_validate_mobile_pairing_policy.py`
+- Mobile secure key/material handling plan: `docs/MOBILE_SECURE_KEY_PLAN.md`
 - Desktop dual-shell adapter contract: `apps/desktop/engine/adapter-contract.json`
 - Mobile verification queue + badge UX: `apps/mobile/lib/main.dart`
 - Offline analytics runtime profile metadata: `agent/analytics_profile.py`, `agent/report.py`
@@ -174,8 +181,8 @@ Mobile/embedded OS families (Android/iOS/HarmonyOS/Amazon Fire OS, etc.) are han
 
 ## Recommended next priorities
 
-1. Implement Rust hot-path acceleration with benchmark evidence reporting.
-2. Advance desktop dual-shell migration criteria and mobile offline pairing hardening.
+1. Extend native acceleration to additional high-cost probes with native-enabled benchmark baselines.
+2. Implement execution-ready Kotlin/Swift mobile secure-storage bridges from published plan.
 3. Add distribution-manifest signature verification linkage into docs-site download UX.
 4. Keep readiness docs synchronized with CI and real-device validation outputs each sprint.
 

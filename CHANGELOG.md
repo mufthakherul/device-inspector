@@ -79,6 +79,13 @@ All notable changes to this project will be documented in this file.
   - CLI pipeline telemetry/artifact integration for hot-path execution (`agent/cli.py`, `artifacts/native_probe_runner.json`)
   - Throughput benchmark harness for baseline vs runner comparisons (`tools/benchmark_native_probe_runner.py`)
   - Native acceleration coverage (`tests/test_native_probe_runner.py`, `tests/test_benchmark_native_probe_runner.py`, `tests/test_cli_run_modes.py`)
+- Added P3 desktop/mobile hardening baseline:
+  - Desktop migration gate criteria + deterministic validator (`apps/desktop/engine/migration-gate-criteria-1.0.0.json`, `tools/validate_desktop_migration_gate.py`)
+  - Mobile pairing hardening policy + deterministic validator (`apps/mobile/pairing-policy-1.0.0.json`, `tools/validate_mobile_pairing_policy.py`)
+  - Mobile QR/file/LAN pairing hardening flow updates with token freshness state (`apps/mobile/lib/main.dart`)
+  - Secure key/material handling plan for Kotlin/Swift bridge tracks (`docs/MOBILE_SECURE_KEY_PLAN.md`)
+  - Desktop/mobile hardening CI gate workflow (`.github/workflows/desktop-mobile-hardening-gate.yml`)
+  - Hardening validation coverage (`tests/test_validate_desktop_migration_gate.py`, `tests/test_validate_mobile_pairing_policy.py`)
 - Added enterprise policy-pack runtime evaluation flow:
   - `agent/policy_pack.py`
   - `agent/cli.py` (`--policy-pack`)

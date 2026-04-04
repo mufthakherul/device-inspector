@@ -38,6 +38,9 @@ class _MobileHomePageState extends State<MobileHomePage> {
   Map<String, dynamic>? _capabilityInfo;
   String? _status;
   String _pairingToken = 'inspecta:pairing:offline';
+  String _pairingMode = 'qr';
+  final int _pairingTtlMinutes = 10;
+  DateTime? _pairingIssuedAt;
   final List<Map<String, dynamic>> _verificationJobs = [];
 
   @override
@@ -162,8 +165,66 @@ class _MobileHomePageState extends State<MobileHomePage> {
 
     setState(() {
       _pairingToken = token;
+      _pairingMode = 'qr';
+      _pairingIssuedAt = DateTime.now().toUtc();
       _status = 'Pairing token updated from QR.';
     });
+  }
+
+  Future<void> _importPairingTokenFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json', 'txt'],
+      dialogTitle: 'Select pairing token file',
+    );
+
+    if (result == null || result.files.single.path == null) {
+      return;
+    }
+
+    final file = File(result.files.single.path!);
+    final rawText = await file.readAsString();
+
+    String token;
+    if (file.path.toLowerCase().endsWith('.json')) {
+      final parsed = jsonDecode(rawText) as Map<String, dynamic>;
+      token = (parsed['pairing_token'] ?? '').toString();
+    } else {
+      token = rawText.trim();
+    }
+
+    if (!token.startsWith('inspecta:pairing:offline')) {
+      setState(() {
+        _status = 'Invalid offline pairing token format.';
+      });
+      return;
+    }
+
+    setState(() {
+      _pairingToken = token;
+      _pairingMode = 'file';
+      _pairingIssuedAt = DateTime.now().toUtc();
+      _status = 'Pairing token imported from file.';
+    });
+  }
+
+  void _generateLanPairingToken() {
+    final issuedAt = DateTime.now().toUtc();
+    final nonce = issuedAt.millisecondsSinceEpoch.toRadixString(16);
+    final token = 'inspecta:pairing:offline:lan:$nonce';
+
+    setState(() {
+      _pairingToken = token;
+      _pairingMode = 'lan';
+      _pairingIssuedAt = issuedAt;
+      _status = 'LAN pairing token generated (offline relay mode).';
+    });
+  }
+
+  bool get _pairingTokenFresh {
+    if (_pairingIssuedAt == null) return false;
+    final age = DateTime.now().toUtc().difference(_pairingIssuedAt!);
+    return age.inMinutes <= _pairingTtlMinutes;
   }
 
   @override
@@ -263,12 +324,31 @@ class _MobileHomePageState extends State<MobileHomePage> {
                   const Text('Pairing (offline)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Text('Current token: $_pairingToken'),
+                  Text('Mode: ${_pairingMode.toUpperCase()}'),
+                  Text(
+                    'Fresh token: ${_pairingTokenFresh ? 'yes' : 'no'} '
+                    '(ttl=${_pairingTtlMinutes}m)',
+                  ),
                   const SizedBox(height: 10),
                   QrImageView(data: _pairingToken, version: QrVersions.auto, size: 150),
                   const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _scanPairingQr,
-                    child: const Text('Scan pairing QR'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _scanPairingQr,
+                        child: const Text('Scan pairing QR'),
+                      ),
+                      ElevatedButton(
+                        onPressed: _importPairingTokenFile,
+                        child: const Text('Import token file'),
+                      ),
+                      ElevatedButton(
+                        onPressed: _generateLanPairingToken,
+                        child: const Text('Generate LAN token'),
+                      ),
+                    ],
                   ),
                 ],
               ),
