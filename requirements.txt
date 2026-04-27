@@ -5,5 +5,5 @@ pytest-mock
 pytest-cov>=4.0.0
 ruff
 black
-bandit>=1.7.0
+bandit>=1.9.4
 safety>=2.0.0
