@@ -47,7 +47,7 @@ jobs:
           python -m tools.channel_promotion --tag "${{ steps.resolve.outputs.tag }}" --output channel-promotion-plan.json
 
       - name: Upload plan artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: channel-promotion-plan
           path: channel-promotion-plan.json
