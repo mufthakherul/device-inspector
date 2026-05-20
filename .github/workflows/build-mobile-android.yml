@@ -68,7 +68,7 @@ jobs:
         run: flutter build apk --release --dart-define=LOCAL_ONLY=true
 
       - name: Upload Android artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: inspecta-mobile-android
           path: |

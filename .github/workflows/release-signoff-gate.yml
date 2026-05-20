@@ -55,7 +55,7 @@ jobs:
             --audit-output test-output/release-signoff-audit.json
 
       - name: Upload signoff audit artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-signoff-audit
           path: test-output/release-signoff-audit.json

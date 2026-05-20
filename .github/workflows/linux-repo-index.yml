@@ -31,7 +31,7 @@ jobs:
                   python scripts/generate_linux_repo_indexes.py --dist dist --output packaging/linux-repo/index
 
             - name: Upload index strategy artifacts
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: linux-repo-index-strategy
                   path: packaging/linux-repo/index/

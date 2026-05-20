@@ -42,7 +42,7 @@ jobs:
                   python -m tools.validate_kpi_snapshot --kpi-json docs-site/data/kpi.json --min-coverage 35 --min-tests 1
 
             - name: Upload KPI snapshot artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: docs-site-kpi-snapshot
                   path: docs-site/data/kpi.json

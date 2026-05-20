@@ -41,7 +41,7 @@ jobs:
           python scripts/build_release.py --platform windows
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: inspecta-windows
           path: |
@@ -75,7 +75,7 @@ jobs:
           python scripts/build_release.py --platform macos
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: inspecta-macos
           path: |
@@ -115,7 +115,7 @@ jobs:
           python scripts/build_release.py --platform linux --native-linux
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: inspecta-linux
           path: |
@@ -164,7 +164,7 @@ jobs:
           PY
 
       - name: Upload Python dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: inspecta-python-dist
           path: |
@@ -217,7 +217,7 @@ jobs:
 
       - name: Upload release signature bundle (optional)
         if: ${{ env.HAS_GPG_SIGNING == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: inspecta-release-signatures
           path: |
